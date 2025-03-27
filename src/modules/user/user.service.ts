@@ -4,7 +4,6 @@ import { Repository } from 'typeorm';
 import { User } from './entities/user.entity';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { GetUserDTO } from './dto/get-user.dto';
-import { error } from 'console';
 
 @Injectable()
 export class UserService {
@@ -23,20 +22,18 @@ export class UserService {
     }
 
     async isEmailExist(email: string): Promise<Boolean> {
-        return await this.usersRepository.findOneBy({ email: email }) != undefined ? true : false
+        return await this.usersRepository.findOneBy({ email: email }) !== undefined ? true : false
     }
 
     async create(newUser: CreateUserDTO): Promise<User | BadRequestException> {
         const isEmailExist = await this.isEmailExist(newUser.email)
         if (isEmailExist) {
-            throw new BadRequestException('Email is already exist')
+            throw new BadRequestException({message:"The email has already existed"})
         } else {
             const temp = this.usersRepository.create(newUser)
             return await this.usersRepository.save(temp)
         }
     }
-
-    //login.. 
 
     // async update(updatedUserID: number, updatedUserDTO: CreateUserDTO) : Promise<User | null> {
     //     const temp = this.usersRepository.create(updatedUserDTO)
