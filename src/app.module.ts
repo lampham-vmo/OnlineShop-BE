@@ -6,7 +6,7 @@ import { User } from './modules/user/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
-import config from './common/config/config';
+import config from './config/config';
 
 
 @Module({
