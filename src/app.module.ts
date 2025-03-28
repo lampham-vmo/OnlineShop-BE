@@ -4,19 +4,33 @@ import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
+import { ProductModule } from './modules/product/product.module';
+import { ConfigModule, ConfigService } from '@nestjs/config';
+import config from './common/config/config';
+
 
 @Module({
   imports: [
-    TypeOrmModule.forRoot({
-      type: 'mysql',
-      host: 'localhost',
-      port: 3306,
-      username: 'root',
-      password: '',
-      database: 'online_shop_db',
-      entities: [User],
-      synchronize: true,
-    }),UserModule
+    ConfigModule.forRoot({
+      isGlobal: true,
+      cache: true,
+      load: [config]
+    }),
+    TypeOrmModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (config)=>({
+        type: 'postgres',
+        host: 'localhost',
+        port: config.get("database.port"),
+        username:'postgres',
+        password: config.get("database.password"),
+        database: config.get("database.DB"),
+        entities: [User],
+        synchronize: true
+      })
+    }),UserModule,ProductModule
+
   ],
   controllers: [AppController],
   providers: [AppService],
