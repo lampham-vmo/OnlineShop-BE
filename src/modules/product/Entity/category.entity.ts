@@ -1,4 +1,4 @@
-import { Column, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Column, CreateDateColumn, PrimaryGeneratedColumn, Timestamp, UpdateDateColumn } from "typeorm";
 
 export class Category{
     @PrimaryGeneratedColumn()
@@ -10,9 +10,9 @@ export class Category{
     @Column()
     description: string
 
-    @Column()
+    @CreateDateColumn()
     createAt: Timestamp
 
-    @Column()
+    @UpdateDateColumn()
     updateAt: Timestamp
 }

@@ -1,4 +1,4 @@
-import { Entity,Column, PrimaryGeneratedColumn, Timestamp } from "typeorm";
+import { Entity,Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn } from "typeorm";
 
 @Entity()
 export class Product{
@@ -26,13 +26,13 @@ export class Product{
     @Column()
     rating: number
 
-    @Column({type: "bytea",nullable: true})
-    image: Buffer
-
     @Column()
+    image: string
+
+    @CreateDateColumn()
     createdAt: Timestamp
 
-    @Column()
+    @UpdateDateColumn()
     updatedAt: Timestamp
 
 }
