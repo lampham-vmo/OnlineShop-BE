@@ -14,7 +14,7 @@ export class UserSignupDTO {
     @IsString()
     @MinLength(1)
     @MaxLength(20)
-    readonly fullName: string;
+    readonly fullname: string;
 
     @IsEmail()
     @IsNotEmpty()
@@ -41,6 +41,7 @@ export class UserSignupDTO {
     @Matches(/^\d+$/, {message: 'Phone number must be number only'})
     readonly phone: string;
 
+    @IsNotEmpty()
     @IsString()
     @MinLength(1)
     @MaxLength(20)
