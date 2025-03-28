@@ -14,7 +14,7 @@ export class CreateUserDTO {
     @IsString()
     @MinLength(1)
     @MaxLength(20)
-    readonly fullName: string;
+    readonly fullname: string;
 
     @IsEmail()
     @IsNotEmpty()

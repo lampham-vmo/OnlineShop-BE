@@ -22,11 +22,12 @@ export class UserService {
     }
 
     async isEmailExist(email: string): Promise<Boolean> {
-        return await this.usersRepository.findOneBy({ email: email }) !== undefined ? true : false
+        return await this.usersRepository.findOneBy({ email: email }) !== null ? true : false
     }
 
     async create(newUser: CreateUserDTO): Promise<User | BadRequestException> {
         const isEmailExist = await this.isEmailExist(newUser.email)
+
         if (isEmailExist) {
             throw new BadRequestException({message:"The email has already existed"})
         } else {

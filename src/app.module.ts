@@ -7,6 +7,7 @@ import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './config/config';
+import { AuthModule } from './modules/auth/auth/auth.module';
 
 
 @Module({
@@ -26,10 +27,10 @@ import config from './config/config';
         username:'postgres',
         password: config.get("database.password"),
         database: config.get("database.DB"),
-        entities: [User],
+        autoLoadEntities: true,
         synchronize: true
       })
-    }),UserModule,ProductModule
+    }),UserModule,ProductModule, AuthModule
 
   ],
   controllers: [AppController],
