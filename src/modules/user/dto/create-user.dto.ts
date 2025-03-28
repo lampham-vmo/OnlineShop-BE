@@ -7,9 +7,9 @@ import {
     IsNotEmpty,
   } from 'class-validator';
 
-import { Match } from './custom-class-validator';
+import { Match } from '../../../common/decorators/match-custom-class-validator';
 
-export class GetUserDTO {
+export class CreateUserDTO {
     @IsNotEmpty()
     @IsString()
     @MinLength(1)
