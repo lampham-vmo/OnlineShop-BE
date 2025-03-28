@@ -9,7 +9,7 @@ import {
 
 import { Match } from '../../../common/decorators/match-custom-class-validator';
 
-export class CreateUserDTO {
+export class UserSignupDTO {
     @IsNotEmpty()
     @IsString()
     @MinLength(1)

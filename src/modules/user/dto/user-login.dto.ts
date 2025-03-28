@@ -7,7 +7,7 @@ import {
     IsNotEmpty,
   } from 'class-validator';
 
-export class GetUserDTO {
+export class UserLoginDTO {
     @IsEmail()
     @IsNotEmpty()
     readonly email: string;

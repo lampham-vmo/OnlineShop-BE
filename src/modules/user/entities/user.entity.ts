@@ -10,17 +10,32 @@ export class User {
   email: string;   
   
   @Column()
-  phone: string;
-
-  @Column()
   password: string;
 
   @Column({ default: false})
-  isVerified: boolean;
+  isVerified: number;
 
   @Column()
-  fullName: string;
+  refreshToken: string;
+
+  @Column()
+  fullname: string;
 
   @Column()
   address: string;
+
+  @Column()
+  role_id: number;
+
+  @Column()
+  phone: string;
+
+  @Column()
+  status: number;
+
+  @Column()
+  createdAt: Date;
+
+  @Column()
+  updatedAt: Date;
 }
