@@ -4,7 +4,7 @@ import { Category } from "src/modules/category/entities/category.entity";
 
 export class ProductResponse{
     @Expose()
-    id: string
+    id: number
 
     @Expose()
     name: string
@@ -19,8 +19,11 @@ export class ProductResponse{
     discount: number
 
     @Expose()
+    image: string
+
+    @Expose()
     priceAfterDis: number
 
     @Expose()
-    category: CategoryResponse
+    category: CategoryResponse | any
 }

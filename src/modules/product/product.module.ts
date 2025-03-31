@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, OnModuleInit } from '@nestjs/common';
 import { ProductController } from './product.controller';
 import { ProductService } from './product.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
@@ -6,6 +6,7 @@ import { Product } from './Entity/product.entity';
 import { Category } from '../category/entities/category.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
+import { SearchService } from './search.service';
 
 @Module({
   imports: [
@@ -22,6 +23,12 @@ import { ElasticsearchModule } from '@nestjs/elasticsearch';
     })
   ],
   controllers: [ProductController],
-  providers: [ProductService]
+  providers: [ProductService,SearchService]
 })
-export class ProductModule {}
+export class ProductModule implements OnModuleInit {
+  constructor(private readonly searchService:SearchService) {}
+  public async onModuleInit() {
+      await this.searchService.createIndex();
+  }
+}
+

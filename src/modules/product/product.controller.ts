@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Post } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, Logger, Param, Post } from '@nestjs/common';
 import { ProductService } from './product.service';
 import { ProductRequest } from './DTO/requests/product.request';
 import { Product } from './Entity/product.entity';
@@ -12,5 +12,11 @@ export class ProductController {
     @Post("product")
     async createProduct(@Body() productRequest: ProductRequest): Promise<ApiResponse<ProductResponse>| BadRequestException>{
         return new ApiResponse<ProductResponse>(await this.productService.createProduct(productRequest))
-    } 
+    }
+    
+    @Get("product/search/:text")
+    async searchProductByName(@Param("text") text: string): Promise<ApiResponse<Partial<ProductResponse>[]>>{
+        const result = await this.productService.findProductBySearch(text);
+        return new ApiResponse<Partial<ProductResponse>[]>(result);
+    }
 }
