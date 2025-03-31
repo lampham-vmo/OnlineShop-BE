@@ -9,11 +9,11 @@ export class RoleService implements OnModuleInit {
         @InjectRepository(Role)
         private readonly roleRepository: Repository<Role>
     ){}
-    async onModuleInit(){
+    async onModuleInit() : Promise<void>{
         await this.createDefaultRoles()
     }
 
-    private async createDefaultRoles() {
+    private async createDefaultRoles() : Promise<void>{
         const roles = [
           { id: 1, name: 'admin', description: 'Administrator role' },
           { id: 2, name: 'user', description: 'Regular user role' },
