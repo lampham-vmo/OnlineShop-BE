@@ -7,5 +7,8 @@ export default()=>({
       port: process.env.POSTGRES_PORT || 5432,
       password: process.env.POSTGRES_PW,
       DB: process.env.POSTGRES_DB,
+    },
+    elastic: {
+      node: process.env.ELASTICSEARCH_NODE || "http://localhost:9200"
     }
   })

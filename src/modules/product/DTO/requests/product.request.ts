@@ -1,4 +1,4 @@
-import { IsNotEmpty, IsNumber, IsString, Length, Max, MaxLength, Min, MinLength } from "class-validator"
+import { IsNotEmpty, IsNumber, IsOptional, IsString, Length, Max, MaxLength, Min, MinLength } from "class-validator"
 
 export class ProductRequest{
 
@@ -30,6 +30,7 @@ export class ProductRequest{
     @IsNumber()
     @Min(0)
     @Max(5)
+    @IsOptional()
     rating: number
 
     @IsString()

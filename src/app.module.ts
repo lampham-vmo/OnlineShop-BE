@@ -1,12 +1,16 @@
 import { Module } from '@nestjs/common';
-import { AppController } from './app.controller';
-import { AppService } from './app.service';
+
+
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { User } from './modules/user/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './config/config';
+import { Product } from './modules/product/Entity/product.entity';
+import { Category } from './modules/category/entities/category.entity';
+import { CategoryModule } from './modules/category/category.module';
+
 
 
 @Module({
@@ -26,13 +30,14 @@ import config from './config/config';
         username:'postgres',
         password: config.get("database.password"),
         database: config.get("database.DB"),
-        entities: [User],
+        autoLoadEntities: true,
         synchronize: true
       })
-    }),UserModule,ProductModule
+    }),UserModule,ProductModule, CategoryModule
 
   ],
-  controllers: [AppController],
-  providers: [AppService],
+  controllers:[],
+  providers:[]
+
 })
 export class AppModule {}
