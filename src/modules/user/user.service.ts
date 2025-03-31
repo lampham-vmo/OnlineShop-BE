@@ -1,9 +1,13 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { GetUserDTO } from './dto/get-user.dto';
+
+
+import { LoginUserDTO } from '../auth/auth/dto/login-user.dto';
+import { SignupResponseDTO } from '../auth/auth/dto/signup-response.dto';
+import { CreateUserDTO } from '../auth/auth/dto/create-user.dto';
+
 
 @Injectable()
 export class UserService {
@@ -17,34 +21,36 @@ export class UserService {
         return await this.usersRepository.findOneBy({ id: id })
     }
 
-    async findOneByEmailAndPassword(findedUser: GetUserDTO): Promise<User | null> {
-        return await this.usersRepository.findOneBy({ email: findedUser.email, password: findedUser.password })
+    async findOneByEmailAndPassword(loggedInUser: LoginUserDTO): Promise<User | null> {
+        return await this.usersRepository.findOneBy({ email: loggedInUser.email, password: loggedInUser.password })
     }
 
     async isEmailExist(email: string): Promise<Boolean> {
         return await this.usersRepository.findOneBy({ email: email }) !== null ? true : false
     }
 
-    async create(newUser: CreateUserDTO): Promise<User | BadRequestException> {
-        const isEmailExist = await this.isEmailExist(newUser.email)
-
-        if (isEmailExist) {
-            throw new BadRequestException({message:"The email has already existed"})
-        } else {
-            const temp = this.usersRepository.create(newUser)
-            return await this.usersRepository.save(temp)
-        }
+    async isPhoneExist(phone: string): Promise<Boolean> {
+        return await this.usersRepository.findOneBy({ phone: phone }) !== null ? true : false
     }
 
-    // async update(updatedUserID: number, updatedUserDTO: CreateUserDTO) : Promise<User | null> {
+    async isAddressExist(address: string): Promise<Boolean> {
+        return await this.usersRepository.findOneBy({ address: address }) !== null ? true : false
+    }
+
+    async updateRefreshToken(id : number, refreshToken: string) : Promise<UpdateResult>{
+        return await this.usersRepository.update({id},{refreshToken})
+    }
+
+
+   
+    // async update(updatedUserID: number, updatedUserDTO: UserSignupDTO) : Promise<User | null> {
     //     const temp = this.usersRepository.create(updatedUserDTO)
     //     await this.usersRepository.update({id: updatedUserID},temp)
     //     return this.findOneById(temp.id)
     // }
-
-    async updateRefreshToken(id: number, refreshToken: string): Promise<void>{
-        await this.usersRepository.update({id}, {refreshToken})
-        
+    async createUser(newUser: CreateUserDTO) {
+        const temp = this.usersRepository.create(newUser)
+        await this.usersRepository.save(temp)
     }
 
     async delete(deletedUserID: number): Promise<void> {

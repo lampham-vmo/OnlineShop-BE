@@ -1,7 +1,10 @@
-import { BadRequestException, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpCode, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/modules/user/user.service';
 import { generateKeyPairSync } from 'crypto';
+import { CreateUserDTO } from './dto/create-user.dto';
+import { SignupResponseDTO } from './dto/signup-response.dto';
+import { SignInResponseDTO } from './dto/login-response-dto';
 @Injectable()
 export class AuthService {
     constructor(
@@ -50,7 +53,7 @@ export class AuthService {
 
     }
 
-    async signIn({ email, password }): Promise<{ accessToken: string, refreshToken: string }> {
+    async signIn({ email, password }): Promise<SignInResponseDTO | BadRequestException> {
         //check if email exists
         const isEmailExists = await this.usersService.isEmailExist(email)
         //if not exists, throw bad request
@@ -78,18 +81,37 @@ export class AuthService {
             expiresIn: '2m',
         });
 
+      
         //save refreshToken for User
         await this.usersService.updateRefreshToken(payload.id, refreshToken)
-
-
-        return {
-            accessToken,
-            refreshToken
-        }
+        const loginResponse = new SignInResponseDTO(true, HttpStatus.CREATED, accessToken, refreshToken);
+        
+        return loginResponse
 
 
 
     }
 
+    //sign up
+
+
+     async signup(newUser: CreateUserDTO): Promise<SignupResponseDTO | BadRequestException> {
+            const isEmailExist = await this.usersService.isEmailExist(newUser.email)
+            const isPhoneExist = await this.usersService.isPhoneExist(newUser.phone)
+            if (isEmailExist) {
+                throw new BadRequestException({message:"The email has already existed"})
+            }else if (isPhoneExist){
+                throw new BadRequestException({message:"The phone has already existed"})
+            }else if (newUser.password !== newUser.confirmPassword) {
+                throw new BadRequestException({message: "The confirm password must match the password"})
+            } else {
+                this.usersService.createUser(newUser)
+                const signupResponse = new SignupResponseDTO()
+                signupResponse.success = true
+                signupResponse.statusCode = 201
+                signupResponse.message = "Registered successfullly"
+                return signupResponse
+            }
+        }
 
 }

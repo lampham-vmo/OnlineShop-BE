@@ -7,7 +7,7 @@ import {
     IsNotEmpty,
   } from 'class-validator';
 
-import { Match } from '../../../common/decorators/match-custom-class-validator';
+import { Match } from '../../../../common/decorators/match-custom-class-validator';
 
 export class CreateUserDTO {
     @IsNotEmpty()
