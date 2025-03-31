@@ -1,3 +1,4 @@
+import { Role } from 'src/modules/role/entities/role.entity';
 import {
   Entity,
   PrimaryGeneratedColumn,
@@ -7,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+
 
 
 @Entity('User') // Đảm bảo tên bảng khớp với PostgreSQL
@@ -19,10 +21,14 @@ export class User {
 
   @Column()
   password: string;
+  
+  @ManyToOne(() => Role, (role) => role.users, { eager: true })
+  @JoinColumn({ name: 'role_id' })
+  role: Role;
 
-  @Column({default: 1})
-  role: number;
-
+  @Column({ default: 2 }) // 🟢 role_id default: 2 (user)
+  role_id: number;
+ 
   @Column({ nullable: true, length: 11 })
   phone: string;
 
@@ -31,7 +37,7 @@ export class User {
 
   @Column({default: 'empty'})
   refreshToken: string;
-
+ 
   @Column({ length: 255 })
   fullname: string;
 

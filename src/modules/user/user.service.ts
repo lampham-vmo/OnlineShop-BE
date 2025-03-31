@@ -42,6 +42,11 @@ export class UserService {
     //     return this.findOneById(temp.id)
     // }
 
+    async updateRefreshToken(id: number, refreshToken: string): Promise<void>{
+        await this.usersRepository.update({id}, {refreshToken})
+        
+    }
+
     async delete(deletedUserID: number): Promise<void> {
         await this.usersRepository.delete({ id: deletedUserID })
     }

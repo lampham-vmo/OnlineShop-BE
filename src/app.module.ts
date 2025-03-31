@@ -8,6 +8,8 @@ import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import config from './config/config';
 import { AuthModule } from './modules/auth/auth/auth.module';
+import { RoleModule } from './modules/role/role.module';
+import { PermissionModule } from './modules/permission/permission.module';
 
 
 @Module({
@@ -30,7 +32,7 @@ import { AuthModule } from './modules/auth/auth/auth.module';
         autoLoadEntities: true,
         synchronize: true
       })
-    }),UserModule,ProductModule, AuthModule
+    }),UserModule,ProductModule, AuthModule, RoleModule, PermissionModule
 
   ],
   controllers: [AppController],
