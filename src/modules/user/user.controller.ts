@@ -10,9 +10,8 @@ import { AuthGuard } from "src/common/guard/auth.guard";
 export class UserController {
     constructor(private readonly userService : UserService) {}
 
-   
-
     @Get()
+    @UseGuards(AuthGuard)
     async findAll() : Promise<User[]> {
         return await this.userService.findAll()
     }

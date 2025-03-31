@@ -8,6 +8,7 @@ import { LoginUserDTO } from '../auth/auth/dto/login-user.dto';
 import { SignupResponseDTO } from '../auth/auth/dto/signup-response.dto';
 import { CreateUserDTO } from '../auth/auth/dto/create-user.dto';
 
+import { hashedPasword } from 'src/common/util/bcrypt.util';
 
 @Injectable()
 export class UserService {
@@ -19,6 +20,10 @@ export class UserService {
 
     async findOneById(id: number): Promise<User | null> {
         return await this.usersRepository.findOneBy({ id: id })
+    }
+
+    async findOneByEmail(email: string){
+        return await this.usersRepository.findOneBy({email: email})
     }
 
     async findOneByEmailAndPassword(loggedInUser: LoginUserDTO): Promise<User | null> {
@@ -37,6 +42,8 @@ export class UserService {
         return await this.usersRepository.findOneBy({ address: address }) !== null ? true : false
     }
 
+    
+
     async updateRefreshToken(id : number, refreshToken: string) : Promise<UpdateResult>{
         return await this.usersRepository.update({id},{refreshToken})
     }
@@ -49,7 +56,9 @@ export class UserService {
     //     return this.findOneById(temp.id)
     // }
     async createUser(newUser: CreateUserDTO) {
-        const temp = this.usersRepository.create(newUser)
+        //hash password before create
+        const hashedPassword = await hashedPasword(newUser.password)
+        const temp = this.usersRepository.create({...newUser, password: hashedPassword})
         await this.usersRepository.save(temp)
     }
 

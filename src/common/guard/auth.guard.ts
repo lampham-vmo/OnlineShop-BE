@@ -19,8 +19,8 @@ export class AuthGuard implements CanActivate {
     const token = this.extractTokenFromHeader(request);
     const refreshToken = this.extractRefreshTokenFromHeader(request);
     const requestUrl = request.url; 
-
-    // if url = /auth/refreshAT by pass validate access token
+    
+    // if url = /auth/refreshAT bypass validate access token
     if (requestUrl === '/auth/refreshAT') {
     //mission of RT only to refresh accessToken => don't need validate at AuthGuard, validate at handleRefreshAT
       if (!refreshToken) throw new UnauthorizedException('Refresh Token is required!');
@@ -28,10 +28,13 @@ export class AuthGuard implements CanActivate {
       return true;
     }
     //mission of AT is validate => need validate
+    
     try{
       if (token) {
-        const payload = await this.validateToken(token)
-        request['user'] = payload;
+        const payload = await this.validateToken(token.trim())
+        request['user'] = {...payload, accessToken: token};
+      }else{
+        return false
       }
     }catch(err){
    

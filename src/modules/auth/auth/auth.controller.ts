@@ -1,4 +1,4 @@
-import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Post, Req, Res, UseGuards } from '@nestjs/common';
+import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
 import { LoginUserDTO } from 'src/modules/auth/auth/dto/login-user.dto';
 import { Request, Response } from 'express';
@@ -18,13 +18,11 @@ export class AuthController {
 
     @Get('refreshAT')
     @UseGuards(AuthGuard)
-    async refreshAcessToken(@Req() req: Request){
+    async refreshAcessToken(@Req() req: Request) : Promise<object | BadRequestException>{
         const refreshToken = req['refreshToken']
         if(!refreshToken) throw new BadRequestException('RT not found!')
-        const accessToken = await this.authService.handleRefreshAccessToken(refreshToken)
-        return {
-            accessToken
-        }
+        return await this.authService.handleRefreshAccessToken(refreshToken)
+        
 
     }
 
@@ -38,6 +36,15 @@ export class AuthController {
     async login(@Body() loginUserDTO : LoginUserDTO): Promise<SignInResponseDTO | BadRequestException>{
         return await this.authService.signIn(loginUserDTO)
        
+    }
+
+    @Patch('logout')
+    @HttpCode(HttpStatus.OK)
+    @UseGuards(AuthGuard)
+    async logout(@Req() req: Request){
+        const user = req['user']
+        return await this.authService.logout(user.id, user.accessToken)
+
     }
 
 }

@@ -2,7 +2,6 @@ import { Module } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { User } from './modules/user/entities/user.entity';
 import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
@@ -11,7 +10,6 @@ import { AuthModule } from './modules/auth/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
 import { PermissionModule } from './modules/permission/permission.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -19,6 +17,7 @@ import { PermissionModule } from './modules/permission/permission.module';
       cache: true,
       load: [config]
     }),
+   
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

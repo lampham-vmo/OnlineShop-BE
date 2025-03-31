@@ -1,15 +1,9 @@
 import { IsString, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator'
+import { BaseResponseDTO } from './base-response.dto';
 
-export class SignupResponseDTO {
-    @IsBoolean()
-    @IsNotEmpty()
-    success: boolean;
+export class SignupResponseDTO extends BaseResponseDTO{
+    constructor(success : boolean, statusCode : number, message : string){
+        super(success, statusCode,message)
 
-    @IsNumber()
-    @IsNotEmpty()
-    statusCode: number;
-
-    @IsNotEmpty()
-    @IsString()
-    message: string;
+    }
 }

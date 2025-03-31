@@ -1,20 +1,7 @@
 import { IsString, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator'
+import { BaseResponseDTO } from './base-response.dto';
 
-export class SignInResponseDTO {
-    constructor(success: boolean, statusCode: number, accessToken: string, refreshToken: string){
-        this.success = success;
-        this.accessToken = accessToken;
-        this.refreshToken = refreshToken;
-        this.statusCode = statusCode
-    }
-    @IsBoolean()
-    @IsNotEmpty()
-    success: boolean;
-
-    @IsNumber()
-    @IsNotEmpty()
-    statusCode: number;
-
+export class SignInResponseDTO extends BaseResponseDTO {
     @IsNotEmpty()
     @IsString()
     accessToken: string;
@@ -22,4 +9,11 @@ export class SignInResponseDTO {
     @IsNotEmpty()
     @IsString()
     refreshToken: string;
+    constructor(success: boolean, statusCode: number, message : string, accessToken: string, refreshToken: string){
+        super(success,statusCode,message);
+        this.accessToken = accessToken;
+        this.refreshToken = refreshToken;
+    }
+
+
 }
