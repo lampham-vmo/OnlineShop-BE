@@ -12,7 +12,7 @@ export class Role {
   name: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string;
+  description: string | undefined;
 
   @OneToMany(() => User, (user) => user.role)
   users: User[];

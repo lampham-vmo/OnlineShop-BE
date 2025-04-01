@@ -6,8 +6,11 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  name: string;
+  @Column({ nullable: false })
+  path: string;
+
+  @Column({nullable: false})
+  method: string;
 
   @ManyToMany(() => Role, (role) => role.permissions)
   roles: Role[];
