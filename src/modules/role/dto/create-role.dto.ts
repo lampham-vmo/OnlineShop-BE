@@ -1,18 +1,16 @@
-import {
-    IsString,
-    IsNotEmpty,
-} from 'class-validator'
+import { IsString, IsOptional, IsArray, ArrayNotEmpty, IsInt } from 'class-validator';
 
 export class CreateRoleDTO {
-    constructor(name: string, description: string) {  // Constructor
-        this.name = name;
-        this.description = description;
-    }
-    @IsNotEmpty()
-    @IsString()
-    readonly name: string;
+  @IsString()
+  name: string;
 
-    @IsNotEmpty()
-    @IsString()
-    readonly description: string;
+  @IsOptional()
+  @IsString()
+  description?: string;
+
+  @IsOptional()
+  @IsArray()
+  @ArrayNotEmpty()
+  @IsInt({ each: true })
+  permissionIds?: number[];
 }

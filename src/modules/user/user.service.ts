@@ -30,19 +30,18 @@ export class UserService {
         return await this.usersRepository.findOneBy({ email: loggedInUser.email, password: loggedInUser.password })
     }
 
-    async isEmailExist(email: string): Promise<Boolean> {
-        return await this.usersRepository.findOneBy({ email: email }) !== null ? true : false
-    }
-
-    async isPhoneExist(phone: string): Promise<Boolean> {
-        return await this.usersRepository.findOneBy({ phone: phone }) !== null ? true : false
+    async isEmailOrPhoneExist(email: string, phone: string): Promise<{emailExists: boolean, phoneExists: boolean}> {
+        const user = await this.usersRepository.findOne({where: [{email},{phone}]})
+        return {
+            emailExists: user?.email == email,
+            phoneExists: user?.phone == phone
+        }
     }
 
     async isAddressExist(address: string): Promise<Boolean> {
         return await this.usersRepository.findOneBy({ address: address }) !== null ? true : false
     }
 
-    
 
     async updateRefreshToken(id : number, refreshToken: string) : Promise<UpdateResult>{
         return await this.usersRepository.update({id},{refreshToken})

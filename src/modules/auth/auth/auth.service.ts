@@ -115,11 +115,10 @@ export class AuthService {
 
 
     async signup(newUser: CreateUserDTO): Promise<SignupResponseDTO | BadRequestException> {
-        const isEmailExist = await this.usersService.isEmailExist(newUser.email)
-        const isPhoneExist = await this.usersService.isPhoneExist(newUser.phone)
-        if (isEmailExist) {
+        const isEmailandPhoneExists =  await this.usersService.isEmailOrPhoneExist(newUser.email,newUser.password)
+        if (isEmailandPhoneExists.emailExists) {
             throw new BadRequestException({ message: "The email has already existed" })
-        } else if (isPhoneExist) {
+        } else if (isEmailandPhoneExists.phoneExists) {
             throw new BadRequestException({ message: "The phone has already existed" })
         } else if (newUser.password !== newUser.confirmPassword) {
             throw new BadRequestException({ message: "The confirm password must match the password" })
