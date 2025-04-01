@@ -8,6 +8,7 @@ import { CreateUserDTO } from './dto/create-user.dto';
 import { User } from 'src/modules/user/entities/user.entity';
 import { SignupResponseDTO } from './dto/signup-response.dto';
 import { SignInResponseDTO } from './dto/login-response-dto';
+import { RouteName } from 'src/common/decorators/route-name.decorator';
 
 @Controller('auth')
 export class AuthController {
@@ -17,6 +18,7 @@ export class AuthController {
     ){}
 
     @Get('refreshAT')
+    @RouteName('refresh access token')
     @UseGuards(AuthGuard)
     async refreshAcessToken(@Req() req: Request) : Promise<object | BadRequestException>{
         const refreshToken = req['refreshToken']
@@ -27,11 +29,13 @@ export class AuthController {
     }
 
     @Post('signup')
+    @RouteName('signup account')
     async create(@Body() createUserDTO : CreateUserDTO) : Promise<SignupResponseDTO | BadRequestException>{
         return await this.authService.signup(createUserDTO)
     }
 
     @Post('login')
+    @RouteName('user login')
     @HttpCode(HttpStatus.OK)
     async login(@Body() loginUserDTO : LoginUserDTO): Promise<SignInResponseDTO | BadRequestException>{
         return await this.authService.signIn(loginUserDTO)
@@ -39,6 +43,7 @@ export class AuthController {
     }
 
     @Patch('logout')
+    @RouteName('Logout')
     @HttpCode(HttpStatus.OK)
     @UseGuards(AuthGuard)
     async logout(@Req() req: Request){

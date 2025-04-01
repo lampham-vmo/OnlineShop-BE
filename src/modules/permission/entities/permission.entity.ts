@@ -6,15 +6,21 @@ export class Permission {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column({ unique: true })
-  name: string;
+  @Column({nullable: true})
+  name: string  //name permission
+ 
+  @Column({ nullable: false })
+  path: string;  // path permission
+ 
+  @Column({ nullable: false })
+  method: string;  // method permission
 
   @ManyToMany(() => Role, (role) => role.permissions)
   roles: Role[];
 
-  @CreateDateColumn()
-  createdAt: Date;
+  @CreateDateColumn({ default: () => 'CURRENT_TIMESTAMP' })
+  createdAt: Date; 
 
-  @UpdateDateColumn()
+  @UpdateDateColumn({ default: () => 'CURRENT_TIMESTAMP', onUpdate: 'CURRENT_TIMESTAMP' })
   updatedAt: Date;
 }
