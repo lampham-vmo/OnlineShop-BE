@@ -18,9 +18,14 @@ export class RoleGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     //get role from request object
     const {role} = request["user"]
-    //check if role had this permission 
+    if(role == 1 ) return true //if admin, pass. If not: check permission
+    //get permissionId with corresponding path and method 
+    const path = request.route.path
+    const method = request.method
+    console.log(path, method);
+    
 
-
+    //check if role had this permissionid 
 
     //permission url  voi ca url input 
 

@@ -17,11 +17,13 @@ export class UserController {
     }
 
     @Get(':id')
+    @UseGuards(AuthGuard)
     async findOneById(@Param('id') id : string) : Promise<User | null> {
         return await this.userService.findOneById(Number(id))
     }
 
     @Delete(':id')
+    @UseGuards(AuthGuard)
     async delete(@Param('id') id : string) : Promise<void> {
         return await this.userService.delete(Number(id))
     }

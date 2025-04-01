@@ -64,7 +64,7 @@ export class AuthService {
         const accessToken = this.jwtService.sign(payload, {
             algorithm: 'RS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
-            expiresIn: '2m',
+            expiresIn: '24h',
         });
         return new RefreshAtResponseDTO(true, HttpStatus.OK, 'get AT success', accessToken)
 
@@ -92,12 +92,12 @@ export class AuthService {
         const accessToken = this.jwtService.sign(payload, {
             algorithm: 'RS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
-            expiresIn: '2m',
+            expiresIn: '24h',
         });
         const refreshToken = this.jwtService.sign(payload, {
             algorithm: 'RS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
-            expiresIn: '5m',
+            expiresIn: '7d',
         });
 
 
