@@ -12,6 +12,7 @@ import { PermissionModule } from './modules/permission/permission.module';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { PermissionService } from './modules/permission/permission.service';
 import { Permission } from './modules/permission/entities/permission.entity';
+import { JwtModule } from '@nestjs/jwt';
 
 @Module({
   imports: [
@@ -36,7 +37,7 @@ import { Permission } from './modules/permission/entities/permission.entity';
       })
     }),
     TypeOrmModule.forFeature([Permission]),
-     UserModule, ProductModule, AuthModule, RoleModule, PermissionModule
+    UserModule, ProductModule, AuthModule, RoleModule, PermissionModule, JwtModule
 
   ],
   controllers: [AppController],
@@ -55,7 +56,7 @@ export class AppModule implements OnModuleInit {
 
   onModuleInit() {
     const controllers = this.discoveryService.getControllers();
-    const routes: { name:string, path: string; method: string }[] = [];
+    const routes: { name: string, path: string; method: string }[] = [];
 
     const methodMap = {
       [RequestMethod.GET]: 'GET',
@@ -64,7 +65,7 @@ export class AppModule implements OnModuleInit {
       [RequestMethod.DELETE]: 'DELETE',
       [RequestMethod.PATCH]: 'PATCH',
     };
-
+    //loop through all controller to get route
     for (const controller of controllers) {
       if (!controller.metatype) continue;
 
@@ -72,16 +73,19 @@ export class AppModule implements OnModuleInit {
       const prototype = Object.getPrototypeOf(instance);
       const controllerPath = Reflect.getMetadata('path', controller.metatype);
       const basePath = controllerPath ? `/${controllerPath}` : '';
-
+      //scan to get each path, method
       this.metadataScanner.scanFromPrototype(instance, prototype, (method) => {
         if (!prototype[method]) return;
-
+        
         const methodPath = Reflect.getMetadata('path', prototype[method]) || '';
         const methodType = Reflect.getMetadata('method', prototype[method]);
         const routeName = Reflect.getMetadata('routeName', prototype[method])
         if (methodType !== undefined) {
-          const fullPath = `${basePath}/${methodPath}`.replace(/\/+/g, '/');
-
+          //path:  /something/something
+          let fullPath = `${basePath}/${methodPath}`.replace(/\/+/g, '/');
+          if (fullPath != '/') {
+            fullPath = fullPath.replace(/\/+$/, '');
+          }
           routes.push({
             name: routeName,
             path: fullPath,
@@ -90,7 +94,7 @@ export class AppModule implements OnModuleInit {
         }
       });
     }
-    console.log(routes);
+    console.log("all route: ", routes);
     //sync permission in db every time app run
     this.permissionService.syncPermissions(routes);
   }

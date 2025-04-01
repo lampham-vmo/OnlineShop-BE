@@ -7,7 +7,7 @@ import { Request } from 'express';
 @Injectable()
 export class AuthGuard implements CanActivate {
   constructor(
-  
+
     private jwtService: JwtService
 
   ) { }
@@ -18,30 +18,23 @@ export class AuthGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     const refreshToken = this.extractRefreshTokenFromHeader(request);
-    const requestUrl = request.url; 
-    
-    // if url = /auth/refreshAT bypass validate access token
+    const requestUrl = request.url;
+
+    // if url = /auth/refreshAT validate refreshToken
     if (requestUrl === '/auth/refreshAT') {
-    //mission of RT only to refresh accessToken => don't need validate at AuthGuard, validate at handleRefreshAT
       if (!refreshToken) throw new UnauthorizedException('Refresh Token is required!');
-      request['refreshToken'] = refreshToken;
+      const payload = await this.validateToken(refreshToken.trim())
+      request['user'] = { ...payload, refreshToken: refreshToken }
       return true;
     }
-    //mission of AT is validate => need validate
+
     
-    try{
-      if (token) {
-        const payload = await this.validateToken(token.trim())
-        request['user'] = {...payload, accessToken: token};
-      }else{
-        return false
-      }
-    }catch(err){
-   
-      throw new BadRequestException('invalid Accesstoken')
+    if (token) {
+      if (!token) throw new UnauthorizedException('access Token is required!');
+      const payload = await this.validateToken(token.trim())
+      request['user'] = { ...payload, accessToken: token };
     }
-  
- 
+
     return true
   }
 

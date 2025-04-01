@@ -39,23 +39,11 @@ export class AuthService {
 
 
 
-    async handleRefreshAccessToken(refreshToken: string) : Promise<RefreshAtResponseDTO | UnauthorizedException> {
-        //check validate of refreshToken
-        let payload
-        try {
-            const { id, email, role } = await this.jwtService.verifyAsync(
-                refreshToken,
-                {
-                    algorithms: ['RS256'],
-                    publicKey: process.env.JWT_PUBLIC_KEY
-                }
-            );
-            payload = { id, email, role }
-        } catch (err) {
-            throw new UnauthorizedException('RT invalid!')
-        }
-
-        //if rt validate, check if rt match userRT? 
+    async handleRefreshAccessToken({payload, refreshToken}) : Promise<RefreshAtResponseDTO | UnauthorizedException> {
+ 
+        
+        
+        //check if rt match userRT? 
         const user = await this.usersService.findOneById(payload.id)
         if (refreshToken !== user?.refreshToken) throw new UnauthorizedException('failed rt, please relogin!')
 

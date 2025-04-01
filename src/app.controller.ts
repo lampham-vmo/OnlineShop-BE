@@ -1,6 +1,8 @@
-import { Controller, Get, Post } from '@nestjs/common';
+import { Controller, Get, Post, UseGuards } from '@nestjs/common';
 import { AppService } from './app.service';
 import { RouteName } from './common/decorators/route-name.decorator';
+import { AuthGuard } from './common/guard/auth.guard';
+import { RoleGuard } from './common/guard/role.guard';
 
 @Controller('/')
 export class AppController {

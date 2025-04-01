@@ -9,6 +9,7 @@ import { User } from 'src/modules/user/entities/user.entity';
 import { SignupResponseDTO } from './dto/signup-response.dto';
 import { SignInResponseDTO } from './dto/login-response-dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
+import { RoleGuard } from 'src/common/guard/role.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -16,14 +17,22 @@ export class AuthController {
         private readonly authService : AuthService,
         private readonly userService: UserService
     ){}
+    @Get('')
+    @UseGuards(AuthGuard, RoleGuard)
+    get(){}
 
     @Get('refreshAT')
     @RouteName('refresh access token')
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard, RoleGuard)
     async refreshAcessToken(@Req() req: Request) : Promise<object | BadRequestException>{
-        const refreshToken = req['refreshToken']
-        if(!refreshToken) throw new BadRequestException('RT not found!')
-        return await this.authService.handleRefreshAccessToken(refreshToken)
+        const user = req['user']
+        const payload = {
+            id: user.id,
+            email: user.email,
+            role: user.role
+        }
+        const {refreshToken} = user
+        return await this.authService.handleRefreshAccessToken({payload, refreshToken})
         
 
     }

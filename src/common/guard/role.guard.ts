@@ -3,12 +3,15 @@ import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, BadRe
 // import { Reflector } from '@nestjs/core';
 import { JwtService } from '@nestjs/jwt';
 import { Request } from 'express';
+import { PermissionService } from 'src/modules/permission/permission.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(
   
-    private jwtService: JwtService
+    private jwtService: JwtService,
+    private readonly permissionService: PermissionService,
+    
 
   ) { }
 
@@ -22,17 +25,14 @@ export class RoleGuard implements CanActivate {
     //get permissionId with corresponding path and method 
     const path = request.route.path
     const method = request.method
-    console.log(path, method);
-    
+    const permissionId = await this.permissionService.getPermissionIdByPathAndMethod(path, method)
+    //check if role has this permissionid 
 
-    //check if role had this permissionid 
+    //if role have, return true else return false
+ 
 
-    //permission url  voi ca url input 
-
-    //return true
-
-    //
-
+   
+    return true
 
   }
 }

@@ -5,6 +5,7 @@ import { GetUserDTO } from "./dto/get-user.dto";
 import { User } from "./entities/user.entity";
 import { BadRequestException } from "@nestjs/common";
 import { AuthGuard } from "src/common/guard/auth.guard";
+import { RoleGuard } from "src/common/guard/role.guard";
 
 @Controller('users')
 export class UserController {
@@ -15,7 +16,6 @@ export class UserController {
     async findAll() : Promise<User[]> {
         return await this.userService.findAll()
     }
-
     @Get(':id')
     @UseGuards(AuthGuard)
     async findOneById(@Param('id') id : string) : Promise<User | null> {
