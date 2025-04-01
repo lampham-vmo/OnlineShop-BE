@@ -1,6 +1,9 @@
 import { Injectable, Logger } from "@nestjs/common";
 import { ElasticsearchService } from "@nestjs/elasticsearch";
 import { ProductResponse } from "./DTO/response/product.response";
+import { title } from "process";
+import { ProductFindResponse } from "./DTO/response/product.find.response";
+import { ProductPagingResponse } from "./DTO/response/product.paging.response";
 
 @Injectable()
 export class SearchService{
@@ -107,24 +110,94 @@ export class SearchService{
         })
     }
 
-    public async findProduct(text: string){
+    public async findProductForSearchBar(text: string){
         const response = await this.esService.search({
-            index: "product",
-            body: {
-                query: {
+          index: "product",
+          body: {
+              query: {
+                  bool: {
+                      should: [
+                          {
+                              match_phrase_prefix: {
+                                  name: text 
+                              }
+                          },
+                          {
+                              match_phrase_prefix: {
+                                  category: text
+                              }
+                          }
+                      ],
+                      minimum_should_match: 1
+                  }
+              },
+              aggs: {
+                  auto_complete: {
+                      terms: {
+                          field: "name.keyword",
+                          order: { _count: "desc" },
+                          size: 10
+                      }
+                  }
+              }
+          }
+          }
+        )
+        const product = response.hits.hits.map(hit => hit._source as Partial<ProductResponse>);
+        return new ProductFindResponse(product)
+    }
 
-
-                                multi_match: {
-                                    query: text,
-                                    fields: ["name","category"],
-                                    fuzziness: "AUTO"
-                                }
-
-
-
+    public async findProductForPaging(text: string,page: number = 1,orderField: string = "price",orderBy: string = "asc"){
+      const pageSize = 10;
+      const from = (page - 1) * pageSize
+      const response = await this.esService.search({
+        body: {
+          from: from,
+          size: pageSize,
+          query: {
+            bool: {
+              should: [
+                {
+                  multi_match: {
+                    query: text,
+                    fields: ["name", "category"],
+                    fuzziness: "AUTO"
+                  }
+                },
+                {
+                  match_phrase_prefix: {
+                    name: text
+                  }
+                },
+                {
+                  match_phrase_prefix: {
+                    category: text
+                  }
                 }
+              ],
+              minimum_should_match: 1
             }
-        })
-        return response.hits.hits.map(hit => hit._source as Partial<ProductResponse>);
+          },
+          sort: [
+            {
+              [orderField]: {
+                order: orderBy.toLowerCase() === "asc" ? "asc" :"desc"
+              }
+            }
+          ]
+        }
+      })
+      const totalItems = typeof response.hits.total === "object" 
+                        ? response.hits.total.value 
+                        : response.hits.total || 0;
+      const totalPages = Math.ceil(totalItems / pageSize);
+      const product = response.hits.hits.map(hit => hit._source as ProductResponse);
+      let pagination={
+        currentPage: page,
+        pageSize: pageSize,
+        totalPages: totalPages,
+        totalItems: totalItems
+      }
+      return new ProductPagingResponse(product,pagination)
     }
 }

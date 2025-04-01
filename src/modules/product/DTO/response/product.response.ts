@@ -26,4 +26,6 @@ export class ProductResponse{
 
     @Expose()
     category: CategoryResponse | any
+
+    
 }

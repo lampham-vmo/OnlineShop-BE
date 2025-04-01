@@ -11,6 +11,8 @@ import { plainToInstance } from 'class-transformer';
 import { CategoryResponse } from '../category/dto/response/category.response';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchService } from './search.service';
+import { ProductFindResponse } from './DTO/response/product.find.response';
+import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
 @Injectable()
 export class ProductService {
@@ -122,9 +124,9 @@ export class ProductService {
         }
       }
       //TODO: find product search by name(Elastic Search)
-      async findProductBySearch(text: string): Promise<Partial<ProductResponse>[]>{
+      async findProductBySearch(text: string): Promise<Partial<ProductFindResponse>>{
         try{
-            const result = await this.esService.findProduct(text);
+            const result = await this.esService.findProductForSearchBar(text);
             return result;
         } catch(error){
             Logger.log(error)
@@ -132,7 +134,14 @@ export class ProductService {
         }
       }
       //TODO: get product by paging/detail
-  
+      async GetProductPagination(text: string, page: number, orderField: string, orderBy: string): Promise<ProductPagingResponse>{
+        try{
+          const result = await this.esService.findProductForPaging(text,page,orderField,orderBy)
+          return result
+        } catch(error){
+          throw new BadRequestException(error)
+        }
+      }
       //TODO: alter product
 }
 
