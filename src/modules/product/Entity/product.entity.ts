@@ -1,4 +1,6 @@
-import { Entity,Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn } from "typeorm";
+import { Transform } from "class-transformer";
+import { Category } from "src/modules/category/entities/category.entity";
+import { Entity,Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
 
 @Entity()
 export class Product{
@@ -35,4 +37,10 @@ export class Product{
     @UpdateDateColumn()
     updatedAt: Timestamp
 
+    @ManyToOne(() => Category, (category) => category.products)
+    @JoinColumn({
+        name: "category_id",
+        referencedColumnName: "id"
+    })
+    category: Category
 }

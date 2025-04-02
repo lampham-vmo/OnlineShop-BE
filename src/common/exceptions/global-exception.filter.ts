@@ -17,8 +17,9 @@ export class GlobalExceptionFilter implements ExceptionFilter{
         const message = exception instanceof HttpException
             ? exception.getResponse()
             : "Internal Server Error"
-        console.log(exception);
+
         const responseBody = {
+            success: false,
             statusCode: httpStatus,
             timeStamp: new Date().toISOString(),
             path: httpAdapter.getRequestUrl(ctx.getRequest()),
