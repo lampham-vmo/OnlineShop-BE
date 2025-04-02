@@ -1,6 +1,6 @@
 import { Controller, Get, Put, Post, Delete, Param, Body, ForbiddenException, UseGuards } from "@nestjs/common";
 import { UserService } from "./user.service";
-import { CreateUserDTO } from "../auth/auth/dto/create-user.dto";
+import { CreateUserDTO } from "../auth/dto/create-user.dto";
 import { GetUserDTO } from "./dto/get-user.dto";
 import { User } from "./entities/user.entity";
 import { BadRequestException } from "@nestjs/common";

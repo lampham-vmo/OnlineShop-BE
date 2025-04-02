@@ -120,7 +120,7 @@ export class AuthService {
         }
     }
 
-    async logout(id: number, accessToken: string): Promise<LogoutResponseDTO>{
+    async logout(id: number): Promise<LogoutResponseDTO>{
         //set refreshToken to empty in Backend
         await this.usersService.updateRefreshToken(id, 'empty')
         //throw at into a blacklist

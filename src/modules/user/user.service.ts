@@ -4,9 +4,9 @@ import { Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
 
 
-import { LoginUserDTO } from '../auth/auth/dto/login-user.dto';
-import { SignupResponseDTO } from '../auth/auth/dto/signup-response.dto';
-import { CreateUserDTO } from '../auth/auth/dto/create-user.dto';
+import { LoginUserDTO } from '../auth/dto/login-user.dto';
+import { SignupResponseDTO } from '../auth/dto/signup-response.dto';
+import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
 

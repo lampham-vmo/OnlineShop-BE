@@ -57,7 +57,7 @@ export class AuthController {
     @UseGuards(AuthGuard)
     async logout(@Req() req: Request){
         const user = req['user']
-        return await this.authService.logout(user.id, user.accessToken)
+        return await this.authService.logout(user.id)
 
     }
 
