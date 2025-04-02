@@ -12,7 +12,7 @@ export class UserController {
     constructor(private readonly userService : UserService) {}
 
     @Get()
-    @UseGuards(AuthGuard)
+    @UseGuards(AuthGuard,RoleGuard)
     async findAll() : Promise<User[]> {
         return await this.userService.findAll()
     }

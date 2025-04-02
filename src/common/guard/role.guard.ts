@@ -1,21 +1,15 @@
 
 import { Injectable, CanActivate, ExecutionContext, UnauthorizedException, BadRequestException } from '@nestjs/common';
 // import { Reflector } from '@nestjs/core';
-import { JwtService } from '@nestjs/jwt';
-import { Request } from 'express';
 import { PermissionService } from 'src/modules/permission/permission.service';
+import { RoleService } from 'src/modules/role/role.service';
 
 @Injectable()
 export class RoleGuard implements CanActivate {
   constructor(
-  
-    private jwtService: JwtService,
     private readonly permissionService: PermissionService,
-    
-
+    private readonly roleService: RoleService
   ) { }
-
-
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -27,13 +21,9 @@ export class RoleGuard implements CanActivate {
     const method = request.method
     const permissionId = await this.permissionService.getPermissionIdByPathAndMethod(path, method)
     //check if role has this permissionid 
-
-    //if role have, return true else return false
- 
-
-   
-    return true
-
+    const isRoleHasPermissionId = await this.roleService.isRoleHasPermissionId(role,permissionId)
+    //if role have, return true else return false   
+    return isRoleHasPermissionId
   }
 }
 

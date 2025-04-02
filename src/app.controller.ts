@@ -14,6 +14,7 @@ export class AppController {
   }
   
   @Post('ok')
+  @UseGuards(AuthGuard, RoleGuard)
   @RouteName('post something')
   postST(){}
 }
