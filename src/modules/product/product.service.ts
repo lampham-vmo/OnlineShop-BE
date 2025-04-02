@@ -1,150 +1,170 @@
-import { BadRequestException, Injectable, Logger, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
+} from '@nestjs/common';
 import { Product } from './Entity/product.entity';
 import { ProductRequest } from './DTO/requests/product.request';
 import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Category } from '../category/entities/category.entity';
-import { console } from 'inspector';
-import { isNotEmpty } from 'class-validator';
 import { ProductResponse } from './DTO/response/product.response';
 import { plainToInstance } from 'class-transformer';
-import { CategoryResponse } from '../category/dto/response/category.response';
-import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { SearchService } from './search.service';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
 @Injectable()
 export class ProductService {
-    constructor(
-        @InjectRepository(Category)private readonly categoryRepository:Repository<Category>,
-        @InjectRepository(Product)private readonly productRepository:Repository<Product>,
-        private readonly esService: SearchService,
-        private readonly dataSource:DataSource
-    ){};
+  constructor(
+    @InjectRepository(Category)
+    private readonly categoryRepository: Repository<Category>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
+    private readonly esService: SearchService,
+    private readonly dataSource: DataSource,
+  ) {}
 
-    //simulate rating 
-    async randomRating(){
-        return Math.floor(Math.random() * 5)+1;
-    }
+  //simulate rating
+  randomRating(): number {
+    return Math.floor(Math.random() * 5) + 1;
+  }
 
-    async priceAfterDis(price: number,discount: number){
-        return price - ((price * discount)/100)
-    }
-    //TODO: create product
-    async createProduct(productRequest:ProductRequest): Promise<ProductResponse|undefined>{
-        const category = await this.categoryRepository.findOneBy({id: productRequest.category})
-        const product = await this.productRepository.exists({where:{name: productRequest.name}})
-        const logger = new Logger('ProductService'); 
-
-        if(productRequest){
-            if(!product){
-                if(category !== null){
-                    const product = this.productRepository.create({
-                        name: productRequest.name,
-                        description: productRequest.description,
-                        stock: productRequest.stock,
-                        price: productRequest.price,
-                        discount: productRequest.discount,
-                        rating: await this.randomRating(),
-                        image: productRequest.image,
-                        category: category
-                    })
-                const proLog = await this.createProductAndSync(product)
-                logger.log(proLog)
-                return proLog
-                } else{
-                    throw new BadRequestException({message: "Category not Exits"})
-                }
-            } else{
-                throw new BadRequestException({message:"product is exited!"})
-            }
-        }else{
-            throw new BadRequestException({message:"Product data is not valid!"})
+  priceAfterDis(price: number, discount: number) {
+    return price - (price * discount) / 100;
+  }
+  //TODO: create product
+  async createProduct(
+    productRequest: ProductRequest,
+  ): Promise<ProductResponse | undefined> {
+    const category = await this.categoryRepository.findOneBy({
+      id: productRequest.categoryId,
+    });
+    const product = await this.productRepository.exists({
+      where: { name: productRequest.name },
+    });
+    if (productRequest) {
+      if (category !== null) {
+        if (!product) {
+          const product = this.productRepository.create({
+            name: productRequest.name,
+            description: productRequest.description,
+            stock: productRequest.stock,
+            price: productRequest.price,
+            discount: productRequest.discount,
+            rating: this.randomRating(),
+            image: productRequest.image,
+            category: category,
+          });
+          const proLog = await this.createProductAndSync(product);
+          return proLog;
+        } else {
+          throw new BadRequestException({ message: 'Product is exited!' });
         }
-    }
-
-    async makeProductRes(product: Product){
-        const categoryRes = plainToInstance(CategoryResponse,product.category,{excludeExtraneousValues: true})
-        const productRes = plainToInstance(ProductResponse,product,{excludeExtraneousValues: true})
-        productRes.category = categoryRes
-        productRes.priceAfterDis = await +(await this.priceAfterDis(productRes.price,productRes.discount)).toFixed(0)
-        return productRes;
-    }
-
-    async updateProductAndSync(id: number, updateData: Partial<Product>) {
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-    
-        try {
-          // 🔹 Cập nhật dữ liệu trong Database
-          await queryRunner.manager.update(Product, { id }, updateData);
-          const updatedProduct = await queryRunner.manager.findOne(Product, { where: { id } });
-    
-          // 🔹 Commit DB trước khi cập nhật Elasticsearch
-          
-          // 🔹 Cập nhật vào Elasticsearch
-          //await this.esService.
-          
-          await queryRunner.commitTransaction();
-          return updatedProduct;
-        } catch (error) {
-          await queryRunner.rollbackTransaction(); // Rollback nếu có lỗi
-          throw error;
-        } finally {
-          await queryRunner.release();
-        }
+      } else {
+        throw new BadRequestException({ message: 'Category not Exits' });
       }
+    } else {
+      throw new BadRequestException({ message: 'Product data is not valid!' });
+    }
+  }
 
-    async createProductAndSync(productData: Product) {
-        const logger = new Logger('ProductService'); 
-        const queryRunner = this.dataSource.createQueryRunner();
-        await queryRunner.connect();
-        await queryRunner.startTransaction();
-    
-        try {
-          const newProduct = queryRunner.manager.create(Product, productData);
-          await queryRunner.manager.save(newProduct);
-          logger.log("saving.....")
-          let productRes = await this.makeProductRes(newProduct)
-          productRes ={
-            ...productRes,
-                category: productRes.category.name
-            }
-          logger.log(productRes)
-          await this.esService.indexProduct(productRes)
-          await queryRunner.commitTransaction();
-          return productRes;
-        } catch (error) {
-          await queryRunner.rollbackTransaction();
-          throw error
-        } finally {
-          await queryRunner.release();
-        }
+  makeProductRes(product: Product) {
+    const productRes = plainToInstance(ProductResponse, product, {
+      excludeExtraneousValues: true,
+    });
+    productRes.priceAfterDis = parseInt(
+      this.priceAfterDis(productRes.price, productRes.discount).toFixed(0),
+    );
+    productRes.categoryName = product.category.name;
+    Logger.log(productRes);
+    return productRes;
+  }
+
+  async updateProductAndSync(id: number, updateData: Partial<Product>) {
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+
+    try {
+      await queryRunner.manager.update(Product, { id }, updateData);
+      const updatedProduct = await queryRunner.manager.findOne(Product, {
+        where: { id },
+      });
+      if (!updatedProduct) {
+        throw new BadRequestException('Nothing to updated!');
       }
-      //TODO: find product search by name(Elastic Search)
-      async findProductBySearch(text: string): Promise<Partial<ProductFindResponse>>{
-        try{
-            const result = await this.esService.findProductForSearchBar(text);
-            return result;
-        } catch(error){
-            Logger.log(error)
-            throw new BadRequestException({message: "Error when find Product!"})
-        }
+      let productRes = this.makeProductRes(updatedProduct);
+      try {
+        await this.esService.updateProductPartial(id, productRes);
+      } catch {
+        throw new BadRequestException('Error when update Elastic');
       }
-      //TODO: get product by paging/detail
-      async GetProductPagination(text: string, page: number, orderField: string, orderBy: string): Promise<ProductPagingResponse>{
-        try{
-          const result = await this.esService.findProductForPaging(text,page,orderField,orderBy)
-          return result
-        } catch(error){
-          throw new BadRequestException(error)
-        }
+      await queryRunner.commitTransaction();
+      return updatedProduct;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+  // create product and async
+  async createProductAndSync(productData: Product): Promise<ProductResponse> {
+    const logger = new Logger('ProductService');
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      const newProduct = queryRunner.manager.create(Product, productData);
+      await queryRunner.manager.save(newProduct);
+      logger.log('saving.....');
+      let productRes = this.makeProductRes(newProduct);
+      logger.log(productRes);
+      try {
+        await this.esService.indexProduct(productRes);
+      } catch (error) {
+        throw new BadRequestException(error);
       }
-      //TODO: alter product
+      await queryRunner.commitTransaction();
+      return productRes;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw error;
+    } finally {
+      await queryRunner.release();
+    }
+  }
+  //TODO: find product search by name(Elastic Search)
+  async findProductBySearch(
+    text: string,
+  ): Promise<Partial<ProductFindResponse>> {
+    try {
+      const result = await this.esService.findProductForSearchBar(text);
+      return result;
+    } catch (error) {
+      throw new BadRequestException({ message: 'Error when find Product!' });
+    }
+  }
+  //TODO: get product by paging/detail
+  async GetProductPagination(
+    text: string,
+    page: number,
+    orderField: string,
+    orderBy: string,
+  ): Promise<ProductPagingResponse> {
+    try {
+      const result = await this.esService.findProductForPaging(
+        text,
+        page,
+        orderField,
+        orderBy,
+      );
+      return result;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
+  }
+  //TODO: alter product
 }
-
-
-    
-

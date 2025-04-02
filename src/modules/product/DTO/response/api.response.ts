@@ -1,18 +1,17 @@
-import { Expose } from "class-transformer";
+import { Expose } from 'class-transformer';
 
-export class ApiResponse<T>{
+export class ApiResponse<T> {
+  @Expose()
+  code: number | 1000;
 
-    @Expose()
-    code: number|1000;
+  message: string;
 
-    message: string;
+  @Expose()
+  result?: T;
 
-    @Expose()
-    result?: T
-
-    constructor(result?:T,messsage = "Success",code = 1000){
-        this.code = code;
-        this.message = messsage;
-        this.result = result
-    }
+  constructor(result?: T, messsage = 'Success', code = 1000) {
+    this.code = code;
+    this.message = messsage;
+    this.result = result;
+  }
 }

@@ -1,31 +1,18 @@
-import { Expose } from "class-transformer";
-import { CategoryResponse } from "src/modules/category/dto/response/category.response";
-import { Category } from "src/modules/category/entities/category.entity";
+import { PickType } from '@nestjs/mapped-types';
+import { Expose } from 'class-transformer';
+import { Product } from '../../Entity/product.entity';
 
-export class ProductResponse{
-    @Expose()
-    id: number
+export class ProductResponse extends PickType(Product, [
+  'id',
+  'name',
+  'price',
+  'stock',
+  'discount',
+  'image',
+]) {
+  @Expose()
+  priceAfterDis: number;
 
-    @Expose()
-    name: string
-
-    @Expose()
-    price: number
-
-    @Expose()
-    stock: number
-
-    @Expose()
-    discount: number
-
-    @Expose()
-    image: string
-
-    @Expose()
-    priceAfterDis: number
-
-    @Expose()
-    category: CategoryResponse | any
-
-    
+  @Expose()
+  categoryName: string;
 }

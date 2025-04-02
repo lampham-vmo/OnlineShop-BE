@@ -1,44 +1,87 @@
-import { Entity,Column, PrimaryGeneratedColumn, Timestamp, CreateDateColumn, UpdateDateColumn, ManyToOne, JoinColumn } from "typeorm";
-import { Category } from "../../category/entities/category.entity";
-import { Exclude, Transform } from "class-transformer";
+import {
+  Entity,
+  Column,
+  PrimaryGeneratedColumn,
+  Timestamp,
+  CreateDateColumn,
+  UpdateDateColumn,
+  ManyToOne,
+  JoinColumn,
+} from 'typeorm';
+import { Category } from '../../category/entities/category.entity';
+import { Expose } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Length,
+  Max,
+  Min,
+} from 'class-validator';
 
 @Entity()
-export class Product{
-    @PrimaryGeneratedColumn()
-    id: number;
+export class Product {
+  @PrimaryGeneratedColumn()
+  @Expose()
+  id: number;
 
-    @Column({nullable: false})
-    name: string
-    
-    @Column()
-    description: string
-    
-    @Column({nullable: false})
-    stock: number
-    
-    @Column({type: "float",nullable: false})
-    price: number
-    
-    @Column({nullable: false})
-    discount: number
-    
-    @Column()
-    @Exclude()
-    rating: number
-    
-    @Column()
-    image: string
-    
-    @ManyToOne(()=>Category,(category)=>category.products,{onDelete:"CASCADE",nullable: false})
-    @JoinColumn({name:"category_id"})
-    category: Category
+  @IsString({ message: 'Description must be string' })
+  @IsNotEmpty()
+  @Length(0, 255, { message: 'Name must be less than 255 word' })
+  @Expose()
+  @Column({ nullable: false })
+  name: string;
 
-    @CreateDateColumn()
-    @Exclude()
-    createdAt: Timestamp
+  @IsString({ message: 'Description must be string' })
+  @IsNotEmpty()
+  @Length(0, 255, { message: 'Description must be less than 255 word' })
+  @Column()
+  @Expose()
+  description: string;
 
-    @UpdateDateColumn()
-    @Exclude()
-    updatedAt: Timestamp
+  @IsNumber()
+  @IsNotEmpty()
+  @Expose()
+  @Column({ nullable: false })
+  stock: number;
 
+  @IsNumber()
+  @IsNotEmpty()
+  @Expose()
+  @Column({ type: 'float', nullable: false })
+  price: number;
+
+  @IsNumber()
+  @Expose()
+  @Column({ nullable: false })
+  discount: number;
+
+  @IsNumber()
+  @Min(0)
+  @Max(5)
+  @Expose()
+  @IsOptional()
+  @Column()
+  rating: number;
+
+  @IsString()
+  @Column()
+  @Expose()
+  image: string;
+
+  @ManyToOne(() => Category, (category) => category.products, {
+    onDelete: 'CASCADE',
+    nullable: false,
+  })
+  @JoinColumn({ name: 'category_id' })
+  category: Category;
+
+  @CreateDateColumn()
+  @Expose()
+  createdAt: Timestamp;
+
+  @UpdateDateColumn()
+  @Expose()
+  updatedAt: Timestamp;
 }

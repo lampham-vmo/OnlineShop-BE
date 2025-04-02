@@ -10,25 +10,24 @@ import { SearchService } from './search.service';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Category,Product]),
+    TypeOrmModule.forFeature([Category, Product]),
     ConfigModule,
     ElasticsearchModule.registerAsync({
-      imports:[ConfigModule],
-      useFactory: async (configService:ConfigService)=>({
-        node: configService.get("elastic.node"),
+      imports: [ConfigModule],
+      useFactory: async (configService: ConfigService) => ({
+        node: configService.get('elastic.node'),
         maxRetries: 10,
         requestTimeout: 60000,
       }),
-      inject: [ConfigService]
-    })
+      inject: [ConfigService],
+    }),
   ],
   controllers: [ProductController],
-  providers: [ProductService,SearchService]
+  providers: [ProductService, SearchService],
 })
 export class ProductModule implements OnModuleInit {
-  constructor(private readonly searchService:SearchService) {}
+  constructor(private readonly searchService: SearchService) {}
   public async onModuleInit() {
-      await this.searchService.createIndex();
+    await this.searchService.createIndex();
   }
 }
-

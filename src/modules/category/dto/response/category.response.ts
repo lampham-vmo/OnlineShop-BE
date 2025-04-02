@@ -4,5 +4,5 @@ export class CategoryResponse{
     @Expose()
     name: string
 
-    description:string
+
 }
