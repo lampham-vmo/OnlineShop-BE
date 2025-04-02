@@ -53,7 +53,7 @@ export class AuthService {
 
         //if not throw error (success), create accesstoken   
         const accessToken = this.jwtService.sign(payload, {
-            algorithm: 'RS256',
+            algorithm: 'HS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
             expiresIn: '24h',
         });
@@ -81,12 +81,12 @@ export class AuthService {
         }
         //sign payload with private key
         const accessToken = this.jwtService.sign(payload, {
-            algorithm: 'RS256',
+            algorithm: 'HS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
             expiresIn: '24h',
         });
         const refreshToken = this.jwtService.sign(payload, {
-            algorithm: 'RS256',
+            algorithm: 'HS256',
             privateKey: process.env.JWT_PRIVATE_KEY,
             expiresIn: '7d',
         });
