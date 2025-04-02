@@ -11,7 +11,7 @@ export class PermissionService {
         private readonly permissionRepository: Repository<Permission>
     ) { }
 
-    async getPermissionIdByPathAndMethod(path: string, method: string): Promise<Number | InternalServerErrorException>{
+    async getPermissionIdByPathAndMethod(path: string, method: string): Promise<number>{
         const permission = await this.permissionRepository.findOne({
             where: [{path: path, method: method}]
         })
