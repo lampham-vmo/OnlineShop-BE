@@ -1,4 +1,4 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
@@ -46,19 +46,10 @@ export class SearchService {
                 type: 'float',
               },
               categoryName: {
-                type: 'object',
-                properties: {
-                  name: {
-                    type: 'text',
-                    fields: {
-                      keyword: {
-                        type: 'keyword',
-                      },
-                    },
-                  },
-                  description: {
-                    type: 'text',
-                    index: false,
+                type: 'text',
+                fields: {
+                  keyword: {
+                    type: 'keyword',
                   },
                 },
               },
