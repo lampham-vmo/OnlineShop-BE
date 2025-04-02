@@ -1,15 +1,19 @@
-import { BadRequestException, HttpCode, HttpStatus, Inject, Injectable, UnauthorizedException } from '@nestjs/common';
+import { BadRequestException, HttpStatus, Injectable, UnauthorizedException } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/modules/user/user.service';
 import { generateKeyPairSync } from 'crypto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { SignupResponseDTO } from './dto/signup-response.dto';
 import { SignInResponseDTO } from './dto/login-response-dto';
-import { comparedPassword, hashedPasword } from 'src/common/util/bcrypt.util';
+import { comparedPassword } from 'src/common/util/bcrypt.util';
 import { LogoutResponseDTO } from './dto/logout-response.dto';
 import { RefreshAtResponseDTO } from './dto/refreshAT-response.dto';
-import { Cache, CACHE_MANAGER} from '@nestjs/cache-manager';
 
+interface Payload {
+    id: number;
+    email: string;
+    role: number
+}
 
 @Injectable()
 export class AuthService {
@@ -21,7 +25,6 @@ export class AuthService {
       
 
      }
-
     createKeyPair(): { privateKey: string, publicKey: string } {
         const { privateKey, publicKey } = generateKeyPairSync('rsa', {
             modulusLength: 2048,
@@ -39,7 +42,7 @@ export class AuthService {
 
 
 
-    async handleRefreshAccessToken({payload, refreshToken}) : Promise<RefreshAtResponseDTO | UnauthorizedException> {
+    async handleRefreshAccessToken({payload, refreshToken}: {payload: Payload, refreshToken: string}) : Promise<RefreshAtResponseDTO | UnauthorizedException> {
  
         
         
@@ -60,7 +63,7 @@ export class AuthService {
 
     }
 
-    async signIn({ email, password }): Promise<SignInResponseDTO | BadRequestException> {
+    async signIn({ email, password } : {email: string, password: string}): Promise<SignInResponseDTO | BadRequestException> {
         //check if user exists
         const user = await this.usersService.findOneByEmail(email)
         //if not exists, throw bad request
