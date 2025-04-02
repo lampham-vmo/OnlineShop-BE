@@ -20,8 +20,8 @@ export class RoleGuard implements CanActivate {
     const path = request.route.path
     const method = request.method
     const permissionId = await this.permissionService.getPermissionIdByPathAndMethod(path, method)
-    const isRoleHasPermissionId = await this.roleService.isRoleHasPermissionId(role,permissionId)
     //check if role has this permissionid 
+    const isRoleHasPermissionId = await this.roleService.isRoleHasPermissionId(role,permissionId)
     //if role have, return true else return false   
     return isRoleHasPermissionId
   }
