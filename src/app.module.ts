@@ -55,6 +55,11 @@ export class AppModule implements OnModuleInit {
   }
 
   onModuleInit() {
+   this.getAllRouteAndInsertIntoPermission()
+  }
+
+
+  getAllRouteAndInsertIntoPermission(){
     const controllers = this.discoveryService.getControllers();
     const routes: { name: string, path: string; method: string }[] = [];
 
