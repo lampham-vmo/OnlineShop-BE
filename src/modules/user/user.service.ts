@@ -1,9 +1,14 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { BadGatewayException, BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
+import { Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
-import { CreateUserDTO } from './dto/create-user.dto';
-import { GetUserDTO } from './dto/get-user.dto';
+
+
+import { LoginUserDTO } from '../auth/auth/dto/login-user.dto';
+import { SignupResponseDTO } from '../auth/auth/dto/signup-response.dto';
+import { CreateUserDTO } from '../auth/auth/dto/create-user.dto';
+
+import { hashedPasword } from 'src/common/util/bcrypt.util';
 
 @Injectable()
 export class UserService {
@@ -17,29 +22,44 @@ export class UserService {
         return await this.usersRepository.findOneBy({ id: id })
     }
 
-    async findOneByEmailAndPassword(findedUser: GetUserDTO): Promise<User | null> {
-        return await this.usersRepository.findOneBy({ email: findedUser.email, password: findedUser.password })
+    async findOneByEmail(email: string){
+        return await this.usersRepository.findOneBy({email: email})
     }
 
-    async isEmailExist(email: string): Promise<Boolean> {
-        return await this.usersRepository.findOneBy({ email: email }) !== undefined ? true : false
+    async findOneByEmailAndPassword(loggedInUser: LoginUserDTO): Promise<User | null> {
+        return await this.usersRepository.findOneBy({ email: loggedInUser.email, password: loggedInUser.password })
     }
 
-    async create(newUser: CreateUserDTO): Promise<User | BadRequestException> {
-        const isEmailExist = await this.isEmailExist(newUser.email)
-        if (isEmailExist) {
-            throw new BadRequestException({message:"The email has already existed"})
-        } else {
-            const temp = this.usersRepository.create(newUser)
-            return await this.usersRepository.save(temp)
+    async isEmailOrPhoneExist(email: string, phone: string): Promise<{emailExists: boolean, phoneExists: boolean}> {
+        const user = await this.usersRepository.findOne({where: [{email},{phone}]})
+        return {
+            emailExists: user?.email == email,
+            phoneExists: user?.phone == phone
         }
     }
 
-    // async update(updatedUserID: number, updatedUserDTO: CreateUserDTO) : Promise<User | null> {
+    async isAddressExist(address: string): Promise<Boolean> {
+        return await this.usersRepository.findOneBy({ address: address }) !== null ? true : false
+    }
+
+
+    async updateRefreshToken(id : number, refreshToken: string) : Promise<UpdateResult>{
+        return await this.usersRepository.update({id},{refreshToken})
+    }
+
+
+   
+    // async update(updatedUserID: number, updatedUserDTO: UserSignupDTO) : Promise<User | null> {
     //     const temp = this.usersRepository.create(updatedUserDTO)
     //     await this.usersRepository.update({id: updatedUserID},temp)
     //     return this.findOneById(temp.id)
     // }
+    async createUser(newUser: CreateUserDTO) {
+        //hash password before create
+        const hashedPassword = await hashedPasword(newUser.password)
+        const temp = this.usersRepository.create({...newUser, password: hashedPassword})
+        await this.usersRepository.save(temp)
+    }
 
     async delete(deletedUserID: number): Promise<void> {
         await this.usersRepository.delete({ id: deletedUserID })
