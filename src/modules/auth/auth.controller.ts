@@ -1,6 +1,6 @@
 import { BadRequestException, Body, Controller, Get, HttpCode, HttpStatus, InternalServerErrorException, Patch, Post, Req, Res, UseGuards } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDTO } from 'src/modules/auth/auth/dto/login-user.dto';
+import { LoginUserDTO } from 'src/modules/auth/dto/login-user.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from 'src/modules/user/user.service';
