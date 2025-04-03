@@ -3,6 +3,8 @@ import {
   Body,
   Controller,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -12,6 +14,8 @@ import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
+import { ProductUpdateDto } from './DTO/product-update.dto';
+import { plainToClass } from 'class-transformer';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -48,5 +52,14 @@ export class ProductController {
         orderBy,
       ),
     );
+  }
+
+  @Patch('product/:id')
+  async updateProductDetail(
+    @Param('id') id:number,
+    @Body() productUpdateDto: ProductUpdateDto,
+  ): Promise<ApiResponse<ProductResponse>> {
+    const result = await this.productService.UpdateProduct(id, productUpdateDto);
+    return new ApiResponse<ProductResponse>(result)
   }
 }

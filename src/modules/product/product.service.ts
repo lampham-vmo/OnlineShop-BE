@@ -10,10 +10,11 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { DataSource, Repository } from 'typeorm';
 import { Category } from '../category/entities/category.entity';
 import { ProductResponse } from './DTO/response/product.response';
-import { plainToInstance } from 'class-transformer';
+import { plainToClass, plainToInstance } from 'class-transformer';
 import { SearchService } from './search.service';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
+import { ProductUpdateDto } from './DTO/product-update.dto';
 
 @Injectable()
 export class ProductService {
@@ -166,5 +167,18 @@ export class ProductService {
       throw new BadRequestException(error);
     }
   }
-  //TODO: alter product
+  //TODO: update product
+  async UpdateProduct(id: number, productUpdateDto: ProductUpdateDto):Promise<ProductResponse>{
+    const product = await this.productRepository.findOne({where: {id}});
+    if (!product)
+      throw new NotFoundException(`The product with ${id} does not exist!`);
+    Object.assign(product, ProductUpdateDto);
+    const result = await this.productRepository.save(product);
+
+    return plainToClass(ProductResponse, {
+      ...result, 
+      priceAfterDis: result.price - (result.price * result.discount) / 100,
+      categoryName: result.category?.name || 'unknown',
+     });
+  }
 }

@@ -4,7 +4,7 @@ import { Product } from "../../Entity/product.entity"
 
 export class ProductRequest extends OmitType(Product,["category","id","updatedAt","createdAt"]){
 
-
+    
     @IsNumber()
     @IsNotEmpty()
     @IsInt()
