@@ -30,12 +30,14 @@ export class AuthGuard implements CanActivate {
 
     
     if (token) {
-      if (!token) throw new UnauthorizedException('access Token is required!');
       const payload = await this.validateToken(token.trim())
+      //if not throw error (validate success)
       request['user'] = { ...payload, accessToken: token };
+      return true
+
     }
 
-    return true
+    return false
   }
 
   async validateToken(token: string) {

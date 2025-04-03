@@ -50,7 +50,6 @@ export class AuthService {
         const user = await this.usersService.findOneById(payload.id)
         if (refreshToken !== user?.refreshToken) throw new UnauthorizedException('failed rt, please relogin!')
 
-
         //if not throw error (success), create accesstoken   
         const accessToken = this.jwtService.sign(payload, {
             algorithm: 'RS256',
