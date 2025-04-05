@@ -13,7 +13,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { AuthService } from './auth.service';
-import { LoginUserDTO } from 'src/modules/auth/auth/dto/login-user.dto';
+import { LoginUserDTO } from 'src/modules/auth/dto/login-user.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from 'src/modules/user/user.service';
@@ -55,27 +55,25 @@ export class AuthController {
 
   @Post('signup')
   @RouteName('signup account')
-  async create(
-    @Body() createUserDTO: CreateUserDTO,
-  ): Promise<SignupResponseDTO | BadRequestException> {
-    return await this.authService.signup(createUserDTO);
+  async create(@Body() createUserDTO : CreateUserDTO) : Promise<SignupResponseDTO | BadRequestException>{
+      return await this.authService.signup(createUserDTO)
   }
 
   @Post('login')
   @RouteName('user login')
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() loginUserDTO: LoginUserDTO,
-  ): Promise<SignInResponseDTO | BadRequestException> {
-    return await this.authService.signIn(loginUserDTO);
+  async login(@Body() loginUserDTO : LoginUserDTO): Promise<SignInResponseDTO | BadRequestException>{
+      return await this.authService.signIn(loginUserDTO)
+      
   }
 
   @Patch('logout')
   @RouteName('Logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async logout(@Req() req: Request) {
-    const user = req['user'];
-    return await this.authService.logout(user.id, user.accessToken);
+  async logout(@Req() req: Request){
+      const user = req['user']
+      return await this.authService.logout(user.id)
+
   }
 }

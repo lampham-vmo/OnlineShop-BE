@@ -1,13 +1,14 @@
 import {
-  IsEmail,
-  IsString,
-  MinLength,
-  MaxLength,
-  Matches,
-  IsNotEmpty,
-} from 'class-validator';
+    IsEmail,
+    IsString,
+    MinLength,
+    MaxLength,
+    Matches,
+    IsNotEmpty,
+  } from 'class-validator';
+import { Match } from 'src/common/decorators/match-custom-class-validator';
 
-import { Match } from '../../../../common/decorators/match-custom-class-validator';
+
 
 export class CreateUserDTO {
   @IsNotEmpty()

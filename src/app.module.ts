@@ -7,7 +7,7 @@ import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { CategoryModule } from './modules/category/category.module';
 import config from './config/config';
-import { AuthModule } from './modules/auth/auth/auth.module';
+import { AuthModule } from './modules/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';

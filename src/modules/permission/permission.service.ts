@@ -10,18 +10,13 @@ export class PermissionService {
     private readonly permissionRepository: Repository<Permission>,
   ) {}
 
-  async getPermissionIdByPathAndMethod(
-    path: string,
-    method: string,
-  ): Promise<Number | InternalServerErrorException> {
-    const permission = await this.permissionRepository.findOne({
-      where: [{ path: path, method: method }],
-    });
-    if (!permission)
-      throw new InternalServerErrorException('Permission not found !');
-    return permission.id;
-  }
-
+    async getPermissionIdByPathAndMethod(path: string, method: string): Promise<number>{
+        const permission = await this.permissionRepository.findOne({
+            where: [{path: path, method: method}]
+        })
+        if(!permission) throw new InternalServerErrorException('Permission not found !')
+        return permission.id
+    }
   async syncPermissions(
     routes: { name: string; path: string; method: string }[],
   ) {
