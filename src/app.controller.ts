@@ -12,8 +12,8 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  
+
   @Post('ok')
   @RouteName('post something')
-  postST(){}
+  postST() {}
 }

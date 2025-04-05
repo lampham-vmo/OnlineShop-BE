@@ -6,6 +6,6 @@ import { JwtService } from '@nestjs/jwt';
 @Module({
   imports: [CloudinaryModule],
   controllers: [UploadController],
-  providers: [JwtService]
+  providers: [JwtService],
 })
 export class UploadModule {}

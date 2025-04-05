@@ -14,10 +14,11 @@ export class RoleService implements OnModuleInit {
   constructor(
     @InjectRepository(Role)
     private readonly roleRepository: Repository<Role>,
-    @InjectRepository(Permission) private readonly permissionRepository: Repository<Permission>
-  ) { }
+    @InjectRepository(Permission)
+    private readonly permissionRepository: Repository<Permission>,
+  ) {}
   async onModuleInit(): Promise<void> {
-    await this.createDefaultRoles()
+    await this.createDefaultRoles();
   }
 
   private async createDefaultRoles(): Promise<void> {
@@ -26,7 +27,9 @@ export class RoleService implements OnModuleInit {
       { id: 2, name: 'user', description: 'Regular user role' },
     ];
     for (const role of roles) {
-      const existingRole = await this.roleRepository.findOne({ where: { id: role.id } });
+      const existingRole = await this.roleRepository.findOne({
+        where: { id: role.id },
+      });
       if (!existingRole) {
         await this.roleRepository.save(role);
         console.log(`✅ Role "${role.name}" created.`);
@@ -34,61 +37,76 @@ export class RoleService implements OnModuleInit {
     }
   }
 
-  private async createARole(newRole: CreateRoleDTO): Promise<APIResponseDTO<string> | BadRequestException> {
-    const { name, description, permissionIds } = newRole
-    const role = new Role()
+  private async createARole(
+    newRole: CreateRoleDTO,
+  ): Promise<APIResponseDTO<string> | BadRequestException> {
+    const { name, description, permissionIds } = newRole;
+    const role = new Role();
     role.name = name;
     role.description = description;
     if ((await this.roleRepository.findOne({ where: { name } })) != null) {
-      throw new BadRequestException("The role name has already existed")
+      throw new BadRequestException('The role name has already existed');
     } else {
       if (permissionIds && permissionIds.length > 0) {
-        role.permissions = await this.permissionRepository.findBy({ id: In(permissionIds) })
-        this.roleRepository.save(role)
+        role.permissions = await this.permissionRepository.findBy({
+          id: In(permissionIds),
+        });
+        this.roleRepository.save(role);
       } else {
-        throw new BadRequestException("The permissionsIDs must not be blank")
+        throw new BadRequestException('The permissionsIDs must not be blank');
       }
-      return new APIResponseDTO(true, 200, "Sucessfully create a role")
+      return new APIResponseDTO(true, 200, 'Sucessfully create a role');
     }
   }
 
-  private async updateARole(id: number, updatedRole: UpdateRoleDTO): Promise<APIResponseDTO<string> | BadRequestException> {
-    const role = await this.roleRepository.findOne({where: {id}, relations: ["permissions"]})
-    if(!role){
-      throw new BadRequestException("The role doesn't exist")
+  private async updateARole(
+    id: number,
+    updatedRole: UpdateRoleDTO,
+  ): Promise<APIResponseDTO<string> | BadRequestException> {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+    if (!role) {
+      throw new BadRequestException("The role doesn't exist");
     }
-    if(updatedRole.name){
-      role.name = updatedRole.name
-    } 
-    if(updatedRole.description){
-      role.description = updatedRole.description
+    if (updatedRole.name) {
+      role.name = updatedRole.name;
     }
-    if(updatedRole.permissionIds){
+    if (updatedRole.description) {
+      role.description = updatedRole.description;
+    }
+    if (updatedRole.permissionIds) {
       role.permissions = await this.permissionRepository.find({
         where: {
-          id: In(updatedRole.permissionIds)
-        }
-      })
+          id: In(updatedRole.permissionIds),
+        },
+      });
     }
-    await this.roleRepository.save(role)
-    return new APIResponseDTO<string>(true,200,"Successfully updated a user")
+    await this.roleRepository.save(role);
+    return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
   }
 
   private async getAllRole(): Promise<Role[] | BadRequestException> {
-    const result = await this.roleRepository.find({relations: {permissions: true}})
-    if(!result){
-      throw new BadRequestException("No roles are found")
+    const result = await this.roleRepository.find({
+      relations: { permissions: true },
+    });
+    if (!result) {
+      throw new BadRequestException('No roles are found');
     } else {
-      return result
+      return result;
     }
   }
 
   private async getARoleByID(id: number): Promise<Role | BadRequestException> {
-    const result = await this.roleRepository.findOne({where: {id}, relations: ["permissions"]})
-    if(!result) {
-      throw new BadRequestException("No role is fund by id")
+    const result = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
+    if (!result) {
+      throw new BadRequestException('No role is fund by id');
     } else {
-      return result
+      return result;
     }
   }
 }

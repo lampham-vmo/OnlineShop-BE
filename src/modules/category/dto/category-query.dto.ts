@@ -4,25 +4,25 @@ import { Type } from 'class-transformer';
 export class CategoryQueryDto {
   @IsOptional()
   @IsString()
-  search?: string;
+  search: string;
 
   @IsOptional()
   @IsString()
-  sortBy?: string;
+  sortBy: string;
 
   @IsOptional()
   @IsString()
-  order?: 'ASC' | 'DESC';
+  order: 'ASC' | 'DESC';
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  page?: number;
+  page: number;
 
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
-  pageSize?: number;
+  pageSize: number;
 }

@@ -9,6 +9,6 @@ import { PermissionModule } from 'src/modules/permission/permission.module';
   imports: [UserModule, JwtModule, PermissionModule],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: [AuthService],
 })
 export class AuthModule {}

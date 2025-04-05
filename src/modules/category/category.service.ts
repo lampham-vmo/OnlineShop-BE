@@ -34,18 +34,20 @@ export class CategoryService {
     createCategoryDto: CreateCategoryDto,
   ): Promise<APIResponseDTO<Category>> {
     createCategoryDto.name = createCategoryDto.name.trim();
+    createCategoryDto.description = createCategoryDto.description.trim();
 
     const existingCategory = await this.categoryRepository.findOne({
       where: { name: createCategoryDto.name, deleted: false },
     });
     if (existingCategory) {
       throw new BadRequestException({
-        message: `Category name: "${existingCategory.name}" existed`,
+        message: `Category name existed`,
       });
     }
 
     const newCategory = this.categoryRepository.create(createCategoryDto);
     const result = await this.categoryRepository.save(newCategory);
+
     return {
       success: true,
       statusCode: 201,
@@ -53,7 +55,24 @@ export class CategoryService {
     };
   }
 
-  async getListCategory(
+  async getListCategory(): Promise<APIResponseDTO<Category[]>> {
+    const categories = await this.categoryRepository.find({
+      where: {
+        deleted: false,
+      },
+      order: {
+        createdAt: 'ASC',
+      },
+    });
+
+    return {
+      success: true,
+      statusCode: 200,
+      data: categories,
+    };
+  }
+
+  async getListCategoryWithPagination(
     query: CategoryQueryDto,
   ): Promise<APIResponseDTO<CategoryData>> {
     let {
@@ -73,7 +92,9 @@ export class CategoryService {
       .where('category.deleted = :deleted', { deleted: false });
 
     if (search) {
-      queryBuilder.andWhere(`category.name LIKE :name`, { name: `%${search}%` });
+      queryBuilder.andWhere(`category.name LIKE :name`, {
+        name: `%${search}%`,
+      });
     }
 
     queryBuilder.orderBy(`category.${sortBy}`, order).skip(skip).take(pageSize);
@@ -96,8 +117,10 @@ export class CategoryService {
     };
   }
 
-  private async findCategoryById(id: number): Promise<Category> {
-    const category = await this.categoryRepository.findOne({ where: { id, deleted: false } });
+  async getOneCategoryWithId(id: number): Promise<Category> {
+    const category = await this.categoryRepository.findOne({
+      where: { id, deleted: false },
+    });
     if (!category) {
       throw new NotFoundException({
         message: `Category with ID ${id} not found`,
@@ -107,7 +130,7 @@ export class CategoryService {
   }
 
   async findOneCategoryById(id: number): Promise<APIResponseDTO<Category>> {
-    const category = await this.findCategoryById(id);
+    const category = await this.getOneCategoryWithId(id);
     return {
       success: true,
       statusCode: 200,
@@ -119,7 +142,11 @@ export class CategoryService {
     id: number,
     updateCategoryDto: UpdateCategoryDto,
   ): Promise<APIResponseDTO<Category>> {
-    await this.findCategoryById(id);
+    await this.getOneCategoryWithId(id);
+
+    if (updateCategoryDto.description) {
+      updateCategoryDto.description = updateCategoryDto.description.trim();
+    }
 
     if (updateCategoryDto.name) {
       updateCategoryDto.name = updateCategoryDto.name.trim();
@@ -141,7 +168,7 @@ export class CategoryService {
   }
 
   async deleteCategory(id: number): Promise<APIResponseDTO<object>> {
-    await this.findCategoryById(id);
+    await this.getOneCategoryWithId(id);
 
     await this.categoryRepository.update({ id }, { deleted: true });
 
