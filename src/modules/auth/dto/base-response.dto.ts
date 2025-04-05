@@ -1,21 +1,21 @@
-import { IsString, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator'
+import { IsString, IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class BaseResponseDTO {
-    @IsBoolean()
-    @IsNotEmpty()
-    success: boolean;
+  @IsBoolean()
+  @IsNotEmpty()
+  success: boolean;
 
-    @IsNumber()
-    @IsNotEmpty()
-    statusCode: number;
+  @IsNumber()
+  @IsNotEmpty()
+  statusCode: number;
 
-    @IsNotEmpty()
-    @IsString()
-    message: string;
+  @IsNotEmpty()
+  @IsString()
+  message: string;
 
-    constructor(success: boolean, statusCode: number, message: string){
-        this.success = success;
-        this.message = message;
-        this.statusCode = statusCode
-    }
+  constructor(success: boolean, statusCode: number, message: string) {
+    this.success = success;
+    this.message = message;
+    this.statusCode = statusCode;
+  }
 }

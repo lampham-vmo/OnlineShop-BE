@@ -5,21 +5,23 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { CategoryModule } from './modules/category/category.module';
 import config from './config/config';
 import { AuthModule } from './modules/auth/auth.module';
 import { RoleModule } from './modules/role/role.module';
 import { PermissionModule } from './modules/permission/permission.module';
 import { DiscoveryService, MetadataScanner, Reflector } from '@nestjs/core';
 import { PermissionService } from './modules/permission/permission.service';
-import { Permission } from './modules/permission/entities/permission.entity';
 import { JwtModule } from '@nestjs/jwt';
+import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
+import { UploadModule } from './modules/upload/upload.module';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
       cache: true,
-      load: [config]
+      load: [config],
     }),
 
     TypeOrmModule.forRootAsync({
@@ -28,40 +30,42 @@ import { JwtModule } from '@nestjs/jwt';
       useFactory: async (config) => ({
         type: 'postgres',
         host: 'localhost',
-        port: config.get("database.port"),
+        port: config.get('database.port'),
         username: 'postgres',
-        password: config.get("database.password"),
-        database: config.get("database.DB"),
+        password: config.get('database.password'),
+        database: config.get('database.DB'),
         autoLoadEntities: true,
-        synchronize: true
-      })
+        synchronize: true,
+      }),
     }),
-    TypeOrmModule.forFeature([Permission]),
-    UserModule, ProductModule, AuthModule, RoleModule, PermissionModule, JwtModule
-
+    UserModule,
+    ProductModule,
+    AuthModule,
+    RoleModule,
+    PermissionModule,
+    JwtModule,
+    CloudinaryModule,
+    UploadModule,
+    CategoryModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DiscoveryService, MetadataScanner, PermissionService],
-
+  providers: [AppService, DiscoveryService, MetadataScanner],
 })
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly metadataScanner: MetadataScanner,
     private readonly reflector: Reflector,
-    private readonly permissionService: PermissionService
-  ) {
-
-  }
+    private readonly permissionService: PermissionService,
+  ) {}
 
   onModuleInit() {
-   this.getAllRouteAndInsertIntoPermission()
+    this.getAllRouteAndInsertIntoPermission();
   }
 
-
-  getAllRouteAndInsertIntoPermission(){
+  getAllRouteAndInsertIntoPermission() {
     const controllers = this.discoveryService.getControllers();
-    const routes: { name: string, path: string; method: string }[] = [];
+    const routes: { name: string; path: string; method: string }[] = [];
 
     const methodMap = {
       [RequestMethod.GET]: 'GET',
@@ -81,10 +85,10 @@ export class AppModule implements OnModuleInit {
       //scan to get each path, method
       this.metadataScanner.scanFromPrototype(instance, prototype, (method) => {
         if (!prototype[method]) return;
-        
+
         const methodPath = Reflect.getMetadata('path', prototype[method]) || '';
         const methodType = Reflect.getMetadata('method', prototype[method]);
-        const routeName = Reflect.getMetadata('routeName', prototype[method])
+        const routeName = Reflect.getMetadata('routeName', prototype[method]);
         if (methodType !== undefined) {
           //path:  /something/something
           let fullPath = `${basePath}/${methodPath}`.replace(/\/+/g, '/');
@@ -99,7 +103,7 @@ export class AppModule implements OnModuleInit {
         }
       });
     }
-    console.log("all route: ", routes);
+    // console.log("all route: ", routes);
     //sync permission in db every time app run
     this.permissionService.syncPermissions(routes);
   }

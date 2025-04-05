@@ -10,6 +10,6 @@ import { RoleModule } from 'src/modules/role/role.module';
   imports: [UserModule, JwtModule, PermissionModule, RoleModule],
   controllers: [AuthController],
   providers: [AuthService],
-  exports: [AuthService]
+  exports: [AuthService],
 })
 export class AuthModule {}

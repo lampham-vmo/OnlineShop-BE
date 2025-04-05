@@ -12,9 +12,9 @@ export class AppController {
   getHello(): string {
     return this.appService.getHello();
   }
-  
+
   @Post('ok')
   @UseGuards(AuthGuard, RoleGuard)
   @RouteName('post something')
-  postST(){}
+  postST() {}
 }
