@@ -1,7 +1,7 @@
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Permission } from './entities/permission.entity';
-import { And, Repository } from 'typeorm';
+import { Repository } from 'typeorm';
 
 @Injectable()
 export class PermissionService {
@@ -10,13 +10,17 @@ export class PermissionService {
     private readonly permissionRepository: Repository<Permission>,
   ) {}
 
-    async getPermissionIdByPathAndMethod(path: string, method: string): Promise<number>{
-        const permission = await this.permissionRepository.findOne({
-            where: [{path: path, method: method}]
-        })
-        if(!permission) throw new InternalServerErrorException('Permission not found !')
-        return permission.id
-    }
+  async getPermissionIdByPathAndMethod(
+    path: string,
+    method: string,
+  ): Promise<number> {
+    const permission = await this.permissionRepository.findOne({
+      where: [{ path: path, method: method }],
+    });
+    if (!permission)
+      throw new InternalServerErrorException('Permission not found !');
+    return permission.id;
+  }
   async syncPermissions(
     routes: { name: string; path: string; method: string }[],
   ) {

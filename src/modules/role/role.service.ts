@@ -7,7 +7,6 @@ import { BadRequestException } from '@nestjs/common';
 import { Permission } from '../permission/entities/permission.entity';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { UpdateRoleDTO } from './dto/update-role-dto';
-import { RoleModule } from './role.module';
 
 @Injectable()
 export class RoleService implements OnModuleInit {
@@ -37,9 +36,11 @@ export class RoleService implements OnModuleInit {
     }
   }
 
-  async createARole(newRole: CreateRoleDTO): Promise<APIResponseDTO<string> | BadRequestException> {
-    const { name, description, permissionIds } = newRole
-    const role = new Role()
+  async createARole(
+    newRole: CreateRoleDTO,
+  ): Promise<APIResponseDTO<string> | BadRequestException> {
+    const { name, description, permissionIds } = newRole;
+    const role = new Role();
     role.name = name;
     role.description = description;
     if ((await this.roleRepository.findOne({ where: { name } })) != null) {
@@ -57,16 +58,22 @@ export class RoleService implements OnModuleInit {
     }
   }
 
-  async updateARole(id: number, updatedRole: UpdateRoleDTO): Promise<APIResponseDTO<string> | BadRequestException> {
-    const role = await this.roleRepository.findOne({ where: { id }, relations: ["permissions"] })
+  async updateARole(
+    id: number,
+    updatedRole: UpdateRoleDTO,
+  ): Promise<APIResponseDTO<string> | BadRequestException> {
+    const role = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
     if (!role) {
-      throw new BadRequestException("The role doesn't exist")
+      throw new BadRequestException("The role doesn't exist");
     }
     if (updatedRole.name) {
-      role.name = updatedRole.name
+      role.name = updatedRole.name;
     }
     if (updatedRole.description) {
-      role.description = updatedRole.description
+      role.description = updatedRole.description;
     }
     if (updatedRole.permissionIds) {
       role.permissions = await this.permissionRepository.find({
@@ -75,32 +82,45 @@ export class RoleService implements OnModuleInit {
         },
       });
     }
-    await this.roleRepository.save(role)
-    return new APIResponseDTO<string>(true, 200, "Successfully updated a user")
+    await this.roleRepository.save(role);
+    return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
   }
 
   async getAllRole(): Promise<Role[] | BadRequestException> {
-    const result = await this.roleRepository.find({ relations: { permissions: true } })
+    const result = await this.roleRepository.find({
+      relations: { permissions: true },
+    });
     if (!result) {
-      throw new BadRequestException("No roles are found")
+      throw new BadRequestException('No roles are found');
     } else {
       return result;
     }
   }
 
   async getARoleByID(id: number): Promise<Role | BadRequestException> {
-    const result = await this.roleRepository.findOne({ where: { id }, relations: ["permissions"] })
+    const result = await this.roleRepository.findOne({
+      where: { id },
+      relations: ['permissions'],
+    });
     if (!result) {
-      throw new BadRequestException("No role is fund by id")
+      throw new BadRequestException('No role is fund by id');
     } else {
       return result;
     }
   }
-  async isRoleHasPermissionId(roleId: number, permissionId: number): Promise<boolean> {
-    const query = await this.roleRepository.findOne({ where: { id: roleId }, relations: ["permissions"] })
+  async isRoleHasPermissionId(
+    roleId: number,
+    permissionId: number,
+  ): Promise<boolean> {
+    const query = await this.roleRepository.findOne({
+      where: { id: roleId },
+      relations: ['permissions'],
+    });
     if (!query) {
-      return false
+      return false;
     }
-    return query.permissions.some(permission => permission.id == permissionId)
+    return query.permissions.some(
+      (permission) => permission.id == permissionId,
+    );
   }
 }

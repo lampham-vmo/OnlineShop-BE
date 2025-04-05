@@ -55,25 +55,27 @@ export class AuthController {
 
   @Post('signup')
   @RouteName('signup account')
-  async create(@Body() createUserDTO : CreateUserDTO) : Promise<SignupResponseDTO | BadRequestException>{
-      return await this.authService.signup(createUserDTO)
+  async create(
+    @Body() createUserDTO: CreateUserDTO,
+  ): Promise<SignupResponseDTO | BadRequestException> {
+    return await this.authService.signup(createUserDTO);
   }
 
   @Post('login')
   @RouteName('user login')
   @HttpCode(HttpStatus.OK)
-  async login(@Body() loginUserDTO : LoginUserDTO): Promise<SignInResponseDTO | BadRequestException>{
-      return await this.authService.signIn(loginUserDTO)
-      
+  async login(
+    @Body() loginUserDTO: LoginUserDTO,
+  ): Promise<SignInResponseDTO | BadRequestException> {
+    return await this.authService.signIn(loginUserDTO);
   }
 
   @Patch('logout')
   @RouteName('Logout')
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
-  async logout(@Req() req: Request){
-      const user = req['user']
-      return await this.authService.logout(user.id)
-
+  async logout(@Req() req: Request) {
+    const user = req['user'];
+    return await this.authService.logout(user.id);
   }
 }
