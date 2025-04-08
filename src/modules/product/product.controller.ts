@@ -5,10 +5,12 @@ import { Product } from './Entity/product.entity';
 
 @Controller('product')
 export class ProductController {
-    constructor(private productService: ProductService){}
+  constructor(private productService: ProductService) {}
 
-    // @Post()
-    // async createProduct(@Body() productRequest: ProductRequest): Promise<Product| BadRequestException>{
-    //     return this.productService.createProduct()
-    // } 
+  @Post()
+  async createProduct(
+    @Body() productRequest: ProductRequest,
+  ): Promise<Product | BadRequestException> {
+    return this.productService.createProduct();
+  }
 }

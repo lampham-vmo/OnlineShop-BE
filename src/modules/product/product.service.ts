@@ -1,13 +1,16 @@
 import { Injectable } from '@nestjs/common';
+import { Product } from './Entity/product.entity';
 
 @Injectable()
 export class ProductService {
+  //TODO: create product
+  createProduct(): Product {
+    return new Product();
+  }
 
-    //TODO: create product
+  //TODO: find product search by name(Elastic Search)
 
-    //TODO: find product search by name(Elastic Search)
+  //TODO: get product by paging/detail
 
-    //TODO: get product by paging/detail
-
-    //TODO: alter product
+  //TODO: alter product
 }

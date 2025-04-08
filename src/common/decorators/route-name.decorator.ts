@@ -1,3 +1,3 @@
-import { SetMetadata } from "@nestjs/common";
+import { SetMetadata } from '@nestjs/common';
 
-export const RouteName = (name: string) => SetMetadata('routeName', name)
+export const RouteName = (name: string) => SetMetadata('routeName', name);

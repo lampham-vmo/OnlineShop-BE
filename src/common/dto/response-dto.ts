@@ -1,20 +1,20 @@
-import { IsNumber, IsBoolean, IsNotEmpty } from 'class-validator'
+import { IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class APIResponseDTO<Type> {
-    constructor(success: boolean, statusCode: number, data: Type) {
-        this.success = success
-        this.statusCode = statusCode
-        this.data = data
-    }
+  constructor(success: boolean, statusCode: number, data: Type) {
+    this.success = success;
+    this.statusCode = statusCode;
+    this.data = data;
+  }
 
-    @IsBoolean()
-    @IsNotEmpty()
-    success: boolean;
+  @IsBoolean()
+  @IsNotEmpty()
+  success: boolean;
 
-    @IsNumber()
-    @IsNotEmpty()
-    statusCode: number;
+  @IsNumber()
+  @IsNotEmpty()
+  statusCode: number;
 
-    @IsNotEmpty()
-    data: Type;
+  @IsNotEmpty()
+  data: Type;
 }
