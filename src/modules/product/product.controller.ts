@@ -7,8 +7,8 @@ import { Product } from './Entity/product.entity';
 export class ProductController {
     constructor(private productService: ProductService){}
 
-    @Post()
-    async createProduct(@Body() productRequest: ProductRequest): Promise<Product| BadRequestException>{
-        return this.productService.createProduct()
-    } 
+    // @Post()
+    // async createProduct(@Body() productRequest: ProductRequest): Promise<Product| BadRequestException>{
+    //     return this.productService.createProduct()
+    // } 
 }
