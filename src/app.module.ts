@@ -1,6 +1,5 @@
 import { Module, OnModuleInit, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
-import { AppService } from './app.service.ts';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
 import { ProductModule } from './modules/product/product.module';
@@ -50,7 +49,7 @@ import { UploadModule } from './modules/upload/upload.module';
     CategoryModule,
   ],
   controllers: [AppController],
-  providers: [AppService, DiscoveryService, MetadataScanner],
+  providers: [DiscoveryService, MetadataScanner],
 })
 export class AppModule implements OnModuleInit {
   constructor(
