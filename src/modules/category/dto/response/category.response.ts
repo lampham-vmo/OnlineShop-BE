@@ -1,8 +1,6 @@
-import { Expose } from "class-transformer"
+import { Expose } from 'class-transformer';
 
-export class CategoryResponse{
-    @Expose()
-    name: string
-
-
+export class CategoryResponse {
+  @Expose()
+  name: string;
 }

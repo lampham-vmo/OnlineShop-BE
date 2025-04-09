@@ -168,22 +168,25 @@ export class ProductService {
     }
   }
   //TODO: update product
-  async UpdateProduct(id: number, productUpdateDto: ProductUpdateDto):Promise<ProductResponse>{
-    const product = await this.productRepository.findOne({where: {id}});
+  async UpdateProduct(
+    id: number,
+    productUpdateDto: ProductUpdateDto,
+  ): Promise<ProductResponse> {
+    const product = await this.productRepository.findOne({ where: { id } });
     if (!product)
       throw new NotFoundException(`The product with ${id} does not exist!`);
     Object.assign(product, ProductUpdateDto);
     const result = await this.productRepository.save(product);
 
     return plainToClass(ProductResponse, {
-      ...result, 
+      ...result,
       priceAfterDis: result.price - (result.price * result.discount) / 100,
       categoryName: result.category?.name || 'unknown',
-     });
+    });
   }
 
   //TODO: read product
-  async GetAllProduct(): Promise<Product[]>{
-    return await this.productRepository.find()
+  async GetAllProduct(): Promise<Product[]> {
+    return await this.productRepository.find();
   }
 }

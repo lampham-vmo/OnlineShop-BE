@@ -11,8 +11,9 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Cho phép gửi cookie
   });
-  app.useGlobalPipes(new ValidationPipe());
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
+  app.setGlobalPrefix(process.env.API_PREFIX || 'api/v1');
   const config = new DocumentBuilder()
     .setTitle('Shoppe example')
     .setDescription('The shop API description')

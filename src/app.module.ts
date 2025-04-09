@@ -15,7 +15,6 @@ import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
 
-
 @Module({
   imports: [
     ConfigModule.forRoot({
