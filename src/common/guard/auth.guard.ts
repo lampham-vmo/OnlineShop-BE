@@ -10,14 +10,14 @@ import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) {}
+  constructor(private jwtService: JwtService) { }
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
     const token = this.extractTokenFromHeader(request);
     const refreshToken = this.extractRefreshTokenFromHeader(request);
     const requestUrl = request.url;
-
+   
     // if url = /auth/refreshAT validate refreshToken
     if (requestUrl === '/auth/refreshAT') {
       if (!refreshToken)
@@ -28,13 +28,19 @@ export class AuthGuard implements CanActivate {
     }
 
     if (token) {
-      const payload = await this.validateToken(token.trim());
-      //if not throw error (validate success)
-      request['user'] = { ...payload, accessToken: token };
-      return true;
+
+      try {
+        const payload = await this.validateToken(token.trim());
+        request['user'] = { ...payload, accessToken: token };
+        return true;
+      } catch (err) {
+        throw new UnauthorizedException('Invalid Accesstoken')
+      }
+    }else{
+      //if token not found
+      throw new UnauthorizedException('Invalid Accesstoken')
     }
 
-    return false;
   }
 
   async validateToken(token: string) {
@@ -51,6 +57,7 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractRefreshTokenFromHeader(request: Request): string | undefined {
-    return request.headers['x-refresh-token'] as string | undefined;
+    const refreshToken = request.headers['x-refresh-token'] as string | undefined;
+    return refreshToken
   }
 }

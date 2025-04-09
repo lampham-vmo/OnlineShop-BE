@@ -86,7 +86,7 @@ export class RoleService implements OnModuleInit {
     return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
   }
 
-  async getAllRole(): Promise<Role[] | BadRequestException> {
+  async getAllRole(): Promise<Role[]> {
     const result = await this.roleRepository.find({
       relations: { permissions: true },
     });
