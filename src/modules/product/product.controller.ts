@@ -17,13 +17,17 @@ import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ProductUpdateDto } from './DTO/product-update.dto';
 import { plainToClass } from 'class-transformer';
-import { ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Post('product')
+  @ApiProperty({
+    description: 'Create a new product',
+    example: '',
+  })
   async createProduct(
     @Body() productRequest: ProductRequest,
   ): Promise<ApiResponse<ProductResponse> | BadRequestException> {
@@ -32,6 +36,7 @@ export class ProductController {
   }
 
   @Get('product/search')
+  @ApiQuery({name: 'text', required: true})
   async searchProductByName(
     @Query('text') text: string,
   ): Promise<ApiResponse<Partial<ProductFindResponse>>> {
@@ -60,7 +65,15 @@ export class ProductController {
     );
   }
 
+  @Get('product')
+  async getAllProduct(
+  ):Promise<ApiResponse<ProductResponse>> {
+    const result = await this.productService.GetAllProduct();
+    return result
+  }
+
   @Patch('product/:id')
+  @ApiBody({type: ProductRequest})
   async updateProductDetail(
     @Param('id') id:number,
     @Body() productUpdateDto: ProductUpdateDto,
