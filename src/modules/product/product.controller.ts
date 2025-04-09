@@ -2,7 +2,10 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
+  Param,
+  Patch,
   Post,
   Query,
 } from '@nestjs/common';
@@ -13,6 +16,7 @@ import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ApiQuery } from '@nestjs/swagger';
+import { ProductUpdateDto } from './DTO/product-update.dto';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -74,5 +78,19 @@ export class ProductController {
         orderBy,
       ),
     );
+  }
+
+  @Patch('product/:id')
+  async updateProductDetail(
+    @Param('id') id:number,
+    @Body() productUpdateDto: ProductUpdateDto,
+  ): Promise<ApiResponse<ProductResponse>> {
+    const result = await this.productService.UpdateProduct(id, productUpdateDto);
+    return new ApiResponse<ProductResponse>(result)
+  }
+
+  @Delete('product/:id')
+  remove(@Param('id') id: number) {
+    return `The product with ${id} has been deleted.`
   }
 }

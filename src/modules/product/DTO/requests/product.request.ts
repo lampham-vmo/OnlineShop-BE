@@ -5,7 +5,7 @@ import { ApiProperty } from "@nestjs/swagger"
 
 export class ProductRequest extends OmitType(Product,["category","id","updatedAt","createdAt"]){
 
-
+    
     @IsNumber()
     @IsNotEmpty()
     @IsInt()
