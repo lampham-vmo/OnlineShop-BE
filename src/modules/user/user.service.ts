@@ -7,6 +7,9 @@ import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
+import { AccountsRO } from './user.interface';
+import { AccountData } from './user.interface';
+import { Role } from '../role/entities/role.entity';
 
 @Injectable()
 export class UserService {
@@ -15,9 +18,23 @@ export class UserService {
   ) {}
 
   async findAll(): Promise<User[]> {
-    const user = await this.usersRepository.find(); 
-    console.log(user);
-    return user
+    return await this.usersRepository.find();
+  }
+
+  async getAllAccounts(): Promise<AccountsRO> {
+    const users = await this.usersRepository.find({relations: ["role"]})
+    const accounts: AccountData[] = users.map((user)=> ({
+      id: user.id,
+      fullName: user.fullname,
+      email: user.email,
+      role: user.role.name,
+      status: user.status,
+      createdAt: user.createdAt
+    }))
+    return {
+      accounts: accounts,
+      accountsCount: accounts.length
+    }
   }
 
   async findOneById(id: number): Promise<User | null> {
@@ -79,6 +96,6 @@ export class UserService {
   }
 
   async delete(deletedUserID: number): Promise<void> {
-    await this.usersRepository.delete({ id: deletedUserID });
+await this.usersRepository.delete({ id: deletedUserID });
   }
 }

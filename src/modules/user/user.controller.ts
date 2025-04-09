@@ -3,6 +3,7 @@ import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RoleGuard } from 'src/common/guard/role.guard';
+import { AccountsRO } from './user.interface';
 
 @Controller('users')
 export class UserController {
@@ -10,8 +11,8 @@ export class UserController {
 
   @Get()
   @UseGuards(AuthGuard, RoleGuard)
-  async findAll(): Promise<User[]> {
-    return await this.userService.findAll();
+  async findAll(): Promise<AccountsRO> {
+    return await this.userService.getAllAccounts();
   }
   @Get(':id')
   @UseGuards(AuthGuard)
