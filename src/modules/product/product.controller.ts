@@ -12,6 +12,7 @@ import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -33,7 +34,32 @@ export class ProductController {
     return new ApiResponse<Partial<ProductFindResponse>>(result);
   }
 
+  // @Get('product/paging')
+  // @ApiQuery({ name: 'text', required: false })
+  // @ApiQuery({ name: 'page', required: false })
+  // @ApiQuery({ name: 'orderField', required: false })
+  // @ApiQuery({ name: 'orderBy', required: false })
+  // async GetProductPagination(
+  //   @Query('text') text: string,
+  //   @Query('page') page: number,
+  //   @Query('orderField') orderField: string,
+  //   @Query('orderBy') orderBy: string,
+  // ): Promise<ApiResponse<ProductPagingResponse>> {
+  //   return new ApiResponse<ProductPagingResponse>(
+  //     await this.productService.GetProductPagination(
+  //       text ?? '',
+  //       page ?? 1,
+  //       orderField ?? 'createdAt',
+  //       orderBy ?? 'asc',
+  //     ),
+  //   );
+  // }
+
   @Get('product/paging')
+  @ApiQuery({ name: 'text', required: true })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'orderField', required: false })
+  @ApiQuery({ name: 'orderBy', required: false })
   async GetProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
