@@ -24,7 +24,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         ? exception.getResponse()
         : 'Internal Server Error';
 
-<<<<<<< HEAD
     const responseBody = {
       success: false,
       statusCode: httpStatus,
@@ -32,18 +31,6 @@ export class GlobalExceptionFilter implements ExceptionFilter {
       path: httpAdapter.getRequestUrl(ctx.getRequest()),
       error: message,
     };
-=======
-        const message = exception instanceof HttpException
-            ? exception.getResponse()["message"]
-            : "Internal Server Error"
-        console.log(exception);
-        const responseBody = {
-            statusCode: httpStatus,
-            timeStamp: new Date().toISOString(),
-            path: httpAdapter.getRequestUrl(ctx.getRequest()),
-            error: message
-        };
->>>>>>> product-branch
 
     httpAdapter.reply(ctx.getResponse(), responseBody, httpStatus);
   }

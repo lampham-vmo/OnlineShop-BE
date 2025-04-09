@@ -1,4 +1,3 @@
-<<<<<<< HEAD
 import { IsNotEmpty, IsString } from 'class-validator';
 export class CreateCategoryDto {
   @IsString()
@@ -9,6 +8,3 @@ export class CreateCategoryDto {
   @IsString()
   description: string;
 }
-=======
-export class CreateCategoryDto {}
->>>>>>> product-branch
