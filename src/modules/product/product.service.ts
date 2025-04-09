@@ -181,4 +181,9 @@ export class ProductService {
       categoryName: result.category?.name || 'unknown',
      });
   }
+
+  //TODO: read product
+  async GetAllProduct(): Promise<Product[]>{
+    return await this.productRepository.find()
+  }
 }

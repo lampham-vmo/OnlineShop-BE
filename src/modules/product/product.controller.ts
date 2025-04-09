@@ -18,6 +18,7 @@ import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ProductUpdateDto } from './DTO/product-update.dto';
 import { plainToClass } from 'class-transformer';
 import { ApiBody, ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { Product } from './Entity/product.entity';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -67,9 +68,8 @@ export class ProductController {
 
   @Get('product')
   async getAllProduct(
-  ):Promise<ApiResponse<ProductResponse>> {
-    const result = await this.productService.GetAllProduct();
-    return result
+  ):Promise<Product[]> {
+    return await this.productService.GetAllProduct();
   }
 
   @Patch('product/:id')
