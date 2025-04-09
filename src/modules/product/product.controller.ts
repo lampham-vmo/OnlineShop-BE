@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Body,
   Controller,
+  Delete,
   Get,
   Param,
   Patch,
@@ -16,6 +17,7 @@ import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ProductUpdateDto } from './DTO/product-update.dto';
 import { plainToClass } from 'class-transformer';
+import { ApiQuery } from '@nestjs/swagger';
 
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -38,6 +40,10 @@ export class ProductController {
   }
 
   @Get('product/paging')
+  @ApiQuery({ name: 'text', required: false })
+  @ApiQuery({ name: 'page', required: false })
+  @ApiQuery({ name: 'orderField', required: false })
+  @ApiQuery({ name: 'orderBy', required: false })
   async GetProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
@@ -61,5 +67,10 @@ export class ProductController {
   ): Promise<ApiResponse<ProductResponse>> {
     const result = await this.productService.UpdateProduct(id, productUpdateDto);
     return new ApiResponse<ProductResponse>(result)
+  }
+
+  @Delete('product/:id')
+  remove(@Param('id') id: number) {
+    return `The product with ${id} has been deleted.`
   }
 }
