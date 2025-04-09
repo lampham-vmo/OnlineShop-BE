@@ -11,7 +11,8 @@ export class RoleController {
       @Get()
       @UseGuards(AuthGuard, RoleGuard)
       async findAll(): Promise<Role[]> {
-        return await this.roleService.getAllRole();
+        return  await this.roleService.getAllRole();
+       
       }
      
 }

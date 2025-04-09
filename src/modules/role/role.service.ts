@@ -123,4 +123,14 @@ export class RoleService implements OnModuleInit {
       (permission) => permission.id == permissionId,
     );
   }
+
+  async getPermissionByRoleId(
+    roleId: number
+  ): Promise<Role | null>{
+    const permissions = this.roleRepository.findOne({
+      where: { id: roleId }, // truyền ID role vào
+      relations: ['permissions'],
+    })
+    return permissions
+  }
 }

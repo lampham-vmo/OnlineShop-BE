@@ -9,6 +9,7 @@ export class PermissionService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
   ) {}
+ 
 
   async getPermissionIdByPathAndMethod(
     path: string,
