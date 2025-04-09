@@ -30,7 +30,7 @@ export class ProductRequest {
 
   @IsNumber()
   @IsNotEmpty()
-  category: number;
+  categoryId: number;
 
   @IsNumber()
   discount: number;
