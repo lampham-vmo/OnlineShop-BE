@@ -198,9 +198,5 @@ export class ProductController {
     return new ApiResponse<ProductResponse>(result);
   }
 
-  // Get your own jwt key
-  @Get('product')
-  returnJwtKey(@Body('id') id: number) {
-    return this.authService.createApiKey()
-  }
+
 }
