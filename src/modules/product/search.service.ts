@@ -3,6 +3,8 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
+import { ProductRequest } from './DTO/requests/product.request';
+import { create } from 'domain';
 
 @Injectable()
 export class SearchService {
@@ -53,6 +55,9 @@ export class SearchService {
                   },
                 },
               },
+              createAt: {
+                type: 'date',
+              }
             },
           },
           settings: {
@@ -81,13 +86,14 @@ export class SearchService {
   public async indexProduct(product: ProductResponse) {
     return await this.esService.index({
       index: 'product',
+      id: product.id.toString(),
       body: product,
     });
   }
 
   public async updateProductPartial(
     productId: number,
-    updateFields: Partial<ProductResponse>,
+    updateFields: ProductResponse,
   ) {
     return await this.esService.update({
       index: 'product',

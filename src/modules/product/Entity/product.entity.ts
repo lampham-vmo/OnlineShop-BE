@@ -63,6 +63,11 @@ export class Product {
   @Column({ nullable: false })
   discount: number;
 
+  @IsOptional()
+  @ApiProperty({ description: 'Deleted or not' })
+  @Column({ default: false })
+  isDeleted: boolean;
+
   @IsNumber()
   @Min(0)
   @Max(5)

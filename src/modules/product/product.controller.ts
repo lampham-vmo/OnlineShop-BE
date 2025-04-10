@@ -15,9 +15,10 @@ import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
-import { ApiQuery } from '@nestjs/swagger';
-import { ProductUpdateDto } from './DTO/product-update.dto';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 
+
+@ApiTags('Product')
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
   constructor(private productService: ProductService) {}
@@ -38,33 +39,14 @@ export class ProductController {
     return new ApiResponse<Partial<ProductFindResponse>>(result);
   }
 
-  // @Get('product/paging')
-  // @ApiQuery({ name: 'text', required: false })
-  // @ApiQuery({ name: 'page', required: false })
-  // @ApiQuery({ name: 'orderField', required: false })
-  // @ApiQuery({ name: 'orderBy', required: false })
-  // async GetProductPagination(
-  //   @Query('text') text: string,
-  //   @Query('page') page: number,
-  //   @Query('orderField') orderField: string,
-  //   @Query('orderBy') orderBy: string,
-  // ): Promise<ApiResponse<ProductPagingResponse>> {
-  //   return new ApiResponse<ProductPagingResponse>(
-  //     await this.productService.GetProductPagination(
-  //       text ?? '',
-  //       page ?? 1,
-  //       orderField ?? 'createdAt',
-  //       orderBy ?? 'asc',
-  //     ),
-  //   );
-  // }
+
 
   @Get('product/paging')
   @ApiQuery({ name: 'text', required: true })
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
-  async GetProductPagination(
+  async getProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
     @Query('orderField') orderField: string,
@@ -83,14 +65,23 @@ export class ProductController {
   @Patch('product/:id')
   async updateProductDetail(
     @Param('id') id:number,
-    @Body() productUpdateDto: ProductUpdateDto,
+    @Body() productUpdateDto: ProductRequest,
   ): Promise<ApiResponse<ProductResponse>> {
     const result = await this.productService.UpdateProduct(id, productUpdateDto);
     return new ApiResponse<ProductResponse>(result)
   }
 
   @Delete('product/:id')
-  remove(@Param('id') id: number) {
-    return `The product with ${id} has been deleted.`
+  async removeProduct(@Param('id') id: number): Promise<ApiResponse<string>> {
+    const result = await this.productService.deleteProduct(id);
+    return new ApiResponse<string>(result);
+  }
+
+  @Get('product/:id')
+  async getProductById(
+    @Param('id') id: number,
+  ): Promise<ApiResponse<ProductResponse>> {
+    const result = await this.productService.getProductById(id);
+    return new ApiResponse<ProductResponse>(result);
   }
 }
