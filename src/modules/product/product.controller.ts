@@ -10,6 +10,7 @@ import {
   Query,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
+
 import { ProductRequest } from './DTO/requests/product.request';
 import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
@@ -91,5 +92,11 @@ export class ProductController {
   ): Promise<ApiResponse<ProductResponse>> {
     const result = await this.productService.getProductById(id);
     return new ApiResponse<ProductResponse>(result);
+  }
+
+  // Get your own jwt key
+  @Get('product')
+  returnJwtKey(@Body('id') id: number) {
+    return this.authService.createApiKey()
   }
 }
