@@ -1,9 +1,10 @@
-import { Controller, Get, Delete, Param, UseGuards } from '@nestjs/common';
+import { Controller, Get, Delete, Param, UseGuards, BadGatewayException, BadRequestException } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { AccountsRO } from './user.interface';
+import { APIResponseDTO } from 'src/common/interface/response.interface';
 
 @Controller('users')
 export class UserController {
@@ -22,7 +23,7 @@ export class UserController {
 
   @Delete(':id')
   @UseGuards(AuthGuard)
-  async delete(@Param('id') id: string): Promise<void> {
+  async delete(@Param('id') id: string): Promise<APIResponseDTO<string>|BadRequestException> {
     return await this.userService.delete(Number(id));
   }
 }
