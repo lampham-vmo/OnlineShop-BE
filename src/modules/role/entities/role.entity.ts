@@ -22,7 +22,7 @@ export class Role {
   @Column({ unique: true })
   @IsString()
   @IsNotEmpty()
-  @ApiProperty({ description: 'Role name', example: 'admin' })
+  @ApiProperty({ description: 'Role name' })
   name: string;
 
   @Column({ type: 'text', nullable: true })

@@ -1,3 +1,4 @@
+import { PickType } from '@nestjs/swagger';
 import {
   IsEmail,
   IsNotEmpty,
@@ -6,22 +7,5 @@ import {
   MaxLength,
   MinLength,
 } from 'class-validator';
-
-export class LoginUserDTO {
-  @IsEmail()
-  @IsNotEmpty()
-  readonly email: string;
-
-  @IsNotEmpty()
-  @IsString()
-  @MinLength(4)
-  @MaxLength(20)
-  @Matches(
-    /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
-    {
-      message:
-        'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-    },
-  )
-  readonly password: string;
-}
+import { User } from 'src/modules/user/entities/user.entity';
+export class LoginUserDTO extends PickType(User, ['email', 'password'] as const) {}

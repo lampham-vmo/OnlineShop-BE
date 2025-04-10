@@ -6,35 +6,38 @@ import { Role } from './entities/role.entity';
 import { CreateRoleDTO } from './dto/create-role.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { UpdateRoleDTO } from './dto/update-role-dto';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOkResponse, ApiProperty } from '@nestjs/swagger';
+import { AddRoleResponseDto, RoleListResponseDto, UpdateRoleResponseDto } from './dto/response-role.dto';
 
 @Controller('role')
 export class RoleController {
 
-    constructor(private readonly roleService: RoleService) {}
-      @Get()
-      @UseGuards(AuthGuard, RoleGuard)
-      @ApiProperty()
-      async findAll(): Promise<APIResponseDTO<Role[]>> {
-        const roles =   await this.roleService.getAllRole();
-        return new APIResponseDTO<Role[]>(true, HttpStatus.OK, roles)
-      }
+  constructor(private readonly roleService: RoleService) { }
+  @Get()
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiProperty()
+  @ApiOkResponse({ description: 'get all role success', type: RoleListResponseDto })
+  async findAll(): Promise<RoleListResponseDto> {
+    const roles = await this.roleService.getAllRole();
+    return new RoleListResponseDto(true, HttpStatus.OK, roles)
+  }
 
-      @Post()
-      @UseGuards(AuthGuard, RoleGuard)
-      @ApiProperty()
-      async addRole(@Body() createRoleDTO: CreateRoleDTO) : Promise<APIResponseDTO<string>>{
-        const result = await this.roleService.createARole(createRoleDTO)
-        return new APIResponseDTO<string>(true, HttpStatus.CREATED, result)
-      }
+  @Post()
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiProperty()
+  @ApiOkResponse({ description: 'add role success', type: AddRoleResponseDto })
+  async addRole(@Body() createRoleDTO: CreateRoleDTO): Promise<AddRoleResponseDto> {
+    const result = await this.roleService.createARole(createRoleDTO)
+    return new AddRoleResponseDto(true, HttpStatus.CREATED, result)
+  }
 
-      @Patch()
-      @UseGuards(AuthGuard, RoleGuard)
-      @ApiProperty()
-      async updateRole(@Body() updateRoleDTO: UpdateRoleDTO){
-        const result = await this.roleService.updateARole(updateRoleDTO)
-        return new APIResponseDTO<string>(true, HttpStatus.CREATED, result)
-      }
+  @Patch()
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiProperty()
+  @ApiOkResponse({ description: 'update role success', type: UpdateRoleResponseDto })
+  async updateRole(@Body() updateRoleDTO: UpdateRoleDTO): Promise<UpdateRoleResponseDto> {
+    const result = await this.roleService.updateARole(updateRoleDTO)
+    return new UpdateRoleResponseDto(true, HttpStatus.CREATED, result)
+  }
 
-     
 }
