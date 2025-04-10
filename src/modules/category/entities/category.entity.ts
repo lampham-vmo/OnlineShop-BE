@@ -17,7 +17,7 @@ export class Category {
   @Column()
   name: string;
 
-  @Column({ default: '' })
+  @Column({ default: '',nullable: false })
   description: string;
 
   @Column({ default: false })

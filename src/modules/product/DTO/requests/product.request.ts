@@ -1,45 +1,44 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Length,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString, Length, Max, Min } from "class-validator"
+import { ApiProperty } from "@nestjs/swagger"
 
-export class ProductRequest {
-  @IsString({ message: 'Description must be string' })
-  @IsNotEmpty()
-  @Length(0, 255, { message: 'Name must be less than 255 word' })
-  name: string;
+export class ProductRequest{
 
-  @IsString({ message: 'Description must be string' })
-  @IsNotEmpty()
-  @Length(0, 255, { message: 'Description must be less than 255 word' })
-  description: string;
+    @IsString({message: "Description must be string"})
+    @IsNotEmpty()
+    @Length(0,255,{message:"Name must be less than 255 word"})
+    @ApiProperty({description:"Product name"})
+    name: string
+ 
+    @IsString({message: "Description must be string"})
+    @IsNotEmpty()
+    @Length(0,255,{message: "Description must be less than 255 word"})
+    @ApiProperty({description:"Product description"})
+    description: string
+ 
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty({description:"Product stock"})
+    stock: number
+ 
+    @IsNumber()
+    @IsNotEmpty()
+    @ApiProperty({description:"Product price"})
+    price: number
+ 
+     
+    @IsNumber()
+    @ApiProperty({description:"Product discount"})
+    discount: number
+ 
+    @IsString()
+    @ApiProperty({description:"Product image"})
+    image: string
 
-  @IsNumber()
-  @IsNotEmpty()
-  stock: number;
+    @IsNumber()
+    @IsNotEmpty()
+    @IsInt()
+    @ApiProperty({description:"category id"})
+    categoryId: number
 
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  categoryId: number;
-
-  @IsNumber()
-  discount: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  rating: number;
-
-  @IsString()
-  image: string;
 }
