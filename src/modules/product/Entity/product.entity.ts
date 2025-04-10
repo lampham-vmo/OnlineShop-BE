@@ -9,7 +9,7 @@ import {
   JoinColumn,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
@@ -27,7 +27,7 @@ export class Product {
   @Expose()
   id: number;
 
-  @IsString({ message: 'Description must be string' })
+  @IsString({ message: 'Name must be string' })
   @IsNotEmpty()
   @Length(0, 255, { message: 'Name must be less than 255 word' })
   @Expose()
@@ -95,6 +95,6 @@ export class Product {
   createdAt: Timestamp;
 
   @UpdateDateColumn()
-  @Expose()
+  @Exclude()
   updatedAt: Timestamp;
 }

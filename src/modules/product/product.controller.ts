@@ -1,5 +1,4 @@
 import {
-  BadRequestException,
   Body,
   Controller,
   Delete,
@@ -13,31 +12,61 @@ import { ProductService } from './product.service';
 import { ProductRequest } from './DTO/requests/product.request';
 import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
-import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
-import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { ApiBody, ApiExtraModels, ApiOkResponse, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
 import { Product } from './Entity/product.entity';
+import { text } from 'body-parser';
 
 @ApiTags('Product')
-@Controller(process.env.API_PREFIX || 'api/v1')
+@Controller()
 export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Post('product')
+  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { $ref: getSchemaPath(ProductResponse) },
+          },
+        },
+      ],
+    },
+  })
   async createProduct(
     @Body() productRequest: ProductRequest,
-  ): Promise<ApiResponse<ProductResponse> | BadRequestException> {
+  ): Promise<ApiResponse<ProductResponse>> {
     const result = await this.productService.createProduct(productRequest);
     return new ApiResponse<ProductResponse>(result);
   }
 
   @Get('product/search')
+  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { 
+              type: 'array',
+              items: {$ref: getSchemaPath(ProductResponse)} },
+          },
+        },
+      ],
+    },
+  })
   @ApiQuery({ name: 'text', required: true })
   async searchProductByName(
     @Query('text') text: string,
-  ): Promise<ApiResponse<Partial<ProductFindResponse>>> {
+  ): Promise<ApiResponse<ProductResponse[]>> {
     const result = await this.productService.findProductBySearch(text);
-    return new ApiResponse<Partial<ProductFindResponse>>(result);
+    return new ApiResponse<ProductResponse[]>(result);
   }
 
   @Get('product/paging')
@@ -45,6 +74,20 @@ export class ProductController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
+  @ApiExtraModels(ApiResponse,ProductPagingResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { $ref: getSchemaPath(ProductPagingResponse) },
+          },
+        },
+      ],
+    },
+  })
   async getProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
@@ -61,13 +104,46 @@ export class ProductController {
     );
   }
 
-  @Get('product')
-  async getAllProduct(): Promise<Product[]> {
-    return await this.productService.GetAllProduct();
+  @Get('product/all')
+  @ApiExtraModels(ApiResponse,Product)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            
+            result: { 
+              type: 'array',  
+              items: {$ref: getSchemaPath(Product)} 
+            },
+          },
+        },
+      ],
+    },
+  })
+  async getAllProduct(): Promise<ApiResponse<Product[]>> {
+    const result = await this.productService.GetAllProduct();
+    return new ApiResponse<Product[]>(result)
   }
 
   @Patch('product/:id')
   @ApiBody({ type: ProductRequest })
+  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { $ref: getSchemaPath(ProductResponse) },
+          },
+        },
+      ],
+    },
+  })
   async updateProductDetail(
     @Param('id') id: number,
     @Body() productUpdateDto: ProductRequest,
@@ -80,12 +156,40 @@ export class ProductController {
   }
 
   @Delete('product/:id')
+  @ApiExtraModels(ApiResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { type: 'string' },
+          },
+        },
+      ],
+    },
+  })
   async removeProduct(@Param('id') id: number): Promise<ApiResponse<string>> {
     const result = await this.productService.deleteProduct(id);
     return new ApiResponse<string>(result);
   }
 
   @Get('product/:id')
+  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiOkResponse({
+    schema: {
+      allOf: [
+        { $ref: getSchemaPath(ApiResponse) },
+        {
+          type: 'object',
+          properties: {
+            result: { $ref: getSchemaPath(ProductResponse) },
+          },
+        },
+      ],
+    },
+  })
   async getProductById(
     @Param('id') id: number,
   ): Promise<ApiResponse<ProductResponse>> {

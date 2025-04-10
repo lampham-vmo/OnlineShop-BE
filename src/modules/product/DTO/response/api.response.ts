@@ -1,11 +1,15 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 
 export class ApiResponse<T> {
+  @ApiProperty()
   @Expose()
   code: number | 1000;
 
+  @ApiProperty()
   message: string;
-
+  
+  @ApiProperty()
   @Expose()
   result?: T;
 
