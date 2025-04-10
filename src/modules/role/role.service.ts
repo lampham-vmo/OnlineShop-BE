@@ -38,7 +38,7 @@ export class RoleService implements OnModuleInit {
 
   async createARole(
     newRole: CreateRoleDTO,
-  ): Promise<APIResponseDTO<string> | BadRequestException> {
+  ): Promise<string> {
     const { name, description, permissionIds } = newRole;
     const role = new Role();
     role.name = name;
@@ -53,13 +53,14 @@ export class RoleService implements OnModuleInit {
         });
       }
       this.roleRepository.save(role);
-      return new APIResponseDTO(true, 200, 'Sucessfully create a role');
+      return "Sucessfully create a role"
+      
     }
   }
 
   async updateARole(
     updatedRole: UpdateRoleDTO,
-  ): Promise<APIResponseDTO<string> | BadRequestException> {
+  ): Promise<string> {
     const { id } = updatedRole
     const role = await this.roleRepository.findOne({
       where: { id },
@@ -91,7 +92,7 @@ export class RoleService implements OnModuleInit {
     await this.roleRepository.save(role);
 
 
-    return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
+    return  'Successfully updated a user'
   }
 
   async getAllRole(): Promise<Role[]> {
