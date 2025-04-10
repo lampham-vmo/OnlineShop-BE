@@ -18,7 +18,6 @@ import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Product } from './Entity/product.entity';
 
-
 @ApiTags('Product')
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
@@ -33,14 +32,13 @@ export class ProductController {
   }
 
   @Get('product/search')
-  @ApiQuery({name: 'text', required: true})
+  @ApiQuery({ name: 'text', required: true })
   async searchProductByName(
     @Query('text') text: string,
   ): Promise<ApiResponse<Partial<ProductFindResponse>>> {
     const result = await this.productService.findProductBySearch(text);
     return new ApiResponse<Partial<ProductFindResponse>>(result);
   }
-
 
   @Get('product/paging')
   @ApiQuery({ name: 'text', required: true })
@@ -64,19 +62,21 @@ export class ProductController {
   }
 
   @Get('product')
-  async getAllProduct(
-  ):Promise<Product[]> {
+  async getAllProduct(): Promise<Product[]> {
     return await this.productService.GetAllProduct();
   }
 
   @Patch('product/:id')
-  @ApiBody({type: ProductRequest})
+  @ApiBody({ type: ProductRequest })
   async updateProductDetail(
-    @Param('id') id:number,
+    @Param('id') id: number,
     @Body() productUpdateDto: ProductRequest,
   ): Promise<ApiResponse<ProductResponse>> {
-    const result = await this.productService.UpdateProduct(id, productUpdateDto);
-    return new ApiResponse<ProductResponse>(result)
+    const result = await this.productService.UpdateProduct(
+      id,
+      productUpdateDto,
+    );
+    return new ApiResponse<ProductResponse>(result);
   }
 
   @Delete('product/:id')

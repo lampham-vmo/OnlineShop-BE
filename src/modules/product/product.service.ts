@@ -16,8 +16,6 @@ import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import e from 'express';
 
-
-
 @Injectable()
 export class ProductService {
   constructor(
@@ -80,7 +78,7 @@ export class ProductService {
     productRes.priceAfterDis = parseInt(
       this.priceAfterDis(productRes.price, productRes.discount).toFixed(0),
     );
-    Logger.log(productRes)
+    Logger.log(productRes);
     productRes.categoryName = product.category.name;
     productRes.createAt = product.createdAt;
     Logger.log(productRes);
@@ -103,7 +101,6 @@ export class ProductService {
       Logger.log(updateData);
       let productRes = this.makeProductRes(updateData);
       try {
-        
         await this.esService.updateProductPartial(id, productRes);
       } catch (error) {
         Logger.error(error);
@@ -151,7 +148,9 @@ export class ProductService {
   }
 
   // create product and async
-  private async createProductAndSync(productData: Product): Promise<ProductResponse> {
+  private async createProductAndSync(
+    productData: Product,
+  ): Promise<ProductResponse> {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
@@ -205,26 +204,34 @@ export class ProductService {
     }
   }
   //TODO: update product
-  async UpdateProduct(id: number, productUpdateDto: ProductRequest):Promise<ProductResponse>{
-    const productExits = await this.productRepository.exists({where: { id: id }});
-    const category = await this.categoryRepository.findOneBy({id: productUpdateDto.categoryId});
-    if(!category){
-      throw new BadRequestException({message: 'Category not found!'})
+  async UpdateProduct(
+    id: number,
+    productUpdateDto: ProductRequest,
+  ): Promise<ProductResponse> {
+    const productExits = await this.productRepository.exists({
+      where: { id: id },
+    });
+    const category = await this.categoryRepository.findOneBy({
+      id: productUpdateDto.categoryId,
+    });
+    if (!category) {
+      throw new BadRequestException({ message: 'Category not found!' });
     }
     const product = plainToInstance(Product, productUpdateDto, {
-      excludeExtraneousValues: true},)
+      excludeExtraneousValues: true,
+    });
     product.category = category;
-    if(productExits){
+    if (productExits) {
       const productRes = await this.updateProductAndSync(id, product);
-      return productRes
+      return productRes;
     } else {
-      throw new NotFoundException({message: 'Product not found!'})
+      throw new NotFoundException({ message: 'Product not found!' });
     }
   }
 
   async deleteProduct(id: number): Promise<string> {
-      const product = await this.deleteProductAndSync(id);
-      return `Product with id: ${product.id} and product name: ${product.name} is deleted!`
+    const product = await this.deleteProductAndSync(id);
+    return `Product with id: ${product.id} and product name: ${product.name} is deleted!`;
   }
 
   async getProductById(id: number): Promise<ProductResponse> {
@@ -240,7 +247,7 @@ export class ProductService {
   }
 
   //TODO: read product
-  async GetAllProduct(): Promise<Product[]>{
-    return await this.productRepository.find()
+  async GetAllProduct(): Promise<Product[]> {
+    return await this.productRepository.find();
   }
 }
