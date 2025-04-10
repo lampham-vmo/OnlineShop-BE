@@ -19,10 +19,12 @@ export class AuthGuard implements CanActivate {
     const requestUrl = request.url;
    
     // if url = /auth/refreshAT validate refreshToken
-    if (requestUrl === '/auth/refreshAT') {
+   
+    if (requestUrl === '/api/v1/auth/refreshAT') {
       if (!refreshToken)
         throw new UnauthorizedException('Refresh Token is required!');
       const payload = await this.validateToken(refreshToken.trim());
+      
       request['user'] = { ...payload, refreshToken: refreshToken };
       return true;
     }
