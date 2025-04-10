@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { BadRequestException, Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository, UpdateResult } from 'typeorm';
 import { User } from './entities/user.entity';
@@ -10,20 +10,21 @@ import { hashedPasword } from 'src/common/util/bcrypt.util';
 import { AccountsRO } from './user.interface';
 import { AccountData } from './user.interface';
 import { Role } from '../role/entities/role.entity';
+import { APIResponseDTO } from 'src/common/interface/response.interface';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-  ) {}
+  ) { }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
 
   async getAllAccounts(): Promise<AccountsRO> {
-    const users = await this.usersRepository.find({relations: ["role"]})
-    const accounts: AccountData[] = users.map((user)=> ({
+    const users = await this.usersRepository.find({ relations: ["role"] })
+    const accounts: AccountData[] = users.map((user) => ({
       id: user.id,
       fullName: user.fullname,
       email: user.email,
@@ -95,7 +96,14 @@ export class UserService {
     await this.usersRepository.save(temp);
   }
 
-  async delete(deletedUserID: number): Promise<void> {
-await this.usersRepository.delete({ id: deletedUserID });
+  async delete(deletedUserID: number): Promise<APIResponseDTO<string> | BadRequestException> {
+    const query = await this.usersRepository.findOneBy({ id: deletedUserID });
+    if (query == null) {
+      throw new BadRequestException("The user does not exist")
+    }
+    else {
+      await this.usersRepository.delete({ id: deletedUserID})
+      return {success: true, statusCode: 200, data: "Sucessfully deleted a user"}
+    }
   }
 }
