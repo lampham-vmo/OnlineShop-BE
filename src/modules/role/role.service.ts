@@ -15,7 +15,7 @@ export class RoleService implements OnModuleInit {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
-  ) {}
+  ) { }
   async onModuleInit(): Promise<void> {
     await this.createDefaultRoles();
   }
@@ -46,22 +46,21 @@ export class RoleService implements OnModuleInit {
     if ((await this.roleRepository.findOne({ where: { name } })) != null) {
       throw new BadRequestException('The role name has already existed');
     } else {
-      if (permissionIds && permissionIds.length > 0) {
+      //if permissionId include
+      if (permissionIds) {
         role.permissions = await this.permissionRepository.findBy({
           id: In(permissionIds),
         });
-        this.roleRepository.save(role);
-      } else {
-        throw new BadRequestException('The permissionsIDs must not be blank');
       }
+      this.roleRepository.save(role);
       return new APIResponseDTO(true, 200, 'Sucessfully create a role');
     }
   }
 
   async updateARole(
-    id: number,
     updatedRole: UpdateRoleDTO,
   ): Promise<APIResponseDTO<string> | BadRequestException> {
+    const { id } = updatedRole
     const role = await this.roleRepository.findOne({
       where: { id },
       relations: ['permissions'],
@@ -69,7 +68,13 @@ export class RoleService implements OnModuleInit {
     if (!role) {
       throw new BadRequestException("The role doesn't exist");
     }
+
     if (updatedRole.name) {
+      const foundRole = await this.roleRepository.findOne({ where: { name: updatedRole.name } })
+      if (foundRole && updatedRole.name != role.name) { //if found role is another role(different role id but same name)
+        throw new BadRequestException('The role name has already existed');
+      }
+
       role.name = updatedRole.name;
     }
     if (updatedRole.description) {
@@ -82,7 +87,10 @@ export class RoleService implements OnModuleInit {
         },
       });
     }
+
     await this.roleRepository.save(role);
+
+
     return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
   }
 
@@ -126,7 +134,7 @@ export class RoleService implements OnModuleInit {
 
   async getPermissionByRoleId(
     roleId: number
-  ): Promise<Role | null>{
+  ): Promise<Role | null> {
     const permissions = this.roleRepository.findOne({
       where: { id: roleId }, // truyền ID role vào
       relations: ['permissions'],

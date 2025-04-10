@@ -1,3 +1,5 @@
+import { ApiProperty } from '@nestjs/swagger';
+import { IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Permission } from 'src/modules/permission/entities/permission.entity';
 import { User } from 'src/modules/user/entities/user.entity';
 import {
@@ -14,13 +16,20 @@ import {
 @Entity()
 export class Role {
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   id: number;
 
   @Column({ unique: true })
+  @IsString()
+  @IsNotEmpty()
+  @ApiProperty({ description: 'Role name', example: 'admin' })
   name: string;
 
   @Column({ type: 'text', nullable: true })
-  description: string | undefined;
+  @IsOptional()
+  @IsString()
+  @ApiProperty({required: false})
+  description?: string | undefined;
 
   @OneToMany(() => User, (user) => user.role)
   users: User[];
