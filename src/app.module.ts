@@ -14,7 +14,7 @@ import { PermissionService } from './modules/permission/permission.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
-
+import 'dotenv/config'
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -89,11 +89,12 @@ export class AppModule implements OnModuleInit {
         const methodType = Reflect.getMetadata('method', prototype[method]);
         const routeName = Reflect.getMetadata('routeName', prototype[method]);
         if (methodType !== undefined) {
-          //path:  /something/something
-          let fullPath = `${basePath}/${methodPath}`.replace(/\/+/g, '/');
+          //path:  /something/something  
+          const apiPrefix = process.env.API_PREFIX ? process.env.API_PREFIX : 'api/v1'
+          let fullPath = `/${apiPrefix}/${basePath}/${methodPath}`.replace(/\/+/g, '/');
           if (fullPath != '/') {
             fullPath = fullPath.replace(/\/+$/, '');
-          }
+          }  
           routes.push({
             name: routeName,
             path: fullPath,
