@@ -16,6 +16,7 @@ import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
+import { Product } from './Entity/product.entity';
 
 
 @ApiTags('Product')
@@ -32,13 +33,13 @@ export class ProductController {
   }
 
   @Get('product/search')
+  @ApiQuery({name: 'text', required: true})
   async searchProductByName(
     @Query('text') text: string,
   ): Promise<ApiResponse<Partial<ProductFindResponse>>> {
     const result = await this.productService.findProductBySearch(text);
     return new ApiResponse<Partial<ProductFindResponse>>(result);
   }
-
 
 
   @Get('product/paging')
@@ -62,7 +63,14 @@ export class ProductController {
     );
   }
 
+  @Get('product')
+  async getAllProduct(
+  ):Promise<Product[]> {
+    return await this.productService.GetAllProduct();
+  }
+
   @Patch('product/:id')
+  @ApiBody({type: ProductRequest})
   async updateProductDetail(
     @Param('id') id:number,
     @Body() productUpdateDto: ProductRequest,

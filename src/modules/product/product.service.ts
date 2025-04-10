@@ -238,4 +238,9 @@ export class ProductService {
     const productRes = this.makeProductRes(product);
     return productRes;
   }
+
+  //TODO: read product
+  async GetAllProduct(): Promise<Product[]>{
+    return await this.productRepository.find()
+  }
 }
