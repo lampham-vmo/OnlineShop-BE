@@ -15,20 +15,15 @@ import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
-import { ProductUpdateDto } from './DTO/product-update.dto';
-import { plainToClass } from 'class-transformer';
-import { ApiBody, ApiParam, ApiProperty, ApiQuery } from '@nestjs/swagger';
+import { ApiBody, ApiQuery, ApiTags } from '@nestjs/swagger';
 import { Product } from './Entity/product.entity';
 
+@ApiTags('Product')
 @Controller(process.env.API_PREFIX || 'api/v1')
 export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Post('product')
-  @ApiProperty({
-    description: 'Create a new product',
-    example: '',
-  })
   async createProduct(
     @Body() productRequest: ProductRequest,
   ): Promise<ApiResponse<ProductResponse> | BadRequestException> {
@@ -50,7 +45,7 @@ export class ProductController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
-  async GetProductPagination(
+  async getProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
     @Query('orderField') orderField: string,
@@ -75,7 +70,7 @@ export class ProductController {
   @ApiBody({ type: ProductRequest })
   async updateProductDetail(
     @Param('id') id: number,
-    @Body() productUpdateDto: ProductUpdateDto,
+    @Body() productUpdateDto: ProductRequest,
   ): Promise<ApiResponse<ProductResponse>> {
     const result = await this.productService.UpdateProduct(
       id,
@@ -85,7 +80,16 @@ export class ProductController {
   }
 
   @Delete('product/:id')
-  remove(@Param('id') id: number) {
-    return `The product with ${id} has been deleted.`;
+  async removeProduct(@Param('id') id: number): Promise<ApiResponse<string>> {
+    const result = await this.productService.deleteProduct(id);
+    return new ApiResponse<string>(result);
+  }
+
+  @Get('product/:id')
+  async getProductById(
+    @Param('id') id: number,
+  ): Promise<ApiResponse<ProductResponse>> {
+    const result = await this.productService.getProductById(id);
+    return new ApiResponse<ProductResponse>(result);
   }
 }
