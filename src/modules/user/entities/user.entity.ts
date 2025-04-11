@@ -8,6 +8,7 @@ import {
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
+
 import {
   IsEmail,
   IsString,
@@ -15,9 +16,6 @@ import {
   MaxLength,
   Matches,
   IsNotEmpty,
-  IsNumber,
-  isNotEmpty,
-  IsBoolean
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 
@@ -25,6 +23,7 @@ import { ApiProperty } from '@nestjs/swagger';
 @Entity('User') // Đảm bảo tên bảng khớp với PostgreSQL
 export class User {
   @PrimaryGeneratedColumn()
+  @ApiProperty()
   id: number;
 
   @Column({ unique: true, length: 255 })
@@ -53,19 +52,19 @@ export class User {
   role: Role;
 
   @Column({ default: 2 }) // 🟢 role_id default: 2 (user)
-  @IsNumber()
   @ApiProperty()
   role_id: number;
 
   @Column({ nullable: true, length: 11 })
   @IsString()
+  @IsNotEmpty()
   @MinLength(10)
   @MaxLength(11)
+  @Matches(/^\d+$/, { message: 'Phone number must be number only' })
   @ApiProperty()
   phone: string;
 
   @Column({ default: false })
-  @IsBoolean()
   @ApiProperty()
   isVerified: boolean;
 
@@ -77,15 +76,14 @@ export class User {
   @IsNotEmpty()
   @IsString()
   @MinLength(1)
-  @MaxLength(30)
+  @MaxLength(20)
   @ApiProperty()
   fullname: string;
 
   @Column({ length: 255 })
-  @IsNotEmpty()
   @IsString()
   @MinLength(1)
-  @MaxLength(30)
+  @MaxLength(20)
   @ApiProperty()
   address: string;
 

@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { IsNumber, IsBoolean, IsNotEmpty } from 'class-validator';
 
 export class APIResponseDTO<Type> {
@@ -9,12 +10,15 @@ export class APIResponseDTO<Type> {
 
   @IsBoolean()
   @IsNotEmpty()
+  @ApiProperty()
   success: boolean;
 
   @IsNumber()
   @IsNotEmpty()
+  @ApiProperty()
   statusCode: number;
 
   @IsNotEmpty()
+  @ApiProperty()
   data: Type;
 }
