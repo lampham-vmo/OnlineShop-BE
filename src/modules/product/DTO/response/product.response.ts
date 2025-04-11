@@ -1,8 +1,6 @@
-import { PickType } from '@nestjs/swagger';
+import { ApiProperty, PickType } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { Product } from '../../Entity/product.entity';
-import { Time } from 'es7/api/types';
-import { Timestamp } from 'typeorm';
 
 export class ProductResponse extends PickType(Product, [
   'id',
@@ -11,13 +9,13 @@ export class ProductResponse extends PickType(Product, [
   'stock',
   'discount',
   'image',
+  'createdAt',
 ]) {
+  @ApiProperty()
   @Expose()
   priceAfterDis: number;
 
-  @Expose()
-  createAt: Timestamp;
-
+  @ApiProperty()
   @Expose()
   categoryName: string;
 }

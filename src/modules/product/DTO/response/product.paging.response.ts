@@ -1,11 +1,11 @@
-import { Expose } from 'class-transformer';
 import { ProductResponse } from './product.response';
+import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductPagingResponse {
-  @Expose()
+  @ApiProperty({ type: [ProductResponse] })
   products: ProductResponse[];
 
-  @Expose()
+  @ApiProperty()
   pagination: {};
 
   constructor(products: ProductResponse[], pagination: {}) {

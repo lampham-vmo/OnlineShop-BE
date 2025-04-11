@@ -1,10 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
-import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
-import { ProductRequest } from './DTO/requests/product.request';
-import { create } from 'domain';
 
 @Injectable()
 export class SearchService {
@@ -91,6 +88,19 @@ export class SearchService {
     });
   }
 
+  public async deleteByCategory(categoryName: string) {
+    return await this.esService.deleteByQuery({
+      index: 'product',
+      body: {
+        query: {
+          match: {
+            categoryName: categoryName,
+          },
+        },
+      },
+    });
+  }
+
   public async updateProductPartial(
     productId: number,
     updateFields: ProductResponse,
@@ -150,9 +160,9 @@ export class SearchService {
       },
     });
     const product = response.hits.hits.map(
-      (hit) => hit._source as Partial<ProductResponse>,
+      (hit) => hit._source as ProductResponse,
     );
-    return new ProductFindResponse(product);
+    return product;
   }
 
   public async findProductForPaging(

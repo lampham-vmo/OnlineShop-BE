@@ -2,14 +2,13 @@ import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
-  Timestamp,
   CreateDateColumn,
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
-import { Expose } from 'class-transformer';
+import { Exclude, Expose, Transform } from 'class-transformer';
 import {
   IsNotEmpty,
   IsNumber,
@@ -27,10 +26,11 @@ export class Product {
   @Expose()
   id: number;
 
-  @IsString({ message: 'Description must be string' })
+  @IsString({ message: 'Name must be string' })
   @IsNotEmpty()
   @Length(0, 255, { message: 'Name must be less than 255 word' })
   @Expose()
+  @Transform(({ value }) => (typeof value === 'string' ? value.trim() : value))
   @ApiProperty({ description: 'Product name' })
   @Column({ nullable: false })
   name: string;
@@ -90,11 +90,13 @@ export class Product {
   @JoinColumn({ name: 'category_id' })
   category: Category;
 
+  @ApiProperty()
   @CreateDateColumn()
   @Expose()
-  createdAt: Timestamp;
+  createdAt: Date;
 
+  @ApiProperty()
   @UpdateDateColumn()
-  @Expose()
-  updatedAt: Timestamp;
+  @Exclude()
+  updatedAt: Date;
 }
