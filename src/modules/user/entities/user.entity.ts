@@ -27,9 +27,9 @@ export class User {
   id: number;
 
   @Column({ unique: true, length: 255 })
+  @ApiProperty({format: "email"})
   @IsEmail()
   @IsNotEmpty()
-  @ApiProperty()
   email: string;
 
   @Column()
@@ -44,7 +44,13 @@ export class User {
         'Password must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
     },
   )
-  @ApiProperty()
+  @ApiProperty({
+    example: 'StrongP@ssw0rd!',
+    description: 'password match pattern and length',
+    minLength: 8,
+    maxLength: 20,
+    pattern: '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
+  })
   password: string;
 
   @ManyToOne(() => Role, (role) => role.users, { eager: true })
@@ -56,12 +62,12 @@ export class User {
   role_id: number;
 
   @Column({ nullable: true, length: 11 })
+  @ApiProperty()
   @IsString()
   @IsNotEmpty()
   @MinLength(10)
   @MaxLength(11)
   @Matches(/^\d+$/, { message: 'Phone number must be number only' })
-  @ApiProperty()
   phone: string;
 
   @Column({ default: false })
@@ -81,10 +87,10 @@ export class User {
   fullname: string;
 
   @Column({ length: 255 })
+  @ApiProperty()
   @IsString()
   @MinLength(1)
   @MaxLength(20)
-  @ApiProperty()
   address: string;
 
   @Column({ type: 'boolean', default: true })

@@ -24,7 +24,7 @@ import { SignInResponseDTO } from './dto/login-response-dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, TokenDTO } from './dto/base-auth-response.dto';
-import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
+import { ApiBadRequestResponse, ApiOkResponse, ApiProperty, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
@@ -72,6 +72,7 @@ export class AuthController {
   @RouteName('user login')
   @ApiProperty()
   @ApiOkResponse({ description: 'login success', type: LogInResponseDTO })
+  @ApiBadRequestResponse({description: "st wrong"})
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginUserDTO: LoginUserDTO,
