@@ -1,17 +1,29 @@
-import { ApiProperty, ApiPropertyOptional, PartialType, PickType } from "@nestjs/swagger";
-import { Category } from "../entities/category.entity";
-import { IsInt, IsOptional, IsString, Min } from "class-validator";
-import { Type } from "class-transformer";
+import {
+  ApiProperty,
+  ApiPropertyOptional,
+  PartialType,
+  PickType,
+} from '@nestjs/swagger';
+import { Category } from '../entities/category.entity';
+import { IsInt, IsOptional, IsString, Min } from 'class-validator';
+import { Type } from 'class-transformer';
 
-export class CreateCategoryDto extends PickType(Category, ['name', 'description']){}
+export class CreateCategoryDto extends PickType(Category, [
+  'name',
+  'description',
+]) {}
 
 export class UpdateCategoryDto extends PartialType(CreateCategoryDto) {}
 
-export class CategoryResponseDto extends PickType(Category, ['id', 'name', 'description']){};
+export class CategoryResponseDto extends PickType(Category, [
+  'id',
+  'name',
+  'description',
+]) {}
 
 enum EOrder {
   ASC = 'ASC',
-  DESC = 'DESC'
+  DESC = 'DESC',
 }
 
 export class CategoryQueryDto {
@@ -19,26 +31,26 @@ export class CategoryQueryDto {
   @IsOptional()
   @IsString()
   search: string;
-  
+
   @ApiPropertyOptional()
   @IsOptional()
   @IsString()
   sortBy: string;
-  
+
   @IsOptional()
   @IsString()
   @ApiPropertyOptional({
     enum: EOrder,
   })
   order: 'ASC' | 'DESC';
-  
+
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
   @IsInt()
   @Min(1)
   page: number;
-  
+
   @ApiPropertyOptional()
   @IsOptional()
   @Type(() => Number)
@@ -69,13 +81,16 @@ export class PaginationData {
 }
 
 export class CategoryPaginationData {
-  @ApiProperty({type: Category, isArray: true})
+  @ApiProperty({ type: Category, isArray: true })
   result: Category[];
 
   @ApiProperty()
   pagination?: PaginationData;
 
-  constructor(result: Category[], pagination?: PaginationData | Partial<PaginationData>) {
+  constructor(
+    result: Category[],
+    pagination?: PaginationData | Partial<PaginationData>,
+  ) {
     this.result = result;
     this.pagination = pagination
       ? pagination instanceof PaginationData

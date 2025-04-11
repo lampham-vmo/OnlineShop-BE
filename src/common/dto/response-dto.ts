@@ -12,12 +12,12 @@ export class APIResponseDTO<Type> {
   @IsBoolean()
   @IsNotEmpty()
   success: boolean;
-  
+
   @ApiProperty()
   @IsNumber()
   @IsNotEmpty()
   statusCode: number;
-  
+
   @ApiProperty()
   @IsNotEmpty()
   data: Type;

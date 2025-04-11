@@ -10,5 +10,5 @@ export default () => ({
   },
   elastic: {
     node: process.env.ELASTICSEARCH_NODE,
-  }
+  },
 });

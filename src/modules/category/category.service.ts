@@ -8,25 +8,21 @@ import { Category } from './entities/category.entity';
 import { Not, Repository } from 'typeorm';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { plainToInstance } from 'class-transformer';
-import { CategoryQueryDto, CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
-
-export interface PaginationData {
-  totalPages: number;
-  totalItems: number;
-  currentPage: number;
-  pageSize: number;
-}
-
-export interface CategoryData {
-  result: Category[];
-  pagination?: PaginationData;
-}
+import {
+  CategoryPaginationData,
+  CategoryQueryDto,
+  CategoryResponseDto,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from './dto/category.dto';
+import { ProductService } from '../product/product.service';
 
 @Injectable()
 export class CategoryService {
   constructor(
     @InjectRepository(Category)
     private categoryRepository: Repository<Category>,
+    private productService: ProductService,
   ) {}
 
   private transformToDTO<T, V>(
@@ -56,7 +52,10 @@ export class CategoryService {
     return {
       success: true,
       statusCode: 201,
-      data: this.transformToDTO(CategoryResponseDto, result) as CategoryResponseDto,
+      data: this.transformToDTO(
+        CategoryResponseDto,
+        result,
+      ) as CategoryResponseDto,
     };
   }
 
@@ -73,13 +72,16 @@ export class CategoryService {
     return {
       success: true,
       statusCode: 200,
-      data: this.transformToDTO(CategoryResponseDto, categories) as Array<CategoryResponseDto>,
+      data: this.transformToDTO(
+        CategoryResponseDto,
+        categories,
+      ) as Array<CategoryResponseDto>,
     };
   }
 
   async getListCategoryWithPagination(
     query: CategoryQueryDto,
-  ): Promise<APIResponseDTO<CategoryData>> {
+  ): Promise<APIResponseDTO<CategoryPaginationData>> {
     let {
       search,
       sortBy = 'createdAt',
@@ -172,9 +174,8 @@ export class CategoryService {
   async deleteCategory(id: number): Promise<APIResponseDTO<string>> {
     await this.getOneCategoryWithId(id);
 
-    await this.categoryRepository.update({ id }, { deleted: true });
-
     // TODO: Updated list product's property 'deleted': 'true' belongs to this category
+    await this.productService.deleteProductWithCategoryAndSync(id);
 
     return {
       success: true,

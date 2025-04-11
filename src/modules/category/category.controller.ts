@@ -13,10 +13,20 @@ import {
 } from '@nestjs/common';
 import { CategoryService } from './category.service';
 import { AuthGuard } from 'src/common/guard/auth.guard';
-import { ApiBearerAuth, ApiBody, ApiExtraModels, ApiResponse, getSchemaPath } from '@nestjs/swagger';
+import { ApiBearerAuth, ApiBody } from '@nestjs/swagger';
 import { Category } from './entities/category.entity';
-import { APIResponseDTO } from 'src/common/dto/response-dto';
-import { CategoryPaginationData, CategoryQueryDto, CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
+import {
+  CategoryPaginationData,
+  CategoryQueryDto,
+  CategoryResponseDto,
+  CreateCategoryDto,
+  UpdateCategoryDto,
+} from './dto/category.dto';
+import {
+  ApiResponseWithArrayModel,
+  ApiResponseWithModel,
+  ApiResponseWithPrimitive,
+} from 'src/common/decorators/swagger.decorator';
 
 @Controller('category')
 export class CategoryController {
@@ -24,72 +34,28 @@ export class CategoryController {
 
   @Post()
   @ApiBearerAuth()
-  @ApiExtraModels(APIResponseDTO, CategoryResponseDto)
-  @ApiResponse({status: 201, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: { $ref: getSchemaPath(CategoryResponseDto)}
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithModel(CategoryResponseDto, 201)
   @ApiBody({
-    type: CreateCategoryDto
-	})
+    type: CreateCategoryDto,
+  })
   create(@Body() createCategoryDto: CreateCategoryDto) {
     return this.categoryService.createCategory(createCategoryDto);
   }
 
   @Get('/all')
-  @ApiExtraModels(APIResponseDTO, CategoryResponseDto)
-  @ApiResponse({status: 200, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: { $ref: getSchemaPath(CategoryResponseDto)}
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithArrayModel(CategoryResponseDto)
   getAll() {
     return this.categoryService.getListCategory();
   }
 
   @Get('')
-  @ApiExtraModels(APIResponseDTO, CategoryPaginationData)
-  @ApiResponse({status: 200, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: { $ref: getSchemaPath(CategoryPaginationData)}
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithModel(CategoryPaginationData)
   getList(@Query() query: CategoryQueryDto) {
     return this.categoryService.getListCategoryWithPagination(query);
   }
 
   @Get(':id')
-  @ApiExtraModels(APIResponseDTO, Category)
-  @ApiResponse({status: 200, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: { $ref: getSchemaPath(Category)}
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithModel(Category)
   findOne(
     @Param(
       'id',
@@ -105,21 +71,10 @@ export class CategoryController {
 
   @Patch(':id')
   @ApiBearerAuth()
-  @ApiExtraModels(APIResponseDTO, Category)
-  @ApiResponse({status: 200, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: { $ref: getSchemaPath(Category)}
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithModel(Category)
   @ApiBody({
-    type: UpdateCategoryDto
-	})
+    type: UpdateCategoryDto,
+  })
   @UseGuards(AuthGuard)
   update(
     @Param(
@@ -138,19 +93,7 @@ export class CategoryController {
   @Delete(':id')
   @UseGuards(AuthGuard)
   @ApiBearerAuth()
-  @ApiResponse({status: 200, schema: {
-    allOf: [
-      { $ref: getSchemaPath(APIResponseDTO)},
-      {
-        type: 'object',
-        properties: {
-          data: {
-            type: 'string'
-          }
-        }
-      }
-    ]
-  }})
+  @ApiResponseWithPrimitive('string')
   delete(
     @Param(
       'id',
