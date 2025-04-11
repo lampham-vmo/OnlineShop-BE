@@ -10,7 +10,8 @@ import { hashedPasword } from 'src/common/util/bcrypt.util';
 import { AccountsRO } from './user.interface';
 import { AccountData } from './user.interface';
 import { Role } from '../role/entities/role.entity';
-import { APIResponseDTO } from 'src/common/interface/response.interface';
+import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import { APIResponseDTO } from 'src/common/dto/response-dto';
 
 @Injectable()
 export class UserService {
@@ -29,6 +30,7 @@ export class UserService {
       fullName: user.fullname,
       email: user.email,
       role: user.role.name,
+      role_id: user.role_id,
       status: user.status,
       createdAt: user.createdAt
     }))
@@ -104,6 +106,19 @@ export class UserService {
     else {
       await this.usersRepository.delete({ id: deletedUserID})
       return {success: true, statusCode: 200, data: "Sucessfully deleted a user"}
+    }
+  }
+
+  async updateRoleForUser(updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<string>| BadRequestException> {
+    const query = await this.usersRepository.update({id: updateRoleDTO.userId},{role_id: updateRoleDTO.newRoleId})
+    if(query.affected == 0){
+      throw new BadRequestException("Cannot update a role")
+    } else {
+      return {
+        success: true,
+        statusCode: 200,
+        data: "Sucessfully update a user"
+      }
     }
   }
 }

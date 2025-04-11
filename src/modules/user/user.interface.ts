@@ -3,6 +3,7 @@ export interface AccountData {
     fullName: string;
     email: string;
     role: string;
+    role_id: number;
     status: boolean;
     createdAt: Date;
 }
