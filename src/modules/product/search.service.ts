@@ -89,6 +89,20 @@ export class SearchService {
     });
   }
 
+  public async deleteByCategory(categoryName: string) {
+    return await this.esService.deleteByQuery({
+      index: 'product',
+      body: {
+        query: {
+          match: {
+            categoryName: categoryName,
+          },
+        },
+      },
+    });
+  }
+  
+
   public async updateProductPartial(
     productId: number,
     updateFields: ProductResponse,

@@ -171,6 +171,32 @@ export class ProductService {
       await queryRunner.release();
     }
   }
+  //delete Product follow category and asyns
+  async deleteProductWithCategoryAndSync(categoryId: number){
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+    try {
+      await queryRunner.manager.update(Category,{id: categoryId},{deleted: true})
+      await queryRunner.manager.update(Product,{category: {id: categoryId}}, {isDeleted: true})
+      const categoryName = await queryRunner.manager.findOne(Category,{where: { id: categoryId }})
+      if(!categoryName){ 
+        throw new BadRequestException("category not found")
+      }
+      try {
+        await this.esService.deleteByCategory(categoryName.name);
+      } catch (error) {
+        throw new BadRequestException(error);
+      }
+      await queryRunner.commitTransaction();
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new BadRequestException(error);
+    } finally {
+      await queryRunner.release();
+    }
+  }
+
   //TODO: find product search by name(Elastic Search)
   async findProductBySearch(
     text: string,
@@ -238,6 +264,7 @@ export class ProductService {
       relations: ['category'],
     });
     if (!product) {
+      Logger.log("not found")
       throw new NotFoundException({ message: 'Product not found!' });
     }
     const productRes = this.makeProductRes(product);

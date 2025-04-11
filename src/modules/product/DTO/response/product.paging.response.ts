@@ -1,4 +1,3 @@
-import { Expose } from 'class-transformer';
 import { ProductResponse } from './product.response';
 import { ApiProperty } from '@nestjs/swagger';
 
