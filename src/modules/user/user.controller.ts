@@ -23,13 +23,13 @@ export class UserController {
   }
 
   @Patch(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard,RoleGuard)
   async updateUserRole(@Param('id') id: string, @Body() updatedUser: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     return await this.userService.updateRoleForUser(Number(id), updatedUser)
   }
 
   @Delete(':id')
-  @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard,RoleGuard)
   async delete(@Param('id') id: string): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     return await this.userService.delete(Number(id));
   }

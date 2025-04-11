@@ -153,6 +153,14 @@ export class User {
   })
   status: boolean;
 
+  @Column({ type: 'boolean', default: true })
+  @ApiProperty({
+    type: 'boolean',
+    example: false,
+    description: 'Account delete status (false = active)',
+  })
+  isDeleted: boolean;
+
   @CreateDateColumn({ type: 'timestamp' })
   @ApiProperty({
     type: 'string',
