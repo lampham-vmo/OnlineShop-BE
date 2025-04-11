@@ -16,13 +16,16 @@ import {
   MaxLength,
   Matches,
   IsNotEmpty,
+  IsNumber,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { Expose } from 'class-transformer';
 
 
 @Entity('User') // Đảm bảo tên bảng khớp với PostgreSQL
 export class User {
   @PrimaryGeneratedColumn()
+  @IsNumber()
   @ApiProperty()
   id: number;
 
@@ -53,6 +56,8 @@ export class User {
 
   @Column({ default: 2 }) // 🟢 role_id default: 2 (user)
   @ApiProperty()
+  @IsNumber()
+  @Expose()
   role_id: number;
 
   @Column({ nullable: true, length: 11 })

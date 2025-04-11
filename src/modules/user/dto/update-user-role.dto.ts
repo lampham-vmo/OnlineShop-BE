@@ -1,14 +1,12 @@
-import { IsNotEmpty, IsNumber  } from "class-validator";
-export class UpdateUserRoleDTO {
-    constructor(userId: number, newRoleId: number){
-        this.userId = userId;
-        this.newRoleId = newRoleId;
-    }
-    @IsNotEmpty()
-    @IsNumber()
-    readonly userId: number;
+import { PickType } from '@nestjs/swagger';
+import {
+  IsEmail,
+  IsString,
+  MinLength,
+  MaxLength,
+  Matches,
+  IsNotEmpty,
+} from 'class-validator';
+import { User } from '../entities/user.entity';
 
-    @IsNotEmpty()
-    @IsNumber()
-    readonly newRoleId: number;
-}
+export class UpdateUserRoleDTO extends PickType(User, ['role_id']){}
