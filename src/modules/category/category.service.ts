@@ -3,13 +3,12 @@ import {
   Injectable,
   NotFoundException,
 } from '@nestjs/common';
-import { CreateCategoryDto } from './dto/create-category.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Category } from './entities/category.entity';
 import { Not, Repository } from 'typeorm';
-import { UpdateCategoryDto } from './dto/update-category.dto';
-import { CategoryQueryDto } from './dto/category-query.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
+import { plainToInstance } from 'class-transformer';
+import { CategoryQueryDto, CategoryResponseDto, CreateCategoryDto, UpdateCategoryDto } from './dto/category.dto';
 
 export interface PaginationData {
   totalPages: number;
@@ -30,12 +29,18 @@ export class CategoryService {
     private categoryRepository: Repository<Category>,
   ) {}
 
+  private transformToDTO<T, V>(
+    classType: new () => T,
+    plainData: V | V[],
+  ): T | T[] {
+    return plainToInstance(classType, plainData, {
+      excludeExtraneousValues: true,
+    });
+  }
+
   async createCategory(
     createCategoryDto: CreateCategoryDto,
-  ): Promise<APIResponseDTO<Category>> {
-    createCategoryDto.name = createCategoryDto.name.trim();
-    createCategoryDto.description = createCategoryDto.description.trim();
-
+  ): Promise<APIResponseDTO<CategoryResponseDto>> {
     const existingCategory = await this.categoryRepository.findOne({
       where: { name: createCategoryDto.name, deleted: false },
     });
@@ -51,11 +56,11 @@ export class CategoryService {
     return {
       success: true,
       statusCode: 201,
-      data: result,
+      data: this.transformToDTO(CategoryResponseDto, result) as CategoryResponseDto,
     };
   }
 
-  async getListCategory(): Promise<APIResponseDTO<Category[]>> {
+  async getListCategory(): Promise<APIResponseDTO<CategoryResponseDto[]>> {
     const categories = await this.categoryRepository.find({
       where: {
         deleted: false,
@@ -68,7 +73,7 @@ export class CategoryService {
     return {
       success: true,
       statusCode: 200,
-      data: categories,
+      data: this.transformToDTO(CategoryResponseDto, categories) as Array<CategoryResponseDto>,
     };
   }
 
@@ -141,16 +146,10 @@ export class CategoryService {
   async updateCategory(
     id: number,
     updateCategoryDto: UpdateCategoryDto,
-  ): Promise<APIResponseDTO<Category>> {
+  ): Promise<APIResponseDTO<Category> | BadRequestException> {
     await this.getOneCategoryWithId(id);
 
-    if (updateCategoryDto.description) {
-      updateCategoryDto.description = updateCategoryDto.description.trim();
-    }
-
     if (updateCategoryDto.name) {
-      updateCategoryDto.name = updateCategoryDto.name.trim();
-
       const duplicateCategory = await this.categoryRepository.findOne({
         where: { name: updateCategoryDto.name, id: Not(id), deleted: false },
       });
@@ -162,12 +161,15 @@ export class CategoryService {
       }
     }
 
-    await this.categoryRepository.update(id, updateCategoryDto);
-
-    return await this.findOneCategoryById(id);
+    try {
+      await this.categoryRepository.update(id, updateCategoryDto);
+      return await this.findOneCategoryById(id);
+    } catch (error) {
+      return new BadRequestException(error);
+    }
   }
 
-  async deleteCategory(id: number): Promise<APIResponseDTO<object>> {
+  async deleteCategory(id: number): Promise<APIResponseDTO<string>> {
     await this.getOneCategoryWithId(id);
 
     await this.categoryRepository.update({ id }, { deleted: true });
@@ -177,9 +179,7 @@ export class CategoryService {
     return {
       success: true,
       statusCode: 200,
-      data: {
-        message: `Category with ID ${id} has been deleted successfully`,
-      },
+      data: `Category with ID ${id} has been deleted successfully`,
     };
   }
 }
