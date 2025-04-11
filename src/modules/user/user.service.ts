@@ -7,34 +7,40 @@ import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
-import { AccountsRO } from './user.interface';
-import { AccountData } from './user.interface';
+import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import { APIResponseDTO } from 'src/common/dto/response-dto';
+import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
-import { APIResponseDTO } from 'src/common/interface/response.interface';
 
 @Injectable()
 export class UserService {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
+    @InjectRepository(Role) private roleRepository: Repository<Role>
   ) { }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
 
-  async getAllAccounts(): Promise<AccountsRO> {
+  async getAllAccounts(): Promise<APIResponseDTO<{ accounts: GetUserAccountDTO[], accountsCount: number }>> {
     const users = await this.usersRepository.find({ relations: ["role"] })
-    const accounts: AccountData[] = users.map((user) => ({
+    const accounts: GetUserAccountDTO[] = users.map((user) => ({
       id: user.id,
-      fullName: user.fullname,
+      fullname: user.fullname,
       email: user.email,
-      role: user.role.name,
+      roleName: user.role.name,
+      role_id: user.role_id,
       status: user.status,
       createdAt: user.createdAt
     }))
     return {
-      accounts: accounts,
-      accountsCount: accounts.length
+      success: true,
+      statusCode: 200,
+      data: {
+        accounts: accounts,
+        accountsCount: accounts.length
+      }
     }
   }
 
@@ -42,7 +48,7 @@ export class UserService {
     return await this.usersRepository.findOneBy({ id: id });
   }
 
-  async findOneByEmail(email: string) {
+  async findOneByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findOneBy({ email: email });
   }
 
@@ -96,14 +102,34 @@ export class UserService {
     await this.usersRepository.save(temp);
   }
 
-  async delete(deletedUserID: number): Promise<APIResponseDTO<string> | BadRequestException> {
+  async delete(deletedUserID: number): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     const query = await this.usersRepository.findOneBy({ id: deletedUserID });
     if (query == null) {
       throw new BadRequestException("The user does not exist")
     }
     else {
-      await this.usersRepository.delete({ id: deletedUserID})
-      return {success: true, statusCode: 200, data: "Sucessfully deleted a user"}
+      await this.usersRepository.delete({ id: deletedUserID })
+      return { success: true, statusCode: 200, data: { message: "Sucessfully deleted a user" } }
+    }
+  }
+
+  async updateRoleForUser(userId: number, updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
+    if (await this.findOneById(userId) == null) {
+      throw new BadRequestException("The user does not exist")
+    }
+    else if (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id }) == null) {
+      throw new BadRequestException("The role does not exist")
+    } else {
+      const query = await this.usersRepository.update({ id: userId }, { role_id: updateRoleDTO.role_id })
+      if (query.affected == 0) {
+        throw new BadRequestException("Cannot update a role")
+      } else {
+        return {
+          success: true,
+          statusCode: 200,
+          data: { message: "Sucessfully update a user" }
+        }
+      }
     }
   }
 }
