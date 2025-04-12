@@ -8,7 +8,11 @@ export class ProductRequest extends OmitType(Product,["category","id","updatedAt
     @IsNumber()
     @IsNotEmpty()
     @IsInt()
-    @ApiProperty({description:"category id"})
+    @ApiProperty({
+        description:"category id",
+        type:'number',
+        nullable: false
+    })
     categoryId: number
 
 

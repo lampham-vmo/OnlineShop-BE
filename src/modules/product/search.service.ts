@@ -228,4 +228,6 @@ export class SearchService {
     };
     return new ProductPagingResponse(product, pagination);
   }
+
+  
 }
