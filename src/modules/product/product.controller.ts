@@ -14,9 +14,15 @@ import { ProductRequest } from './DTO/requests/product.request';
 import { ApiResponse } from './DTO/response/api.response';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
-import { ApiBody, ApiExtraModels, ApiOkResponse, ApiQuery, ApiTags, getSchemaPath } from '@nestjs/swagger';
+import {
+  ApiBody,
+  ApiExtraModels,
+  ApiOkResponse,
+  ApiQuery,
+  ApiTags,
+  getSchemaPath,
+} from '@nestjs/swagger';
 import { Product } from './Entity/product.entity';
-import { text } from 'body-parser';
 
 @ApiTags('Product')
 @Controller()
@@ -24,7 +30,7 @@ export class ProductController {
   constructor(private productService: ProductService) {}
 
   @Post('product')
-  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiExtraModels(ApiResponse, ProductResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
@@ -46,7 +52,7 @@ export class ProductController {
   }
 
   @Get('product/search')
-  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiExtraModels(ApiResponse, ProductResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
@@ -54,9 +60,10 @@ export class ProductController {
         {
           type: 'object',
           properties: {
-            result: { 
+            result: {
               type: 'array',
-              items: {$ref: getSchemaPath(ProductResponse)} },
+              items: { $ref: getSchemaPath(ProductResponse) },
+            },
           },
         },
       ],
@@ -75,7 +82,7 @@ export class ProductController {
   @ApiQuery({ name: 'page', required: false })
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
-  @ApiExtraModels(ApiResponse,ProductPagingResponse)
+  @ApiExtraModels(ApiResponse, ProductPagingResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
@@ -140,7 +147,7 @@ export class ProductController {
 
   @Patch('product/:id')
   @ApiBody({ type: ProductRequest })
-  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiExtraModels(ApiResponse, ProductResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
@@ -186,7 +193,7 @@ export class ProductController {
   }
 
   @Get('product/:id')
-  @ApiExtraModels(ApiResponse,ProductResponse)
+  @ApiExtraModels(ApiResponse, ProductResponse)
   @ApiOkResponse({
     schema: {
       allOf: [

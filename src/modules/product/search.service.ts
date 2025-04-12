@@ -3,7 +3,6 @@ import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
-
 @Injectable()
 export class SearchService {
   constructor(private readonly esService: ElasticsearchService) {}
@@ -101,7 +100,6 @@ export class SearchService {
       },
     });
   }
-  
 
   public async updateProductPartial(
     productId: number,

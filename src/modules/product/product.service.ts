@@ -14,7 +14,6 @@ import { plainToInstance } from 'class-transformer';
 import { SearchService } from './search.service';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
-
 @Injectable()
 export class ProductService {
   constructor(
@@ -172,16 +171,26 @@ export class ProductService {
     }
   }
   //delete Product follow category and asyns
-  async deleteProductWithCategoryAndSync(categoryId: number){
+  async deleteProductWithCategoryAndSync(categoryId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
-      await queryRunner.manager.update(Category,{id: categoryId},{deleted: true})
-      await queryRunner.manager.update(Product,{category: {id: categoryId}}, {isDeleted: true})
-      const categoryName = await queryRunner.manager.findOne(Category,{where: { id: categoryId }})
-      if(!categoryName){ 
-        throw new BadRequestException("category not found")
+      await queryRunner.manager.update(
+        Category,
+        { id: categoryId },
+        { deleted: true },
+      );
+      await queryRunner.manager.update(
+        Product,
+        { category: { id: categoryId } },
+        { isDeleted: true },
+      );
+      const categoryName = await queryRunner.manager.findOne(Category, {
+        where: { id: categoryId },
+      });
+      if (!categoryName) {
+        throw new BadRequestException('category not found');
       }
       try {
         await this.esService.deleteByCategory(categoryName.name);
@@ -198,9 +207,7 @@ export class ProductService {
   }
 
   //TODO: find product search by name(Elastic Search)
-  async findProductBySearch(
-    text: string,
-  ): Promise<ProductResponse[]> {
+  async findProductBySearch(text: string): Promise<ProductResponse[]> {
     try {
       const result = await this.esService.findProductForSearchBar(text);
       return result;
@@ -264,7 +271,7 @@ export class ProductService {
       relations: ['category'],
     });
     if (!product) {
-      Logger.log("not found")
+      Logger.log('not found');
       throw new NotFoundException({ message: 'Product not found!' });
     }
     const productRes = this.makeProductRes(product);

@@ -8,7 +8,7 @@ export class ApiResponse<T> {
 
   @ApiProperty()
   message: string;
-  
+
   @ApiProperty()
   @Expose()
   result?: T;

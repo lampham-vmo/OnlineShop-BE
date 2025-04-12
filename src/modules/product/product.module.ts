@@ -24,7 +24,7 @@ import { SearchService } from './search.service';
   ],
   controllers: [ProductController],
   providers: [ProductService, SearchService],
-  exports: [ProductService]
+  exports: [ProductService],
 })
 export class ProductModule implements OnModuleInit {
   constructor(private readonly searchService: SearchService) {}

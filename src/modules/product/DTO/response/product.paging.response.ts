@@ -3,7 +3,7 @@ import { ProductResponse } from './product.response';
 import { ApiProperty } from '@nestjs/swagger';
 
 export class ProductPagingResponse {
-  @ApiProperty({type: [ProductResponse]})
+  @ApiProperty({ type: [ProductResponse] })
   products: ProductResponse[];
 
   @ApiProperty()
