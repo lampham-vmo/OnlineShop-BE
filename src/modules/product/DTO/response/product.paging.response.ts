@@ -6,7 +6,7 @@ export class ProductPagingResponse {
   @ApiProperty({ type: [ProductResponse] })
   products: ProductResponse[];
 
-  @ApiProperty()
+  @ApiProperty({type: PaginationDTO})
   pagination: PaginationDTO;
 
   constructor(products: ProductResponse[], pagination: PaginationDTO) {
