@@ -24,7 +24,7 @@ export class UserService {
   }
 
   async getAllAccounts(): Promise<APIResponseDTO<{ accounts: GetUserAccountDTO[], accountsCount: number }>> {
-    const users = await this.usersRepository.find({ relations: ["role"] })
+    const users = await this.usersRepository.find({ relations: ["role"], where: { isDeleted: false } })
     const accounts: GetUserAccountDTO[] = users.map((user) => ({
       id: user.id,
       fullname: user.fullname,
@@ -108,13 +108,13 @@ export class UserService {
       throw new BadRequestException("The user does not exist")
     }
     else {
-      await this.usersRepository.delete({ id: deletedUserID })
+      await this.usersRepository.update({ id: deletedUserID }, { isDeleted: true })
       return { success: true, statusCode: 200, data: { message: "Sucessfully deleted a user" } }
     }
   }
 
   async updateRoleForUser(userId: number, updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
-    if (await this.findOneById(userId) == null) {
+    if (await this.findOneById(userId) == null || await this.usersRepository.findBy({ id: userId, isDeleted: true }) != null) {
       throw new BadRequestException("The user does not exist")
     }
     else if (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id }) == null) {
