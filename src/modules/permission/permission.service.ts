@@ -9,6 +9,9 @@ export class PermissionService {
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
   ) {}
+  async getAllPermission(): Promise<Permission[] | null>{
+    return await this.permissionRepository.find();
+  }
 
   async getPermissionIdByPathAndMethod(
     path: string,

@@ -48,7 +48,7 @@ export class AuthService {
   }: {
     payload: Payload;
     refreshToken: string;
-  }): Promise<RefreshAtResponseDTO | UnauthorizedException> {
+  }): Promise<string> {
     //check if rt match userRT?
     const user = await this.usersService.findOneById(payload.id);
     if (refreshToken !== user?.refreshToken)
@@ -60,12 +60,8 @@ export class AuthService {
       privateKey: process.env.JWT_PRIVATE_KEY,
       expiresIn: '24h',
     });
-    return new RefreshAtResponseDTO(
-      true,
-      HttpStatus.OK,
-      'get AT success',
-      accessToken,
-    );
+    
+    return accessToken
   }
 
   async signIn({
@@ -74,7 +70,7 @@ export class AuthService {
   }: {
     email: string;
     password: string;
-  }): Promise<SignInResponseDTO | BadRequestException> {
+  }): Promise<{accessToken: string, refreshToken: string}> {
     //check if user exists
     const user = await this.usersService.findOneByEmail(email);
     //if not exists, throw bad request
@@ -104,22 +100,16 @@ export class AuthService {
 
     //save refreshToken for User
     await this.usersService.updateRefreshToken(payload.id, refreshToken);
-    const loginResponse = new SignInResponseDTO(
-      true,
-      HttpStatus.CREATED,
-      'Login success',
-      accessToken,
-      refreshToken,
-    );
-
-    return loginResponse;
+    return {
+      accessToken, refreshToken
+    }
   }
 
   //sign up
 
   async signup(
     newUser: CreateUserDTO,
-  ): Promise<SignupResponseDTO | BadRequestException> {
+  ): Promise<string> {
     const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
       newUser.email,
       newUser.password,
@@ -138,12 +128,8 @@ export class AuthService {
       });
     } else {
       this.usersService.createUser(newUser);
-      const signupResponse = new SignupResponseDTO(
-        true,
-        201,
-        'Registered successfully',
-      );
-      return signupResponse;
+      
+      return 'Registered successfully'
     }
   }
 

@@ -23,23 +23,24 @@ import { SignupResponseDTO } from './dto/signup-response.dto';
 import { SignInResponseDTO } from './dto/login-response-dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
+import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, TokenDTO } from './dto/base-auth-response.dto';
+import { ApiBadRequestResponse, ApiOkResponse, ApiProperty, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('auth')
 export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) {}
-  @Get('')
-  @UseGuards(AuthGuard, RoleGuard)
-  get() {}
+  ) { }
 
   @Get('refreshAT')
   @RouteName('refresh access token')
+  @ApiProperty()
+  @ApiOkResponse({ description: 'refresh access token success', type: RefreshAccessTokenResponseDTO })
   @UseGuards(AuthGuard, RoleGuard)
   async refreshAcessToken(
     @Req() req: Request,
-  ): Promise<object | BadRequestException> {
+  ): Promise<RefreshAccessTokenResponseDTO> {
     const user = req['user'];
     const payload = {
       id: user.id,
@@ -47,27 +48,40 @@ export class AuthController {
       role: user.role,
     };
     const { refreshToken } = user;
-    return await this.authService.handleRefreshAccessToken({
+    const accessToken =  await this.authService.handleRefreshAccessToken({
       payload,
       refreshToken,
     });
+
+    const accessTokenDTO = new AccessTokenDTO(accessToken)
+    return new RefreshAccessTokenResponseDTO(true, HttpStatus.CREATED, accessTokenDTO)
   }
 
   @Post('signup')
   @RouteName('signup account')
+  @ApiProperty()
+  @ApiOkResponse({ description: 'create account success', type: SignUpResponseDto })
   async create(
     @Body() createUserDTO: CreateUserDTO,
-  ): Promise<SignupResponseDTO | BadRequestException> {
-    return await this.authService.signup(createUserDTO);
+  ): Promise<SignUpResponseDto> {
+    const result = await this.authService.signup(createUserDTO);
+    return new SignUpResponseDto(true, HttpStatus.CREATED, result)
   }
 
   @Post('login')
   @RouteName('user login')
+  @ApiProperty()
+  @ApiOkResponse({ description: 'login success', type: LogInResponseDTO })
+  @ApiBadRequestResponse({description: "st wrong"})
   @HttpCode(HttpStatus.OK)
   async login(
     @Body() loginUserDTO: LoginUserDTO,
-  ): Promise<SignInResponseDTO | BadRequestException> {
-    return await this.authService.signIn(loginUserDTO);
+  ): Promise<LogInResponseDTO> {
+    const {accessToken, refreshToken} = await this.authService.signIn(loginUserDTO);
+    const token = new TokenDTO(accessToken, refreshToken)
+
+    return new LogInResponseDTO(true, HttpStatus.OK, token)
+   
   }
 
   @Patch('logout')
