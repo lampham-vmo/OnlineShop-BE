@@ -279,7 +279,7 @@ export class ProductService {
   }
 
   //TODO: read product
-  async GetAllProductPaging(page: number = 1, orderField: string = "createdAt", orderBy: string = "ASC", pageSize: number = 10): Promise<ProductPagingResponse> {
+  async GetAllProductPaging(page: number = 1, orderField: string = "createdAt", orderBy: string = "ASC", pageSize: number = 10, categoryId: number): Promise<ProductPagingResponse> {
     const skip = (page - 1) * pageSize;
 
     // 1. Get paginated data
@@ -287,6 +287,9 @@ export class ProductService {
       relations: ['category'],
       skip,
       take: pageSize,
+      where: {
+        category: {id: categoryId}
+      },
       order: {
         [orderField]: orderBy,
       },
