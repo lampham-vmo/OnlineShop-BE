@@ -17,6 +17,7 @@ import {
   Matches,
   IsNotEmpty,
   IsNumber,
+  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
@@ -38,7 +39,7 @@ export class User {
   @Column()
   @IsNotEmpty()
   @IsString()
-  @MinLength(4)
+  @MinLength(8)
   @MaxLength(20)
   @Matches(
     /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/,
