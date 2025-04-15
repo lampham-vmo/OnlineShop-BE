@@ -117,18 +117,16 @@ export class ProductController {
   @ApiQuery({ name: 'pageSize', required: false })
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
+  @ApiQuery({ name: 'categoryId', required: false })
   @ApiExtraModels(ApiResponse,ProductPagingResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
         { $ref: getSchemaPath(ApiResponse) },
         {
-          type: 'object',
           properties: {
-            
             result: { 
-              type: 'array',  
-              items: {$ref: getSchemaPath(ProductPagingResponse)} 
+              $ref: getSchemaPath(ProductPagingResponse)
             },
           },
         },
@@ -140,8 +138,9 @@ export class ProductController {
     @Query('pageSize') pageSize: number,
     @Query('orderField') orderField: string,
     @Query('orderBy') orderBy: string,
+    @Query('categoryId') categoryId: number
   ): Promise<ApiResponse<ProductPagingResponse>> {
-    const result = await this.productService.GetAllProductPaging(page, orderField, orderBy, pageSize);
+    const result = await this.productService.GetAllProductPaging(page, orderField, orderBy, pageSize, categoryId);
     return new ApiResponse<ProductPagingResponse>(result)
   }
 
