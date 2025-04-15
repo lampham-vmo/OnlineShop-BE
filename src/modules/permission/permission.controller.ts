@@ -1,15 +1,20 @@
-import { Controller, Get, UseGuards } from '@nestjs/common';
+import { Controller, Get, HttpStatus, UseGuards } from '@nestjs/common';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { PermissionService } from './permission.service';
 import { Permission } from './entities/permission.entity';
+import { ApiOkResponse, ApiProperty } from '@nestjs/swagger';
+import { GetPermissionResponseDTO } from './dto/base-permission-response.dto';
 
 @Controller('permission')
 export class PermissionController {
     constructor(private readonly permissionService: PermissionService){}
     @Get()
     @UseGuards(AuthGuard, RoleGuard)
-    async findAll(): Promise<Permission[] | null>{
-        return await this.permissionService.getAllPermission()
+    @ApiProperty()
+    @ApiOkResponse({ description: 'get role success', type: GetPermissionResponseDTO })
+    async findAll(): Promise<GetPermissionResponseDTO>{
+        const result = await this.permissionService.getAllPermission()
+        return new GetPermissionResponseDTO(true, HttpStatus.OK, result)
     }
 }
