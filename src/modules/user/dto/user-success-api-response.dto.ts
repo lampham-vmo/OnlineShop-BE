@@ -1,14 +1,9 @@
 // user-success-api-response.dto.ts
 import { ApiProperty } from '@nestjs/swagger';
 import { UserSuccessMessageResponseDTO } from './user-success-message-response.dto';
+import { APIResponseDTO } from 'src/common/dto/response-dto';
 
-export class UserSuccessAPIResponseDTO {
-  @ApiProperty({ example: true })
-  success: boolean;
-
-  @ApiProperty({ example: 200 })
-  statusCode: number;
-
+export class UserSuccessMessageFinalResponseDTO extends APIResponseDTO<UserSuccessMessageResponseDTO>{
   @ApiProperty({ type: () => UserSuccessMessageResponseDTO })
-  data: UserSuccessMessageResponseDTO;
+  data: UserSuccessMessageResponseDTO = new UserSuccessMessageResponseDTO();
 }
