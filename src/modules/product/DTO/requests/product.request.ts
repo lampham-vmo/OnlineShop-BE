@@ -1,45 +1,19 @@
-import {
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Length,
-  Max,
-  MaxLength,
-  Min,
-  MinLength,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber, IsString, Length, Max, Min } from "class-validator"
+import { ApiProperty, OmitType } from "@nestjs/swagger"
+import { Product } from "../../Entity/product.entity"
 
-export class ProductRequest {
-  @IsString({ message: 'Description must be string' })
-  @IsNotEmpty()
-  @Length(0, 255, { message: 'Name must be less than 255 word' })
-  name: string;
+export class ProductRequest extends OmitType(Product,["category","id","updatedAt","createdAt","isDeleted","rating"]) {
 
-  @IsString({ message: 'Description must be string' })
-  @IsNotEmpty()
-  @Length(0, 255, { message: 'Description must be less than 255 word' })
-  description: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  stock: number;
+    @IsNumber()
+    @IsNotEmpty()
+    @IsInt()
+    @ApiProperty({
+        description:"category id",
+        type:'number',
+        nullable: false
+    })
+    categoryId: number
 
-  @IsNumber()
-  @IsNotEmpty()
-  price: number;
 
-  @IsNumber()
-  @IsNotEmpty()
-  categoryId: number;
-
-  @IsNumber()
-  discount: number;
-
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  rating: number;
-
-  @IsString()
-  image: string;
 }

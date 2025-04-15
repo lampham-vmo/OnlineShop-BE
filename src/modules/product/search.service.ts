@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
-import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
 @Injectable()
@@ -53,6 +52,9 @@ export class SearchService {
                   },
                 },
               },
+              createAt: {
+                type: 'date',
+              },
             },
           },
           settings: {
@@ -81,13 +83,27 @@ export class SearchService {
   public async indexProduct(product: ProductResponse) {
     return await this.esService.index({
       index: 'product',
+      id: product.id.toString(),
       body: product,
+    });
+  }
+
+  public async deleteByCategory(categoryName: string) {
+    return await this.esService.deleteByQuery({
+      index: 'product',
+      body: {
+        query: {
+          match: {
+            categoryName: categoryName,
+          },
+        },
+      },
     });
   }
 
   public async updateProductPartial(
     productId: number,
-    updateFields: Partial<ProductResponse>,
+    updateFields: ProductResponse,
   ) {
     return await this.esService.update({
       index: 'product',
@@ -144,9 +160,9 @@ export class SearchService {
       },
     });
     const product = response.hits.hits.map(
-      (hit) => hit._source as Partial<ProductResponse>,
+      (hit) => hit._source as ProductResponse,
     );
-    return new ProductFindResponse(product);
+    return product;
   }
 
   public async findProductForPaging(
@@ -210,4 +226,6 @@ export class SearchService {
     };
     return new ProductPagingResponse(product, pagination);
   }
+
+  
 }
