@@ -16,8 +16,8 @@ import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
-import { GetAllAccountsResponseDTO } from './dto/get-all-accounts-response.dto';
-import { UserSuccessAPIResponseDTO } from './dto/user-success-api-response.dto';
+import { GetAllAccountsFinalResponseDTO } from './dto/user-get-account-success-api-response.dto';
+import { UserSuccessMessageFinalResponseDTO } from './dto/user-success-api-response.dto';
 
 @ApiTags('users')
 @Controller('users')
@@ -28,7 +28,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'List of all user accounts',
-    type: GetAllAccountsResponseDTO,
+    type: GetAllAccountsFinalResponseDTO,
   })  
   async findAll(): Promise<APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>> {
     return await this.userService.getAllAccounts();
@@ -48,7 +48,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'User role updated successfully',
-    type: UserSuccessAPIResponseDTO,
+    type: UserSuccessMessageFinalResponseDTO,
   })
   async updateUserRole(
     @Param('id') id: string,
@@ -61,7 +61,7 @@ export class UserController {
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'User deleted successfully',
-    type: UserSuccessAPIResponseDTO,
+    type: UserSuccessMessageFinalResponseDTO,
   })
   async delete(@Param('id') id: string): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     return await this.userService.delete(Number(id));

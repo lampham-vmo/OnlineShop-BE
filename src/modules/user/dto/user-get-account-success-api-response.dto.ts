@@ -3,7 +3,7 @@ import { ApiProperty } from '@nestjs/swagger';
 import { GetAllAccountsResponseDTO } from './get-all-accounts-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 
-export class UserSuccessAPIResponseDTO extends APIResponseDTO<GetAllAccountsResponseDTO>{
+export class GetAllAccountsFinalResponseDTO extends APIResponseDTO<GetAllAccountsResponseDTO>{
   @ApiProperty({ type: () => GetAllAccountsResponseDTO })
   data: GetAllAccountsResponseDTO = new GetAllAccountsResponseDTO();
 }
