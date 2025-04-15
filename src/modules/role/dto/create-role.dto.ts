@@ -15,6 +15,6 @@ export class CreateRoleDTO extends PickType(Role, ['name', 'description'] as con
   @IsArray()
   @ArrayNotEmpty()
   @IsInt({ each: true })
-  @ApiProperty({description: "array of permissionId ", example: "[1, 2, 3, 4]"})
+  @ApiProperty({description: "array of permissionId ", example: "[1, 2, 3, 4]", type: [Number]})
   permissionIds?: number[];
 }
