@@ -52,6 +52,9 @@ export class SearchService {
                   },
                 },
               },
+              description: {
+                type: 'text'
+              },
               createAt: {
                 type: 'date',
               },
