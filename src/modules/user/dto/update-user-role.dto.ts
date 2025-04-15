@@ -9,4 +9,4 @@ import {
 } from 'class-validator';
 import { User } from '../entities/user.entity';
 
-export class GetUserDTO extends PickType(User, ['email', 'password'] as const){}
+export class UpdateUserRoleDTO extends PickType(User, ['role_id']){}
