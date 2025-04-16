@@ -125,7 +125,7 @@ export class UserService implements OnModuleInit {
     const temp = this.usersRepository.create({
       ...newUser,
       password: hashedPassword,
-      isDeleted: false
+      isDeleted: false,
     });
     await this.usersRepository.save(temp);
   }
@@ -149,12 +149,21 @@ export class UserService implements OnModuleInit {
     }
   }
 
-  async updateRoleForUser(userId: number, updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
-    if (await this.findOneById(userId) == null || (await this.usersRepository.findBy({ id: userId, isDeleted: true })).length > 0) {
-      throw new BadRequestException("The user does not exist")
-    }
-    else if (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id }) == null) {
-      throw new BadRequestException("The role does not exist")
+  async updateRoleForUser(
+    userId: number,
+    updateRoleDTO: UpdateUserRoleDTO,
+  ): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
+    if (
+      (await this.findOneById(userId)) == null ||
+      (await this.usersRepository.findBy({ id: userId, isDeleted: true }))
+        .length > 0
+    ) {
+      throw new BadRequestException('The user does not exist');
+    } else if (
+      (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id })) ==
+      null
+    ) {
+      throw new BadRequestException('The role does not exist');
     } else {
       const query = await this.usersRepository.update(
         { id: userId },

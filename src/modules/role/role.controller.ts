@@ -25,11 +25,13 @@ import {
   RoleListResponseDto,
   UpdateRoleResponseDto,
 } from './dto/response-role.dto';
+import { RouteName } from 'src/common/decorators/route-name.decorator';
 
 @Controller('role')
 export class RoleController {
   constructor(private readonly roleService: RoleService) {}
   @Get()
+  @RouteName('admin get all role')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiProperty()
   @ApiOkResponse({
@@ -42,6 +44,7 @@ export class RoleController {
   }
 
   @Post()
+  @RouteName('admin add role')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiProperty()
   @ApiOkResponse({ description: 'add role success', type: AddRoleResponseDto })
@@ -53,6 +56,7 @@ export class RoleController {
   }
 
   @Patch()
+  @RouteName('admin update role')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiProperty()
   @ApiOkResponse({

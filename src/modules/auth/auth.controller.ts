@@ -17,8 +17,19 @@ import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
-import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, LoginResultDTO } from './dto/base-auth-response.dto';
-import { ApiBadRequestResponse, ApiOkResponse, ApiProperty, ApiUnauthorizedResponse } from '@nestjs/swagger';
+import {
+  AccessTokenDTO,
+  LogInResponseDTO,
+  RefreshAccessTokenResponseDTO,
+  SignUpResponseDto,
+  LoginResultDTO,
+} from './dto/base-auth-response.dto';
+import {
+  ApiBadRequestResponse,
+  ApiOkResponse,
+  ApiProperty,
+  ApiUnauthorizedResponse,
+} from '@nestjs/swagger';
 import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 
@@ -77,16 +88,14 @@ export class AuthController {
   @RouteName('user login')
   @ApiProperty()
   @ApiOkResponse({ description: 'login success', type: LogInResponseDTO })
-  @ApiBadRequestResponse({ description: "st wrong" })
+  @ApiBadRequestResponse({ description: 'st wrong' })
   @HttpCode(HttpStatus.OK)
-  async login(
-    @Body() loginUserDTO: LoginUserDTO,
-  ): Promise<LogInResponseDTO> {
-    const { accessToken, refreshToken, permission } = await this.authService.signIn(loginUserDTO);
-    const token = new LoginResultDTO(accessToken, refreshToken, permission)
+  async login(@Body() loginUserDTO: LoginUserDTO): Promise<LogInResponseDTO> {
+    const { accessToken, refreshToken, permission } =
+      await this.authService.signIn(loginUserDTO);
+    const token = new LoginResultDTO(accessToken, refreshToken, permission);
 
-    return new LogInResponseDTO(true, HttpStatus.OK, token)
-
+    return new LogInResponseDTO(true, HttpStatus.OK, token);
   }
 
   @Patch('logout')

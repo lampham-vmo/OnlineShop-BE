@@ -26,7 +26,7 @@ export class UserController {
   constructor(private readonly userService: UserService) {}
 
   @Get()
-  @RouteName("Get all user account info")
+  @RouteName('Get all user account info')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'List of all user accounts',
@@ -39,7 +39,7 @@ export class UserController {
   }
 
   @Get(':id')
-  @RouteName("Get an user with an ID")
+  @RouteName('Get an user with an ID')
   @UseGuards(AuthGuard)
   @ApiOkResponse({
     description: 'User with given ID',
@@ -50,7 +50,7 @@ export class UserController {
   }
 
   @Patch(':id')
-  @RouteName("Patch a role for an user")
+  @RouteName('Patch a role for an user')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'User role updated successfully',
@@ -64,7 +64,7 @@ export class UserController {
   }
 
   @Delete(':id')
-  @RouteName("Remove an user account")
+  @RouteName('Remove an user account')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiOkResponse({
     description: 'User deleted successfully',
