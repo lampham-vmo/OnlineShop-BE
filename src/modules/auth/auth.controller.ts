@@ -17,7 +17,7 @@ import { UserService } from 'src/modules/user/user.service';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
-import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, TokenDTO } from './dto/base-auth-response.dto';
+import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, LoginResultDTO } from './dto/base-auth-response.dto';
 import { ApiBadRequestResponse, ApiOkResponse, ApiProperty, ApiUnauthorizedResponse } from '@nestjs/swagger';
 import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
@@ -27,12 +27,15 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) { }
+  ) {}
 
   @Get('refreshAT')
   @RouteName('refresh access token')
   @ApiProperty()
-  @ApiOkResponse({ description: 'refresh access token success', type: RefreshAccessTokenResponseDTO })
+  @ApiOkResponse({
+    description: 'refresh access token success',
+    type: RefreshAccessTokenResponseDTO,
+  })
   @UseGuards(AuthGuard, RoleGuard)
   async refreshAcessToken(
     @Req() req: Request,
@@ -49,8 +52,12 @@ export class AuthController {
       refreshToken,
     });
 
-    const accessTokenDTO = new AccessTokenDTO(accessToken)
-    return new RefreshAccessTokenResponseDTO(true, HttpStatus.CREATED, accessTokenDTO)
+    const accessTokenDTO = new AccessTokenDTO(accessToken);
+    return new RefreshAccessTokenResponseDTO(
+      true,
+      HttpStatus.CREATED,
+      accessTokenDTO,
+    );
   }
 
   @Post('signup')
@@ -75,8 +82,8 @@ export class AuthController {
   async login(
     @Body() loginUserDTO: LoginUserDTO,
   ): Promise<LogInResponseDTO> {
-    const { accessToken, refreshToken } = await this.authService.signIn(loginUserDTO);
-    const token = new TokenDTO(accessToken, refreshToken)
+    const { accessToken, refreshToken, permission } = await this.authService.signIn(loginUserDTO);
+    const token = new LoginResultDTO(accessToken, refreshToken, permission)
 
     return new LogInResponseDTO(true, HttpStatus.OK, token)
 

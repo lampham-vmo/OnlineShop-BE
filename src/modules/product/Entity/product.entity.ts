@@ -40,7 +40,7 @@ export class Product {
     example: 'Intel Core i9-13900K',
     nullable: false,
     type: 'string',
-    minLength: 1
+    minLength: 1,
   })
   @Column({ nullable: false })
   name: string;
@@ -54,7 +54,7 @@ export class Product {
     example: 'High-end 13th Gen Intel processor for gamers and creators.',
     type: 'string',
     minLength: 1,
-    nullable: false
+    nullable: false,
   })
   @Column()
   @Expose()
@@ -69,7 +69,7 @@ export class Product {
     minimum: 0,
     example: 50,
     type: 'number',
-    nullable: false
+    nullable: false,
   })
   @Column({ nullable: false })
   stock: number;
@@ -83,7 +83,7 @@ export class Product {
     minimum: 0,
     example: 599.99,
     type: 'number',
-    nullable: false
+    nullable: false,
   })
   @Column({ type: 'float', nullable: false })
   price: number;
@@ -98,7 +98,7 @@ export class Product {
     maximum: 100,
     example: 15,
     nullable: false,
-    type: 'number'
+    type: 'number',
   })
   @Column({ nullable: false })
   discount: number;
@@ -136,7 +136,7 @@ export class Product {
     description: 'URL of product image',
     example: 'https://cdn.example.com/products/intel-i9.jpg',
     type: 'string',
-    nullable: false
+    nullable: false,
   })
   @Expose()
   @Column()
