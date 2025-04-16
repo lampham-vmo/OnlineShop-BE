@@ -11,13 +11,33 @@ import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
-
+import { OnModuleInit } from '@nestjs/common';
 @Injectable()
-export class UserService {
+export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Role) private roleRepository: Repository<Role>
   ) { }
+
+  async onModuleInit(): Promise<void> {
+    await this.createDefaultUsers();
+  }
+  private async createDefaultUsers(): Promise<void> {
+    //check if user role admin exists
+    const isUserRoleAdminExist = await this.usersRepository.findOneBy({ role_id: 1 })
+
+    if (!isUserRoleAdminExist) {
+      const res = await this.createUser({
+        fullname: "Admin",
+        email: "admin123@gmail.com",
+        password: "Admin123@",
+        phone: "1234567890",
+        address: "123 Admin St",
+        confirmPassword: "Admin123@",
+        role_id: 1,
+      })
+    }
+  }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
@@ -101,6 +121,7 @@ export class UserService {
     });
     await this.usersRepository.save(temp);
   }
+
 
   async delete(deletedUserID: number): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     const query = await this.usersRepository.findOneBy({ id: deletedUserID });

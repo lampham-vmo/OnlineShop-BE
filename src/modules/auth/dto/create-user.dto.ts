@@ -28,4 +28,7 @@ export class CreateUserDTO extends PickType(User, ['fullname', 'email', 'passwor
   @Match('password', { message: 'Confirm password must match password' })
   readonly confirmPassword: string;
 
+  
+  role_id: number  = 2
+
 }
