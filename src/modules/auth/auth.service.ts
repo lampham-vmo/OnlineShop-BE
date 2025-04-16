@@ -121,7 +121,7 @@ export class AuthService {
 
   async signup(
     newUser: CreateUserDTO,
-  ): Promise<APIResponseDTO<{message: string}>> {
+  ): Promise<APIResponseDTO<{ message: string }>> {
     const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
       newUser.email,
       newUser.password,
@@ -140,12 +140,12 @@ export class AuthService {
       });
     } else {
       this.usersService.createUser(newUser);
-      
+
       return {
         success: true,
         statusCode: 200,
-        data: {message: "Successfully created a user"}
-      }
+        data: { message: 'Successfully created a user' },
+      };
     }
   }
 
