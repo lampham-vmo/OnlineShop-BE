@@ -13,6 +13,8 @@ export class PermissionService {
     return await this.permissionRepository.find();
   }
 
+ 
+
   async getPermissionIdByPathAndMethod(
     path: string,
     method: string,

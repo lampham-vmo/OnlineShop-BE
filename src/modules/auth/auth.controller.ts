@@ -23,7 +23,7 @@ import { SignupResponseDTO } from './dto/signup-response.dto';
 import { SignInResponseDTO } from './dto/login-response-dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
-import { AccessTokenDTO, LogInResponseDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto, TokenDTO } from './dto/base-auth-response.dto';
+import { AccessTokenDTO, LogInResponseDTO, LoginResultDTO, RefreshAccessTokenResponseDTO, SignUpResponseDto } from './dto/base-auth-response.dto';
 import { ApiBadRequestResponse, ApiOkResponse, ApiProperty, ApiUnauthorizedResponse } from '@nestjs/swagger';
 
 @Controller('auth')
@@ -77,8 +77,8 @@ export class AuthController {
   async login(
     @Body() loginUserDTO: LoginUserDTO,
   ): Promise<LogInResponseDTO> {
-    const {accessToken, refreshToken} = await this.authService.signIn(loginUserDTO);
-    const token = new TokenDTO(accessToken, refreshToken)
+    const {accessToken, refreshToken, permission} = await this.authService.signIn(loginUserDTO);
+    const token = new LoginResultDTO(accessToken, refreshToken, permission)
 
     return new LogInResponseDTO(true, HttpStatus.OK, token)
    
