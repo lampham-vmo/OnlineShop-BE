@@ -13,6 +13,7 @@ import { SignInResponseDTO } from './dto/login-response-dto';
 import { comparedPassword } from 'src/common/util/bcrypt.util';
 import { LogoutResponseDTO } from './dto/logout-response.dto';
 import { RefreshAtResponseDTO } from './dto/refreshAT-response.dto';
+import { APIResponseDTO } from 'src/common/dto/response-dto';
 
 interface Payload {
   id: number;
@@ -109,7 +110,7 @@ export class AuthService {
 
   async signup(
     newUser: CreateUserDTO,
-  ): Promise<string> {
+  ): Promise<APIResponseDTO<{message: string}>> {
     const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
       newUser.email,
       newUser.password,
@@ -129,7 +130,11 @@ export class AuthService {
     } else {
       this.usersService.createUser(newUser);
       
-      return 'Registered successfully'
+      return {
+        success: true,
+        statusCode: 200,
+        data: {message: "Successfully created a user"}
+      }
     }
   }
 
