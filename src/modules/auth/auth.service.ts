@@ -10,9 +10,10 @@ import { generateKeyPairSync } from 'crypto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { comparedPassword } from 'src/common/util/bcrypt.util';
 import { LogoutResponseDTO } from './dto/logout-response.dto';
+import { RefreshAtResponseDTO } from './dto/refreshAT-response.dto';
+import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
-
 interface Payload {
   id: number;
   email: string;
@@ -118,7 +119,9 @@ export class AuthService {
 
   //sign up
 
-  async signup(newUser: CreateUserDTO): Promise<string> {
+  async signup(
+    newUser: CreateUserDTO,
+  ): Promise<APIResponseDTO<{message: string}>> {
     const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
       newUser.email,
       newUser.password,
@@ -137,8 +140,12 @@ export class AuthService {
       });
     } else {
       this.usersService.createUser(newUser);
-
-      return 'Registered successfully';
+      
+      return {
+        success: true,
+        statusCode: 200,
+        data: {message: "Successfully created a user"}
+      }
     }
   }
 
