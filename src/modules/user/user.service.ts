@@ -114,7 +114,7 @@ export class UserService {
   }
 
   async updateRoleForUser(userId: number, updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
-    if (await this.findOneById(userId) == null || await this.usersRepository.findBy({ id: userId, isDeleted: true }) != null) {
+    if (await this.findOneById(userId) == null || (await this.usersRepository.findBy({ id: userId, isDeleted: true })).length > 0) {
       throw new BadRequestException("The user does not exist")
     }
     else if (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id }) == null) {
