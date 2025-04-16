@@ -125,6 +125,7 @@ export class UserService implements OnModuleInit {
     const temp = this.usersRepository.create({
       ...newUser,
       password: hashedPassword,
+      isDeleted: false
     });
     await this.usersRepository.save(temp);
   }
