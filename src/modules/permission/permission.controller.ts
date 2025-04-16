@@ -8,13 +8,16 @@ import { GetPermissionResponseDTO } from './dto/base-permission-response.dto';
 
 @Controller('permission')
 export class PermissionController {
-    constructor(private readonly permissionService: PermissionService){}
-    @Get()
-    @UseGuards(AuthGuard, RoleGuard)
-    @ApiProperty()
-    @ApiOkResponse({ description: 'get role success', type: GetPermissionResponseDTO })
-    async findAll(): Promise<GetPermissionResponseDTO>{
-        const result = await this.permissionService.getAllPermission()
-        return new GetPermissionResponseDTO(true, HttpStatus.OK, result)
-    }
+  constructor(private readonly permissionService: PermissionService) {}
+  @Get()
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'get role success',
+    type: GetPermissionResponseDTO,
+  })
+  async findAll(): Promise<GetPermissionResponseDTO> {
+    const result = await this.permissionService.getAllPermission();
+    return new GetPermissionResponseDTO(true, HttpStatus.OK, result);
+  }
 }
