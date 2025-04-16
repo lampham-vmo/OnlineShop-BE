@@ -16,26 +16,28 @@ import { OnModuleInit } from '@nestjs/common';
 export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
-    @InjectRepository(Role) private roleRepository: Repository<Role>
-  ) { }
+    @InjectRepository(Role) private roleRepository: Repository<Role>,
+  ) {}
 
   async onModuleInit(): Promise<void> {
     await this.createDefaultUsers();
   }
   private async createDefaultUsers(): Promise<void> {
     //check if user role admin exists
-    const isUserRoleAdminExist = await this.usersRepository.findOneBy({ role_id: 1 })
+    const isUserRoleAdminExist = await this.usersRepository.findOneBy({
+      role_id: 1,
+    });
 
     if (!isUserRoleAdminExist) {
       const res = await this.createUser({
-        fullname: "Admin",
-        email: "admin123@gmail.com",
-        password: "Admin123@",
-        phone: "1234567890",
-        address: "123 Admin St",
-        confirmPassword: "Admin123@",
+        fullname: 'Admin',
+        email: 'admin123@gmail.com',
+        password: 'Admin123@',
+        phone: '1234567890',
+        address: '123 Admin St',
+        confirmPassword: 'Admin123@',
         role_id: 1,
-      })
+      });
     }
   }
 
@@ -43,8 +45,13 @@ export class UserService implements OnModuleInit {
     return await this.usersRepository.find();
   }
 
-  async getAllAccounts(): Promise<APIResponseDTO<{ accounts: GetUserAccountDTO[], accountsCount: number }>> {
-    const users = await this.usersRepository.find({ relations: ["role"], where: { isDeleted: false } })
+  async getAllAccounts(): Promise<
+    APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>
+  > {
+    const users = await this.usersRepository.find({
+      relations: ['role'],
+      where: { isDeleted: false },
+    });
     const accounts: GetUserAccountDTO[] = users.map((user) => ({
       id: user.id,
       fullname: user.fullname,
@@ -52,16 +59,16 @@ export class UserService implements OnModuleInit {
       roleName: user.role.name,
       role_id: user.role_id,
       status: user.status,
-      createdAt: user.createdAt
-    }))
+      createdAt: user.createdAt,
+    }));
     return {
       success: true,
       statusCode: 200,
       data: {
         accounts: accounts,
-        accountsCount: accounts.length
-      }
-    }
+        accountsCount: accounts.length,
+      },
+    };
   }
 
   async findOneById(id: number): Promise<User | null> {
@@ -122,34 +129,53 @@ export class UserService implements OnModuleInit {
     await this.usersRepository.save(temp);
   }
 
-
-  async delete(deletedUserID: number): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
+  async delete(
+    deletedUserID: number,
+  ): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     const query = await this.usersRepository.findOneBy({ id: deletedUserID });
     if (query == null) {
-      throw new BadRequestException("The user does not exist")
-    }
-    else {
-      await this.usersRepository.update({ id: deletedUserID }, { isDeleted: true })
-      return { success: true, statusCode: 200, data: { message: "Sucessfully deleted a user" } }
+      throw new BadRequestException('The user does not exist');
+    } else {
+      await this.usersRepository.update(
+        { id: deletedUserID },
+        { isDeleted: true },
+      );
+      return {
+        success: true,
+        statusCode: 200,
+        data: { message: 'Sucessfully deleted a user' },
+      };
     }
   }
 
-  async updateRoleForUser(userId: number, updateRoleDTO: UpdateUserRoleDTO): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
-    if (await this.findOneById(userId) == null || await this.usersRepository.findBy({ id: userId, isDeleted: true }) != null) {
-      throw new BadRequestException("The user does not exist")
-    }
-    else if (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id }) == null) {
-      throw new BadRequestException("The role does not exist")
+  async updateRoleForUser(
+    userId: number,
+    updateRoleDTO: UpdateUserRoleDTO,
+  ): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
+    if (
+      (await this.findOneById(userId)) == null ||
+      (await this.usersRepository.findBy({ id: userId, isDeleted: true })) !=
+        null
+    ) {
+      throw new BadRequestException('The user does not exist');
+    } else if (
+      (await this.roleRepository.findOneBy({ id: updateRoleDTO.role_id })) ==
+      null
+    ) {
+      throw new BadRequestException('The role does not exist');
     } else {
-      const query = await this.usersRepository.update({ id: userId }, { role_id: updateRoleDTO.role_id })
+      const query = await this.usersRepository.update(
+        { id: userId },
+        { role_id: updateRoleDTO.role_id },
+      );
       if (query.affected == 0) {
-        throw new BadRequestException("Cannot update a role")
+        throw new BadRequestException('Cannot update a role');
       } else {
         return {
           success: true,
           statusCode: 200,
-          data: { message: "Sucessfully update a user" }
-        }
+          data: { message: 'Sucessfully update a user' },
+        };
       }
     }
   }

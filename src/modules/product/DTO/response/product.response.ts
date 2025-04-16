@@ -11,7 +11,7 @@ export class ProductResponse extends PickType(Product, [
   'image',
   'createdAt',
   'rating',
-  'description'
+  'description',
 ]) {
   @ApiProperty()
   @Expose()

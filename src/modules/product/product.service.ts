@@ -279,7 +279,13 @@ export class ProductService {
   }
 
   //TODO: read product
-  async GetAllProductPaging(page: number = 1, orderField: string = "createdAt", orderBy: string = "ASC", pageSize: number = 10, categoryId: number): Promise<ProductPagingResponse> {
+  async GetAllProductPaging(
+    page: number = 1,
+    orderField: string = 'createdAt',
+    orderBy: string = 'ASC',
+    pageSize: number = 10,
+    categoryId: number,
+  ): Promise<ProductPagingResponse> {
     const skip = (page - 1) * pageSize;
 
     // 1. Get paginated data
@@ -288,7 +294,7 @@ export class ProductService {
       skip,
       take: pageSize,
       where: {
-        category: {id: categoryId}
+        category: { id: categoryId },
       },
       order: {
         [orderField]: orderBy,
@@ -303,15 +309,15 @@ export class ProductService {
         priceAfterDis: p.price - (p.price * p.discount) / 100,
         categoryName: p.category?.name,
       })),
-      { excludeExtraneousValues: true }
+      { excludeExtraneousValues: true },
     );
     let pagination = {
       currentPage: +page,
       pageSize: pageSize,
       totalPages: Math.ceil(totalItems / pageSize),
       totalItems: totalItems,
-    }
-    const productPaging = new ProductPagingResponse(transformed,pagination)
-    return productPaging
+    };
+    const productPaging = new ProductPagingResponse(transformed, pagination);
+    return productPaging;
   }
 }

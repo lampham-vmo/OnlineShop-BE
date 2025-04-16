@@ -24,7 +24,7 @@ export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
-    private roleService: RoleService
+    private roleService: RoleService,
   ) {}
 
   createKeyPair(): { privateKey: string; publicKey: string } {
@@ -60,8 +60,8 @@ export class AuthService {
       privateKey: process.env.JWT_PRIVATE_KEY,
       expiresIn: '24h',
     });
-    
-    return accessToken
+
+    return accessToken;
   }
 
   async signIn({
@@ -70,7 +70,11 @@ export class AuthService {
   }: {
     email: string;
     password: string;
-  }): Promise<{accessToken: string, refreshToken: string, permission: Permission[]}> {
+  }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    permission: Permission[];
+  }> {
     //check if user exists
     const user = await this.usersService.findOneByEmail(email);
     //if not exists, throw bad request
@@ -81,10 +85,10 @@ export class AuthService {
     if (!isValidPassword) throw new BadRequestException('password not match!');
 
     //get payload
-    let permission 
+    let permission;
     const role = await this.roleService.getPermissionByRoleId(user.role_id);
-    if(role){
-      permission = role.permissions
+    if (role) {
+      permission = role.permissions;
     }
     const payload = {
       id: user.id,
@@ -106,15 +110,15 @@ export class AuthService {
     //save refreshToken for User
     await this.usersService.updateRefreshToken(payload.id, refreshToken);
     return {
-      accessToken, refreshToken, permission
-    }
+      accessToken,
+      refreshToken,
+      permission,
+    };
   }
 
   //sign up
 
-  async signup(
-    newUser: CreateUserDTO,
-  ): Promise<string> {
+  async signup(newUser: CreateUserDTO): Promise<string> {
     const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
       newUser.email,
       newUser.password,
@@ -133,8 +137,8 @@ export class AuthService {
       });
     } else {
       this.usersService.createUser(newUser);
-      
-      return 'Registered successfully'
+
+      return 'Registered successfully';
     }
   }
 

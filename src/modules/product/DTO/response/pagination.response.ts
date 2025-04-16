@@ -1,16 +1,15 @@
-import { ApiProperty } from "@nestjs/swagger"
+import { ApiProperty } from '@nestjs/swagger';
 
-export class PaginationDTO{
+export class PaginationDTO {
+  @ApiProperty()
+  currentPage: number;
 
-    @ApiProperty()
-    currentPage: number
+  @ApiProperty()
+  pageSize: number;
 
-    @ApiProperty()
-    pageSize: number
+  @ApiProperty()
+  totalPages: number;
 
-    @ApiProperty()
-    totalPages: number
-
-    @ApiProperty()
-    totalItems: number
+  @ApiProperty()
+  totalItems: number;
 }

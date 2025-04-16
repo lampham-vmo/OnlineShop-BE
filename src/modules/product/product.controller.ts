@@ -118,15 +118,15 @@ export class ProductController {
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
-  @ApiExtraModels(ApiResponse,ProductPagingResponse)
+  @ApiExtraModels(ApiResponse, ProductPagingResponse)
   @ApiOkResponse({
     schema: {
       allOf: [
         { $ref: getSchemaPath(ApiResponse) },
         {
           properties: {
-            result: { 
-              $ref: getSchemaPath(ProductPagingResponse)
+            result: {
+              $ref: getSchemaPath(ProductPagingResponse),
             },
           },
         },
@@ -138,10 +138,16 @@ export class ProductController {
     @Query('pageSize') pageSize: number,
     @Query('orderField') orderField: string,
     @Query('orderBy') orderBy: string,
-    @Query('categoryId') categoryId: number
+    @Query('categoryId') categoryId: number,
   ): Promise<ApiResponse<ProductPagingResponse>> {
-    const result = await this.productService.GetAllProductPaging(page, orderField, orderBy, pageSize, categoryId);
-    return new ApiResponse<ProductPagingResponse>(result)
+    const result = await this.productService.GetAllProductPaging(
+      page,
+      orderField,
+      orderBy,
+      pageSize,
+      categoryId,
+    );
+    return new ApiResponse<ProductPagingResponse>(result);
   }
 
   @Patch('product/:id')
@@ -212,7 +218,4 @@ export class ProductController {
     const result = await this.productService.getProductById(id);
     return new ApiResponse<ProductResponse>(result);
   }
-
-
-
 }

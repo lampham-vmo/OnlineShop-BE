@@ -11,7 +11,13 @@ import { Match } from 'src/common/decorators/match-custom-class-validator';
 import { User } from 'src/modules/user/entities/user.entity';
 import { ApiProperty } from '@nestjs/swagger';
 
-export class CreateUserDTO extends PickType(User, ['fullname', 'email', 'password', 'phone', 'address'] as const) {
+export class CreateUserDTO extends PickType(User, [
+  'fullname',
+  'email',
+  'password',
+  'phone',
+  'address',
+] as const) {
   @ApiProperty({
     type: 'string',
     example: 'StrongP@ssw0rd!',
@@ -28,7 +34,5 @@ export class CreateUserDTO extends PickType(User, ['fullname', 'email', 'passwor
   @Match('password', { message: 'Confirm password must match password' })
   readonly confirmPassword: string;
 
-  
-  role_id: number  = 2
-
+  role_id: number = 2;
 }
