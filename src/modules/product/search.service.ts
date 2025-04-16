@@ -53,7 +53,7 @@ export class SearchService {
                 },
               },
               description: {
-                type: 'text'
+                type: 'text',
               },
               createAt: {
                 type: 'date',
@@ -229,6 +229,4 @@ export class SearchService {
     };
     return new ProductPagingResponse(product, pagination);
   }
-
-  
 }

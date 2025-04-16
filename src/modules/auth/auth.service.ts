@@ -8,13 +8,12 @@ import { JwtService } from '@nestjs/jwt';
 import { UserService } from 'src/modules/user/user.service';
 import { generateKeyPairSync } from 'crypto';
 import { CreateUserDTO } from './dto/create-user.dto';
-import { SignupResponseDTO } from './dto/signup-response.dto';
-import { SignInResponseDTO } from './dto/login-response-dto';
 import { comparedPassword } from 'src/common/util/bcrypt.util';
 import { LogoutResponseDTO } from './dto/logout-response.dto';
 import { RefreshAtResponseDTO } from './dto/refreshAT-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
-
+import { RoleService } from '../role/role.service';
+import { Permission } from '../permission/entities/permission.entity';
 interface Payload {
   id: number;
   email: string;
@@ -26,6 +25,7 @@ export class AuthService {
   constructor(
     private usersService: UserService,
     private jwtService: JwtService,
+    private roleService: RoleService,
   ) {}
 
   createKeyPair(): { privateKey: string; publicKey: string } {
@@ -61,8 +61,8 @@ export class AuthService {
       privateKey: process.env.JWT_PRIVATE_KEY,
       expiresIn: '24h',
     });
-    
-    return accessToken
+
+    return accessToken;
   }
 
   async signIn({
@@ -71,7 +71,11 @@ export class AuthService {
   }: {
     email: string;
     password: string;
-  }): Promise<{accessToken: string, refreshToken: string}> {
+  }): Promise<{
+    accessToken: string;
+    refreshToken: string;
+    permission: Permission[];
+  }> {
     //check if user exists
     const user = await this.usersService.findOneByEmail(email);
     //if not exists, throw bad request
@@ -82,6 +86,11 @@ export class AuthService {
     if (!isValidPassword) throw new BadRequestException('password not match!');
 
     //get payload
+    let permission;
+    const role = await this.roleService.getPermissionByRoleId(user.role_id);
+    if (role) {
+      permission = role.permissions;
+    }
     const payload = {
       id: user.id,
       email: user.email,
@@ -102,8 +111,10 @@ export class AuthService {
     //save refreshToken for User
     await this.usersService.updateRefreshToken(payload.id, refreshToken);
     return {
-      accessToken, refreshToken
-    }
+      accessToken,
+      refreshToken,
+      permission,
+    };
   }
 
   //sign up

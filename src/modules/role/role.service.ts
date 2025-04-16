@@ -15,7 +15,7 @@ export class RoleService implements OnModuleInit {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
-  ) { }
+  ) {}
   async onModuleInit(): Promise<void> {
     await this.createDefaultRoles();
   }
@@ -36,9 +36,7 @@ export class RoleService implements OnModuleInit {
     }
   }
 
-  async createARole(
-    newRole: CreateRoleDTO,
-  ): Promise<string> {
+  async createARole(newRole: CreateRoleDTO): Promise<string> {
     const { name, description, permissionIds } = newRole;
     const role = new Role();
     role.name = name;
@@ -53,15 +51,12 @@ export class RoleService implements OnModuleInit {
         });
       }
       this.roleRepository.save(role);
-      return "Sucessfully create a role"
-      
+      return 'Sucessfully create a role';
     }
   }
 
-  async updateARole(
-    updatedRole: UpdateRoleDTO,
-  ): Promise<string> {
-    const { id } = updatedRole
+  async updateARole(updatedRole: UpdateRoleDTO): Promise<string> {
+    const { id } = updatedRole;
     const role = await this.roleRepository.findOne({
       where: { id },
       relations: ['permissions'],
@@ -71,8 +66,11 @@ export class RoleService implements OnModuleInit {
     }
 
     if (updatedRole.name) {
-      const foundRole = await this.roleRepository.findOne({ where: { name: updatedRole.name } })
-      if (foundRole && updatedRole.name != role.name) { //if found role is another role(different role id but same name)
+      const foundRole = await this.roleRepository.findOne({
+        where: { name: updatedRole.name },
+      });
+      if (foundRole && updatedRole.name != role.name) {
+        //if found role is another role(different role id but same name)
         throw new BadRequestException('The role name has already existed');
       }
 
@@ -91,8 +89,7 @@ export class RoleService implements OnModuleInit {
 
     await this.roleRepository.save(role);
 
-
-    return  'Successfully updated a user'
+    return 'Successfully updated a user';
   }
 
   async getAllRole(): Promise<Role[]> {
@@ -133,13 +130,11 @@ export class RoleService implements OnModuleInit {
     );
   }
 
-  async getPermissionByRoleId(
-    roleId: number
-  ): Promise<Role | null> {
+  async getPermissionByRoleId(roleId: number): Promise<Role | null> {
     const permissions = this.roleRepository.findOne({
       where: { id: roleId }, // truyền ID role vào
       relations: ['permissions'],
-    })
-    return permissions
+    });
+    return permissions;
   }
 }

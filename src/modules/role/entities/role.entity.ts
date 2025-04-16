@@ -29,7 +29,7 @@ export class Role {
   @Column({ type: 'text', nullable: true })
   @IsOptional()
   @IsString()
-  @ApiProperty({required: false, type: String})
+  @ApiProperty({ required: false, type: String })
   description?: string | undefined;
 
   @OneToMany(() => User, (user) => user.role)

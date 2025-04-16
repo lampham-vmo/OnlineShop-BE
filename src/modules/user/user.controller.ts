@@ -31,8 +31,10 @@ export class UserController {
   @ApiOkResponse({
     description: 'List of all user accounts',
     type: GetAllAccountsFinalResponseDTO,
-  })  
-  async findAll(): Promise<APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>> {
+  })
+  async findAll(): Promise<
+    APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>
+  > {
     return await this.userService.getAllAccounts();
   }
 
@@ -60,7 +62,7 @@ export class UserController {
   ): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     return await this.userService.updateRoleForUser(Number(id), updatedUser);
   }
-  
+
   @Delete(':id')
   @RouteName("Remove an user account")
   @UseGuards(AuthGuard, RoleGuard)
@@ -68,7 +70,9 @@ export class UserController {
     description: 'User deleted successfully',
     type: UserSuccessMessageFinalResponseDTO,
   })
-  async delete(@Param('id') id: string): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
+  async delete(
+    @Param('id') id: string,
+  ): Promise<APIResponseDTO<{ message: string }> | BadRequestException> {
     return await this.userService.delete(Number(id));
   }
 }

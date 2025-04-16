@@ -10,7 +10,7 @@ import { Request } from 'express';
 
 @Injectable()
 export class AuthGuard implements CanActivate {
-  constructor(private jwtService: JwtService) { }
+  constructor(private jwtService: JwtService) {}
 
   async canActivate(context: ExecutionContext): Promise<boolean> {
     const request = context.switchToHttp().getRequest();
@@ -28,7 +28,7 @@ export class AuthGuard implements CanActivate {
         request['user'] = { ...payload, refreshToken: refreshToken };
         return true;
       } catch (err) {
-        throw new UnauthorizedException('Invalid RefreshToken')
+        throw new UnauthorizedException('Invalid RefreshToken');
       }
     }
 
@@ -38,13 +38,12 @@ export class AuthGuard implements CanActivate {
         request['user'] = { ...payload, accessToken: token };
         return true;
       } catch (err) {
-        throw new UnauthorizedException('Invalid Accesstoken')
+        throw new UnauthorizedException('Invalid Accesstoken');
       }
     } else {
       //if token not found
-      throw new UnauthorizedException('Invalid Accesstoken')
+      throw new UnauthorizedException('Invalid Accesstoken');
     }
-
   }
 
   async validateToken(token: string) {
@@ -61,7 +60,9 @@ export class AuthGuard implements CanActivate {
   }
 
   private extractRefreshTokenFromHeader(request: Request): string | undefined {
-    const refreshToken = request.headers['x-refresh-token'] as string | undefined;
-    return refreshToken
+    const refreshToken = request.headers['x-refresh-token'] as
+      | string
+      | undefined;
+    return refreshToken;
   }
 }
