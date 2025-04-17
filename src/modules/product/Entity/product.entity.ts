@@ -63,7 +63,7 @@ export class Product {
   @IsNumber()
   @IsNotEmpty()
   @Expose()
-  @Min(0)
+  @Min(1)
   @ApiProperty({
     description: 'Stock quantity available',
     minimum: 0,
@@ -76,7 +76,7 @@ export class Product {
 
   @IsNumber()
   @IsNotEmpty()
-  @Min(0)
+  @Min(1)
   @Expose()
   @ApiProperty({
     description: 'Product price in USD',
@@ -131,7 +131,6 @@ export class Product {
   rating: number;
 
   @IsString()
-  @IsUrl()
   @ApiProperty({
     description: 'URL of product image',
     example: 'https://cdn.example.com/products/intel-i9.jpg',
