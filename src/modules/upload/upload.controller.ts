@@ -31,9 +31,10 @@ export class UploadController {
   })
   @ApiBearerAuth()
   @ApiResponseWithPrimitive('string')
-  @UseGuards(AuthGuard)
+  // @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   uploadImage(@UploadedFile() file: Express.Multer.File) {
+    console.log(file)
     return this.cloudinaryService.uploadImageFile(file);
   }
 }
