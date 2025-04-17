@@ -39,9 +39,10 @@ export class ProductService {
   ): Promise<ProductResponse | undefined> {
     const category = await this.categoryRepository.findOneBy({
       id: productRequest.categoryId,
+      deleted:false
     });
     const product = await this.productRepository.exists({
-      where: { name: productRequest.name },
+      where: { name: productRequest.name, isDeleted: false },
     });
     if (productRequest) {
       if (category !== null) {
@@ -90,7 +91,7 @@ export class ProductService {
     try {
       await queryRunner.manager.update(Product, { id }, updateData);
       const updatedProduct = await queryRunner.manager.findOne(Product, {
-        where: { id },
+        where: { id: id, isDeleted: false },
       });
       if (!updatedProduct) {
         throw new BadRequestException('Nothing to updated!');
@@ -120,7 +121,7 @@ export class ProductService {
     await queryRunner.startTransaction();
     try {
       const product = await queryRunner.manager.findOne(Product, {
-        where: { id },
+        where: { id:id,isDeleted:false },
         relations: ['category'],
       });
       Logger.log(product);
@@ -240,11 +241,15 @@ export class ProductService {
     productUpdateDto: ProductRequest,
   ): Promise<ProductResponse> {
     const productExits = await this.productRepository.exists({
-      where: { id: id },
+      where: { id: id,isDeleted: false },
     });
     const category = await this.categoryRepository.findOneBy({
       id: productUpdateDto.categoryId,
+      deleted: false
     });
+    if(!productExits){
+      throw new BadRequestException({ message: 'Product not exits!' });
+    }
     if (!category) {
       throw new BadRequestException({ message: 'Category not found!' });
     }
@@ -267,7 +272,7 @@ export class ProductService {
 
   async getProductById(id: number): Promise<ProductResponse> {
     const product = await this.productRepository.findOne({
-      where: { id },
+      where: { id:id,isDeleted: false },
       relations: ['category'],
     });
     if (!product) {
@@ -295,6 +300,7 @@ export class ProductService {
       take: pageSize,
       where: {
         category: { id: categoryId },
+        isDeleted: false
       },
       order: {
         [orderField]: orderBy,
