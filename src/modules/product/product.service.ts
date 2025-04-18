@@ -39,7 +39,7 @@ export class ProductService {
   ): Promise<ProductResponse | undefined> {
     const category = await this.categoryRepository.findOneBy({
       id: productRequest.categoryId,
-      deleted:false
+      deleted: false,
     });
     const product = await this.productRepository.exists({
       where: { name: productRequest.name, isDeleted: false },
@@ -78,9 +78,9 @@ export class ProductService {
       this.priceAfterDis(productRes.price, productRes.discount).toFixed(0),
     );
     Logger.log(product.category);
-    if(product.category === null){
-      Logger.log("wqeqwe")
-      productRes.categoryName = null
+    if (product.category === null) {
+      Logger.log('wqeqwe');
+      productRes.categoryName = null;
     } else {
       productRes.categoryName = product.category.name;
     }
@@ -126,7 +126,7 @@ export class ProductService {
     await queryRunner.startTransaction();
     try {
       const product = await queryRunner.manager.findOne(Product, {
-        where: { id:id,isDeleted:false },
+        where: { id: id, isDeleted: false },
         relations: ['category'],
       });
       Logger.log(product);
@@ -196,7 +196,7 @@ export class ProductService {
       await queryRunner.manager.update(
         Product,
         { category: { id: categoryId } },
-        { category: null as any},
+        { category: null as any },
       );
       try {
         await this.esService.updateCategoryNameToNullInES(categoryName.name);
@@ -246,13 +246,13 @@ export class ProductService {
     productUpdateDto: ProductRequest,
   ): Promise<ProductResponse> {
     const productExits = await this.productRepository.exists({
-      where: { id: id,isDeleted: false },
+      where: { id: id, isDeleted: false },
     });
     const category = await this.categoryRepository.findOneBy({
       id: productUpdateDto.categoryId,
-      deleted: false
+      deleted: false,
     });
-    if(!productExits){
+    if (!productExits) {
       throw new BadRequestException({ message: 'Product not exits!' });
     }
     if (!category) {
@@ -277,7 +277,7 @@ export class ProductService {
 
   async getProductById(id: number): Promise<ProductResponse> {
     const product = await this.productRepository.findOne({
-      where: { id:id,isDeleted: false },
+      where: { id: id, isDeleted: false },
       relations: ['category'],
     });
     if (!product) {
@@ -285,7 +285,7 @@ export class ProductService {
       throw new NotFoundException({ message: 'Product not found!' });
     }
     const productRes = this.makeProductRes(product);
-    Logger.log(productRes)
+    Logger.log(productRes);
     return productRes;
   }
 
@@ -298,28 +298,29 @@ export class ProductService {
     categoryId?: number,
   ): Promise<ProductPagingResponse> {
     const skip = (page - 1) * pageSize;
-  
+
     const queryBuilder = this.productRepository
       .createQueryBuilder('product')
       .leftJoinAndSelect('product.category', 'category')
       .where('product.isDeleted = false');
-  
+
     // Nếu có categoryId thì lọc theo id hoặc category null
     if (categoryId) {
       queryBuilder.andWhere(
         new Brackets((qb) => {
-          qb.where('category.id = :categoryId', { categoryId })
-            .orWhere('product.category IS NULL');
+          qb.where('category.id = :categoryId', { categoryId }).orWhere(
+            'product.category IS NULL',
+          );
         }),
       );
     }
-  
+
     const [products, totalItems] = await queryBuilder
       .skip(skip)
       .take(pageSize)
       .orderBy(`product.${orderField}`, orderBy.toUpperCase() as 'ASC' | 'DESC')
       .getManyAndCount();
-  
+
     const transformed = plainToInstance(
       ProductResponse,
       products.map((p) => ({
@@ -329,15 +330,14 @@ export class ProductService {
       })),
       { excludeExtraneousValues: true },
     );
-  
+
     const pagination = {
       currentPage: +page,
       pageSize: pageSize,
       totalPages: Math.ceil(totalItems / pageSize),
       totalItems: totalItems,
     };
-  
+
     return new ProductPagingResponse(transformed, pagination);
   }
-  
 }

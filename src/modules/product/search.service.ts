@@ -93,7 +93,7 @@ export class SearchService {
 
   public async updateCategoryNameToNullInES(categoryName: string) {
     const index = 'product';
-  
+
     const response = await this.esService.updateByQuery({
       index,
       body: {
@@ -109,7 +109,7 @@ export class SearchService {
       },
       refresh: true,
     });
-  
+
     console.log('Elasticsearch update response:', response);
   }
 

@@ -34,7 +34,7 @@ export class UploadController {
   // @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   uploadImage(@UploadedFile() file: Express.Multer.File) {
-    console.log(file)
+    console.log(file);
     return this.cloudinaryService.uploadImageFile(file);
   }
 }

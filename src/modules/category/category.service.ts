@@ -177,7 +177,7 @@ export class CategoryService {
 
     // TODO: Updated list product's property 'deleted': 'true' belongs to this category
 
-      await this.productService.alterProductWithCategoryAndSync(id);
+    await this.productService.alterProductWithCategoryAndSync(id);
 
     return {
       success: true,

@@ -150,7 +150,7 @@ export class Product {
   @ApiProperty({
     type: () => Category,
     description: 'Product category (e.g., CPU, GPU, RAM, etc.)',
-    nullable: true
+    nullable: true,
   })
   category: Category;
 
