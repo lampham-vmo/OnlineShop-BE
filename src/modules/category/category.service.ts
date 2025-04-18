@@ -1,6 +1,7 @@
 import {
   BadRequestException,
   Injectable,
+  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -175,7 +176,8 @@ export class CategoryService {
     await this.getOneCategoryWithId(id);
 
     // TODO: Updated list product's property 'deleted': 'true' belongs to this category
-    await this.productService.deleteProductWithCategoryAndSync(id);
+
+      await this.productService.alterProductWithCategoryAndSync(id);
 
     return {
       success: true,
