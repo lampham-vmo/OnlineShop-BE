@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { Exclude, Expose, Transform } from 'class-transformer';
@@ -21,6 +22,7 @@ import {
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CartProduct } from '../../cart/entities/cart_product.entity';
 
 @Entity()
 export class Product {
@@ -152,6 +154,9 @@ export class Product {
     description: 'Product category (e.g., CPU, GPU, RAM, etc.)',
   })
   category: Category;
+
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product )
+  cartProducts: CartProduct[];
 
   @CreateDateColumn()
   @Expose()

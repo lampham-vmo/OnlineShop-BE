@@ -14,7 +14,9 @@ import { PermissionService } from './modules/permission/permission.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
+
 import 'dotenv/config';
+import { CartModule } from './modules/cart/cart.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,6 +48,7 @@ import 'dotenv/config';
     CloudinaryModule,
     UploadModule,
     CategoryModule,
+    CartModule
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
