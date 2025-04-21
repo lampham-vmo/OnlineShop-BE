@@ -4,7 +4,7 @@ import { CartProduct } from "./cart_product.entity";
 import { ApiProperty } from "@nestjs/swagger";
 
 @Entity()
-export class Cart{
+export class Cart {
     @PrimaryGeneratedColumn()
     @ApiProperty({
         type: Number,
@@ -12,13 +12,13 @@ export class Cart{
         example: 1,
     })
     id: number;
-    
-    @OneToOne(() => User, (user) => user.cart, {onDelete: 'CASCADE'})
+
+    @OneToOne(() => User, (user) => user.cart, { onDelete: 'CASCADE' })
     @ApiProperty({
         type: User,
         description: 'User associated with the cart',
-    }) 
-    user: User; 
+    })
+    user: User;
 
     @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart, {
         eager: true,
@@ -43,5 +43,5 @@ export class Cart{
         description: 'Date when the cart was last updated',
     })
     updatedAt: Date;
-    
+
 }
