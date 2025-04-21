@@ -1,4 +1,4 @@
-import { Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { Controller, Post, UseGuards } from '@nestjs/common';
 import { RouteName } from './common/decorators/route-name.decorator';
 import { AuthGuard } from './common/guard/auth.guard';
 import { RoleGuard } from './common/guard/role.guard';
@@ -12,7 +12,7 @@ export class AppController {
   //   return this.appService.getHello();
   // }
 
-  @Post('ok')
+  @Post('/dashboard')
   @UseGuards(AuthGuard, RoleGuard)
   @RouteName('post something')
   postST() {}

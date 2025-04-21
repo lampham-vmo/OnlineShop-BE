@@ -10,6 +10,7 @@ import { CloudinaryService } from '../cloudinary/cloudinary.service';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { ApiBearerAuth, ApiBody, ApiConsumes } from '@nestjs/swagger';
 import { ApiResponseWithPrimitive } from 'src/common/decorators/swagger.decorator';
+import { RouteName } from 'src/common/decorators/route-name.decorator';
 
 @Controller('upload')
 export class UploadController {
@@ -30,11 +31,12 @@ export class UploadController {
     },
   })
   @ApiBearerAuth()
+  @RouteName('UPLOAD_IMAGE_TO_CLOUDINARY')
   @ApiResponseWithPrimitive('string')
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @UseInterceptors(FileInterceptor('file'))
   uploadImage(@UploadedFile() file: Express.Multer.File) {
-    console.log(file)
+    console.log(file);
     return this.cloudinaryService.uploadImageFile(file);
   }
 }
