@@ -19,5 +19,5 @@ export class ProductResponse extends PickType(Product, [
 
   @ApiProperty()
   @Expose()
-  categoryName: string;
+  categoryName: string | null;
 }
