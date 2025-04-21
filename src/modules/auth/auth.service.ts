@@ -59,7 +59,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload, {
       algorithm: 'RS256',
       privateKey: process.env.JWT_PRIVATE_KEY,
-      expiresIn: '6m',
+      expiresIn: '1d',
     });
 
     return accessToken;
@@ -100,7 +100,7 @@ export class AuthService {
     const accessToken = this.jwtService.sign(payload, {
       algorithm: 'RS256',
       privateKey: process.env.JWT_PRIVATE_KEY,
-      expiresIn: '6m',
+      expiresIn: '1d',
     });
     const refreshToken = this.jwtService.sign(payload, {
       algorithm: 'RS256',

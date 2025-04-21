@@ -39,7 +39,7 @@ export class ProductService {
   ): Promise<ProductResponse | undefined> {
     const category = await this.categoryRepository.findOneBy({
       id: productRequest.categoryId,
-      deleted:false
+      deleted: false,
     });
     const product = await this.productRepository.exists({
       where: { name: productRequest.name, isDeleted: false },
@@ -121,7 +121,7 @@ export class ProductService {
     await queryRunner.startTransaction();
     try {
       const product = await queryRunner.manager.findOne(Product, {
-        where: { id:id,isDeleted:false },
+        where: { id: id, isDeleted: false },
         relations: ['category'],
       });
       Logger.log(product);
@@ -241,13 +241,13 @@ export class ProductService {
     productUpdateDto: ProductRequest,
   ): Promise<ProductResponse> {
     const productExits = await this.productRepository.exists({
-      where: { id: id,isDeleted: false },
+      where: { id: id, isDeleted: false },
     });
     const category = await this.categoryRepository.findOneBy({
       id: productUpdateDto.categoryId,
-      deleted: false
+      deleted: false,
     });
-    if(!productExits){
+    if (!productExits) {
       throw new BadRequestException({ message: 'Product not exits!' });
     }
     if (!category) {
@@ -272,7 +272,7 @@ export class ProductService {
 
   async getProductById(id: number): Promise<ProductResponse> {
     const product = await this.productRepository.findOne({
-      where: { id:id,isDeleted: false },
+      where: { id: id, isDeleted: false },
       relations: ['category'],
     });
     if (!product) {
@@ -300,7 +300,7 @@ export class ProductService {
       take: pageSize,
       where: {
         category: { id: categoryId },
-        isDeleted: false
+        isDeleted: false,
       },
       order: {
         [orderField]: orderBy,
