@@ -51,7 +51,7 @@ export class AuthController {
   async refreshAcessToken(
     @Req() req: Request,
   ): Promise<RefreshAccessTokenResponseDTO> {
-    const user = req['user'];
+    const user = req['user']!;
     const payload = {
       id: user.id,
       email: user.email,
@@ -103,7 +103,7 @@ export class AuthController {
   @HttpCode(HttpStatus.OK)
   @UseGuards(AuthGuard)
   async logout(@Req() req: Request) {
-    const user = req['user'];
+    const user = req['user']!;
     return await this.authService.logout(user.id);
   }
 }

@@ -7,18 +7,22 @@ import {
   UseGuards,
   Body,
   BadRequestException,
+  Req,
+  Put,
 } from '@nestjs/common';
 import { UserService } from './user.service';
 import { User } from './entities/user.entity';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
-import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import { UpdateProfileDTO, UpdateUserRoleDTO } from './dto/update-user-role.dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { ApiOkResponse, ApiTags } from '@nestjs/swagger';
 import { GetAllAccountsFinalResponseDTO } from './dto/user-get-account-success-api-response.dto';
 import { UserSuccessMessageFinalResponseDTO } from './dto/user-success-api-response.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
+import { GetProfileResponseDTO, Profile } from './dto/get-profile.response';
+import { Request } from 'express';
 
 @ApiTags('users')
 @Controller('users')
@@ -47,6 +51,60 @@ export class UserController {
   })
   async findOneById(@Param('id') id: string): Promise<User | null> {
     return await this.userService.findOneById(Number(id));
+  }
+
+  @Put('profile/:id')
+  @RouteName('UPDATE_PROFILE_BY_ID')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    description: "Update user profile successfully",
+    type: APIResponseDTO<String>,
+  })
+  async updateProfile(
+    @Body() updateProfileDTO: UpdateProfileDTO,
+    @Req() req: Request,
+    @Param('id') id: string
+  ) : Promise<APIResponseDTO<string> | BadRequestException> {
+    const user = req['user'];
+    if(id !== user!.id.toString()){
+      throw new BadRequestException('NOT YOUR PROFILE!');
+    }
+    await this.userService.updateUserProfile(updateProfileDTO, Number(id));
+    return new APIResponseDTO<string>(true, 200, "Profile updated successfully!");
+  }
+
+
+
+  @Get('profile/:id')
+  @RouteName('GET_PROFILE_BY_ID')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    description: 'Get user profile by ID',
+    type: GetProfileResponseDTO,
+  })
+  async getProfileById(
+    @Param('id') id: string,
+    @Req() req: Request
+  ){
+    const user =  await this.userService.findOneById(Number(id));
+    if(!user){
+      throw new BadRequestException('User not found!');
+    }
+    //check if the user id in the request matches with the user id in the params
+    if(req['user']!.id !== user.id){
+      throw new BadRequestException('NOT YOUR PROFILE!');
+    }else{
+      const profile = new Profile({
+        address: user.address,
+        email: user.email,
+        fullname: user.fullname,
+        phone: user.phone,
+        role: user.role, 
+      })
+      
+      return new GetProfileResponseDTO(true, 200, profile);
+    }
+ 
   }
 
   @Patch(':id')

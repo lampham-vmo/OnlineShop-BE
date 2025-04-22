@@ -7,17 +7,20 @@ import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
-import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import { UpdateProfileDTO, UpdateUserRoleDTO } from './dto/update-user-role.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
 import { OnModuleInit } from '@nestjs/common';
+
 @Injectable()
 export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
-  ) {}
+  ) {
+    
+  }
 
   async onModuleInit(): Promise<void> {
     await this.createDefaultUsers();
@@ -119,15 +122,17 @@ export class UserService implements OnModuleInit {
   //     await this.usersRepository.update({id: updatedUserID},temp)
   //     return this.findOneById(temp.id)
   // }
-  async createUser(newUser: CreateUserDTO) {
+  async createUser(newUser: CreateUserDTO): Promise<void> {
     //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
-    const temp = this.usersRepository.create({
+    const user = this.usersRepository.create({
       ...newUser,
       password: hashedPassword,
       isDeleted: false,
     });
-    await this.usersRepository.save(temp);
+    //create user
+    await this.usersRepository.save(user);
+
   }
 
   async delete(
@@ -179,5 +184,30 @@ export class UserService implements OnModuleInit {
         };
       }
     }
+  }
+
+  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, id: number): Promise<boolean> {
+    const {address, email, fullname, phone } = updateProfileDTO;
+    const user = await this.usersRepository.findOneBy({ id: id });
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+    //check if the email or phone already exists
+    const isEmailExists = await this.usersRepository.findOneBy({ email: email });
+    const isPhoneExists = await this.usersRepository.findOneBy({ phone: phone });
+   
+    if (isEmailExists && email !== user.email) {
+      throw new BadRequestException('Email already exists!');
+    }
+    if (isPhoneExists && phone !== user.phone) {
+      throw new BadRequestException('Phone already exists!');
+    }
+    user.address = address;
+    user.email = email;
+    user.fullname = fullname;
+    user.phone = phone;
+    await this.usersRepository.save(user);
+    return true;
+
   }
 }
