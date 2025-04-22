@@ -91,17 +91,26 @@ export class SearchService {
     });
   }
 
-  public async deleteByCategory(categoryName: string) {
-    return await this.esService.deleteByQuery({
-      index: 'product',
+  public async updateCategoryNameToNullInES(categoryName: string) {
+    const index = 'product';
+
+    const response = await this.esService.updateByQuery({
+      index,
       body: {
+        script: {
+          source: 'ctx._source.categoryName = null', // Hoặc: 'ctx._source.categoryName = ""'
+          lang: 'painless',
+        },
         query: {
-          match: {
-            categoryName: categoryName,
+          term: {
+            'categoryName.keyword': categoryName, // dùng keyword để so sánh chính xác
           },
         },
       },
+      refresh: true,
     });
+
+    console.log('Elasticsearch update response:', response);
   }
 
   public async updateProductPartial(

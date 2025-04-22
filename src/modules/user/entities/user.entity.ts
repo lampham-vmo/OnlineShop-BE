@@ -17,7 +17,6 @@ import {
   Matches,
   IsNotEmpty,
   IsNumber,
-  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';

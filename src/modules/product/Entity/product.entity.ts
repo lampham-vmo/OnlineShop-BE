@@ -144,14 +144,15 @@ export class Product {
   image: string;
 
   @ManyToOne(() => Category, (category) => category.products, {
-    onDelete: 'CASCADE',
-    nullable: false,
+    onDelete: 'SET NULL',
+    nullable: true,
   })
   @JoinColumn({ name: 'category_id' })
   @Expose()
   @ApiProperty({
     type: () => Category,
     description: 'Product category (e.g., CPU, GPU, RAM, etc.)',
+    nullable: true,
   })
   category: Category;
 
