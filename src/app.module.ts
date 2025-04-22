@@ -15,6 +15,7 @@ import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
 import 'dotenv/config';
+import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -46,6 +47,7 @@ import 'dotenv/config';
     CloudinaryModule,
     UploadModule,
     CategoryModule,
+    PaymentMethodModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
