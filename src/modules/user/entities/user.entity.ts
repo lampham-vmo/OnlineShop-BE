@@ -7,7 +7,6 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToOne,
 } from 'typeorm';
 import {
   IsEmail,
@@ -20,7 +19,6 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { Cart } from 'src/modules/cart/entities/cart.entity';
 
 @Entity()
 export class User {
@@ -146,10 +144,6 @@ export class User {
   @MinLength(1)
   @MaxLength(20)
   address: string;
-
-  @OneToOne(() => Cart, (cart) => cart.user, {cascade: true})
-  @JoinColumn()
-  cart: Cart;
 
   @Column({ type: 'boolean', default: true })
   @ApiProperty({

@@ -12,14 +12,12 @@ import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
 import { OnModuleInit } from '@nestjs/common';
-import { Cart } from '../cart/entities/cart.entity';
-import { CartService } from '../cart/cart.service';
+
 @Injectable()
 export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
-    private cartService: CartService
   ) {
     
   }
@@ -132,8 +130,6 @@ export class UserService implements OnModuleInit {
       password: hashedPassword,
       isDeleted: false,
     });
-    const cart = await this.cartService.createCart(user)
-    user.cart = cart;
     //create user
     await this.usersRepository.save(user);
 

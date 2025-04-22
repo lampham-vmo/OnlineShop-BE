@@ -16,7 +16,6 @@ import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
 
 import 'dotenv/config';
-import { CartModule } from './modules/cart/cart.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -48,7 +47,7 @@ import { CartModule } from './modules/cart/cart.module';
     CloudinaryModule,
     UploadModule,
     CategoryModule,
-    CartModule
+
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
