@@ -7,7 +7,7 @@ import {
 import { Product } from './Entity/product.entity';
 import { ProductRequest } from './DTO/requests/product.request';
 import { InjectRepository } from '@nestjs/typeorm';
-import { DataSource, Repository } from 'typeorm';
+import { Brackets, DataSource, Repository } from 'typeorm';
 import { Category } from '../category/entities/category.entity';
 import { ProductResponse } from './DTO/response/product.response';
 import { plainToInstance } from 'class-transformer';
@@ -39,7 +39,7 @@ export class ProductService {
   ): Promise<ProductResponse | undefined> {
     const category = await this.categoryRepository.findOneBy({
       id: productRequest.categoryId,
-      deleted:false
+      deleted: false,
     });
     const product = await this.productRepository.exists({
       where: { name: productRequest.name, isDeleted: false },
@@ -77,9 +77,14 @@ export class ProductService {
     productRes.priceAfterDis = parseInt(
       this.priceAfterDis(productRes.price, productRes.discount).toFixed(0),
     );
-    Logger.log(productRes);
-    productRes.categoryName = product.category.name;
-    Logger.log(productRes);
+    Logger.log(product.category);
+    if (product.category === null) {
+      Logger.log('wqeqwe');
+      productRes.categoryName = null;
+    } else {
+      productRes.categoryName = product.category.name;
+    }
+    Logger.log(productRes.categoryName);
     return productRes;
   }
 
@@ -121,7 +126,7 @@ export class ProductService {
     await queryRunner.startTransaction();
     try {
       const product = await queryRunner.manager.findOne(Product, {
-        where: { id:id,isDeleted:false },
+        where: { id: id, isDeleted: false },
         relations: ['category'],
       });
       Logger.log(product);
@@ -172,11 +177,17 @@ export class ProductService {
     }
   }
   //delete Product follow category and asyns
-  async deleteProductWithCategoryAndSync(categoryId: number) {
+  async alterProductWithCategoryAndSync(categoryId: number) {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
     try {
+      const categoryName = await queryRunner.manager.findOne(Category, {
+        where: { id: categoryId },
+      });
+      if (!categoryName) {
+        throw new BadRequestException('category not found');
+      }
       await queryRunner.manager.update(
         Category,
         { id: categoryId },
@@ -185,16 +196,10 @@ export class ProductService {
       await queryRunner.manager.update(
         Product,
         { category: { id: categoryId } },
-        { isDeleted: true },
+        { category: null as any },
       );
-      const categoryName = await queryRunner.manager.findOne(Category, {
-        where: { id: categoryId },
-      });
-      if (!categoryName) {
-        throw new BadRequestException('category not found');
-      }
       try {
-        await this.esService.deleteByCategory(categoryName.name);
+        await this.esService.updateCategoryNameToNullInES(categoryName.name);
       } catch (error) {
         throw new BadRequestException(error);
       }
@@ -241,13 +246,13 @@ export class ProductService {
     productUpdateDto: ProductRequest,
   ): Promise<ProductResponse> {
     const productExits = await this.productRepository.exists({
-      where: { id: id,isDeleted: false },
+      where: { id: id, isDeleted: false },
     });
     const category = await this.categoryRepository.findOneBy({
       id: productUpdateDto.categoryId,
-      deleted: false
+      deleted: false,
     });
-    if(!productExits){
+    if (!productExits) {
       throw new BadRequestException({ message: 'Product not exits!' });
     }
     if (!category) {
@@ -272,7 +277,7 @@ export class ProductService {
 
   async getProductById(id: number): Promise<ProductResponse> {
     const product = await this.productRepository.findOne({
-      where: { id:id,isDeleted: false },
+      where: { id: id, isDeleted: false },
       relations: ['category'],
     });
     if (!product) {
@@ -280,6 +285,7 @@ export class ProductService {
       throw new NotFoundException({ message: 'Product not found!' });
     }
     const productRes = this.makeProductRes(product);
+    Logger.log(productRes);
     return productRes;
   }
 
@@ -287,27 +293,34 @@ export class ProductService {
   async GetAllProductPaging(
     page: number = 1,
     orderField: string = 'createdAt',
-    orderBy: string = 'ASC',
+    orderBy: string = 'DESC',
     pageSize: number = 10,
-    categoryId: number,
+    categoryId?: number,
   ): Promise<ProductPagingResponse> {
     const skip = (page - 1) * pageSize;
 
-    // 1. Get paginated data
-    const [products, totalItems] = await this.productRepository.findAndCount({
-      relations: ['category'],
-      skip,
-      take: pageSize,
-      where: {
-        category: { id: categoryId },
-        isDeleted: false
-      },
-      order: {
-        [orderField]: orderBy,
-      },
-    });
+    const queryBuilder = this.productRepository
+      .createQueryBuilder('product')
+      .leftJoinAndSelect('product.category', 'category')
+      .where('product.isDeleted = false');
 
-    // 2. Transform products
+    // Nếu có categoryId thì lọc theo id hoặc category null
+    if (categoryId) {
+      queryBuilder.andWhere(
+        new Brackets((qb) => {
+          qb.where('category.id = :categoryId', { categoryId }).orWhere(
+            'product.category IS NULL',
+          );
+        }),
+      );
+    }
+
+    const [products, totalItems] = await queryBuilder
+      .skip(skip)
+      .take(pageSize)
+      .orderBy(`product.${orderField}`, orderBy.toUpperCase() as 'ASC' | 'DESC')
+      .getManyAndCount();
+
     const transformed = plainToInstance(
       ProductResponse,
       products.map((p) => ({
@@ -317,13 +330,14 @@ export class ProductService {
       })),
       { excludeExtraneousValues: true },
     );
-    let pagination = {
+
+    const pagination = {
       currentPage: +page,
       pageSize: pageSize,
       totalPages: Math.ceil(totalItems / pageSize),
       totalItems: totalItems,
     };
-    const productPaging = new ProductPagingResponse(transformed, pagination);
-    return productPaging;
+
+    return new ProductPagingResponse(transformed, pagination);
   }
 }
