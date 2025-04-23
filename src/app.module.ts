@@ -17,6 +17,7 @@ import { UploadModule } from './modules/upload/upload.module';
 import { OrdersModule } from './modules/orders/orders.module';
 import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
+import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -55,6 +56,7 @@ import 'dotenv/config';
     UploadModule,
     CategoryModule,
     OrdersModule,
+    PaymentMethodModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
