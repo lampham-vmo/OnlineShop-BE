@@ -116,6 +116,14 @@ export class UserService implements OnModuleInit {
     };
   }
 
+  async isEmailExists(email: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ email: email })) !== null
+  }
+
+  async isPhoneExists(phone: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ phone: phone })) !== null
+  }
+
   async isAddressExist(address: string): Promise<Boolean> {
     return (await this.usersRepository.findOneBy({ address: address })) !== null
       ? true

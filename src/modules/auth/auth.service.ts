@@ -156,15 +156,12 @@ export class AuthService {
   async signup(
     newUser: CreateUserDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
-    const isEmailandPhoneExists = await this.usersService.isEmailOrPhoneExist(
-      newUser.email,
-      newUser.password,
-    );
-    if (isEmailandPhoneExists.emailExists) {
+    
+    if (await this.usersService.isEmailExists(newUser.email)) {
       throw new BadRequestException({
         message: 'The email has already existed',
       });
-    } else if (isEmailandPhoneExists.phoneExists) {
+    } else if (await this.usersService.isPhoneExists(newUser.phone)) {
       throw new BadRequestException({
         message: 'The phone has already existed',
       });
