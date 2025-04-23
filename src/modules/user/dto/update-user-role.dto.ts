@@ -10,3 +10,12 @@ import {
 import { User } from '../entities/user.entity';
 
 export class UpdateUserRoleDTO extends PickType(User, ['role_id']) {}
+
+export class UpdateProfileDTO extends PickType(User, [
+  'address',
+  'email',
+  'fullname',
+  'phone',
+] as const) {
+
+}

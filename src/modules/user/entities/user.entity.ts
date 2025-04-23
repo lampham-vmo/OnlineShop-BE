@@ -7,7 +7,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
-  OneToOne,
+  OneToMany,
 } from 'typeorm';
 import {
   IsEmail,
@@ -17,11 +17,10 @@ import {
   Matches,
   IsNotEmpty,
   IsNumber,
-  Length,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
-import { Cart } from 'src/modules/cart/entities/cart.entity';
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 @Entity()
 export class User {
@@ -78,6 +77,9 @@ export class User {
     description: 'The role object of the user',
   })
   role: Role;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @Column({ default: 2 })
   @ApiProperty({

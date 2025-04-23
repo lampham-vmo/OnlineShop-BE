@@ -14,9 +14,10 @@ import { PermissionService } from './modules/permission/permission.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
-
+import { OrdersModule } from './modules/orders/orders.module';
+import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
-import { CartModule } from './modules/cart/cart.module';
+import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -39,6 +40,12 @@ import { CartModule } from './modules/cart/cart.module';
         synchronize: true,
       }),
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     UserModule,
     ProductModule,
     AuthModule,
@@ -48,7 +55,8 @@ import { CartModule } from './modules/cart/cart.module';
     CloudinaryModule,
     UploadModule,
     CategoryModule,
-    CartModule
+    OrdersModule,
+    PaymentMethodModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],

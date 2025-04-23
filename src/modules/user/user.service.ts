@@ -7,7 +7,7 @@ import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
-import { UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import { UpdateProfileDTO, UpdateUserRoleDTO } from './dto/update-user-role.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
@@ -184,5 +184,30 @@ export class UserService implements OnModuleInit {
         };
       }
     }
+  }
+
+  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, id: number): Promise<boolean> {
+    const {address, email, fullname, phone } = updateProfileDTO;
+    const user = await this.usersRepository.findOneBy({ id: id });
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+    //check if the email or phone already exists
+    const isEmailExists = await this.usersRepository.findOneBy({ email: email });
+    const isPhoneExists = await this.usersRepository.findOneBy({ phone: phone });
+   
+    if (isEmailExists && email !== user.email) {
+      throw new BadRequestException('Email already exists!');
+    }
+    if (isPhoneExists && phone !== user.phone) {
+      throw new BadRequestException('Phone already exists!');
+    }
+    user.address = address;
+    user.email = email;
+    user.fullname = fullname;
+    user.phone = phone;
+    await this.usersRepository.save(user);
+    return true;
+
   }
 }

@@ -1,32 +1,29 @@
-import {
-  Entity,
-  Column,
-  PrimaryGeneratedColumn,
-  CreateDateColumn,
-  UpdateDateColumn,
-  ManyToOne,
-  JoinColumn,
-} from 'typeorm';
-import { Category } from '../../category/entities/category.entity';
+import { ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import {
-  IsBoolean,
   IsNotEmpty,
   IsNumber,
-  IsOptional,
   IsString,
-  IsUrl,
   Length,
   Max,
   Min,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from './order.entity';
 
 @Entity()
-export class Product {
+export class OrderDetail {
   @PrimaryGeneratedColumn()
-  @Expose()
-  @ApiProperty({ example: 1, description: 'Product ID' })
+  @ApiProperty()
   id: number;
 
   @IsString()
@@ -44,35 +41,6 @@ export class Product {
   })
   @Column({ nullable: false })
   name: string;
-
-  @IsString()
-  @IsNotEmpty()
-  @Length(1, 255)
-  @ApiProperty({
-    description: 'Short product description',
-    maxLength: 255,
-    example: 'High-end 13th Gen Intel processor for gamers and creators.',
-    type: 'string',
-    minLength: 1,
-    nullable: false,
-  })
-  @Column()
-  @Expose()
-  description: string;
-
-  @IsNumber()
-  @IsNotEmpty()
-  @Expose()
-  @Min(1)
-  @ApiProperty({
-    description: 'Stock quantity available',
-    minimum: 0,
-    example: 50,
-    type: 'number',
-    nullable: false,
-  })
-  @Column({ nullable: false })
-  stock: number;
 
   @IsNumber()
   @IsNotEmpty()
@@ -103,33 +71,6 @@ export class Product {
   @Column({ nullable: false })
   discount: number;
 
-  @IsOptional()
-  @IsBoolean()
-  @Expose()
-  @ApiProperty({
-    description: 'Is product marked as deleted?',
-    default: false,
-    example: false,
-    type: 'boolean',
-  })
-  @Column({ default: false })
-  isDeleted: boolean;
-
-  @IsNumber()
-  @Min(0)
-  @Max(5)
-  @Expose()
-  @IsOptional()
-  @ApiProperty({
-    description: 'Average customer rating (0.0 - 5.0)',
-    minimum: 0,
-    maximum: 5,
-    example: 4.7,
-    nullable: true,
-  })
-  @Column({ nullable: true })
-  rating: number;
-
   @IsString()
   @ApiProperty({
     description: 'URL of product image',
@@ -141,18 +82,27 @@ export class Product {
   @Column()
   image: string;
 
-  @ManyToOne(() => Category, (category) => category.products, {
-    onDelete: 'SET NULL',
-    nullable: true,
+  @IsNumber()
+  @IsNotEmpty()
+  @Expose()
+  @Min(1)
+  @ApiProperty({
+    description: 'Stock quantity available',
+    minimum: 0,
+    example: 50,
+    type: 'number',
+    nullable: false,
   })
-  @JoinColumn({ name: 'category_id' })
+  @Column({ nullable: false })
+  quantity: number;
+
+  @ManyToOne(() => Order, (order) => order.order_details)
+  @JoinColumn({ name: 'order_id' })
   @Expose()
   @ApiProperty({
-    type: () => Category,
-    description: 'Product category (e.g., CPU, GPU, RAM, etc.)',
-    nullable: true,
+    type: () => Order,
   })
-  category: Category;
+  order: Order;
 
   @CreateDateColumn()
   @Expose()
