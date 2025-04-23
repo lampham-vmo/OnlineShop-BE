@@ -131,11 +131,8 @@ export class UserService implements OnModuleInit {
       isDeleted: false,
       cart: cart
     });
-    const cart = await this.cartService.createCart(user)
-    user.cart = cart;
     //create user
-    await this.usersRepository.save(user);
-
+    await this.usersRepository.save(temp);
   }
 
   async delete(
