@@ -140,7 +140,7 @@ export class UserService implements OnModuleInit {
       cart: cart
     });
     //create user
-    return await this.usersRepository.save(user);
+    return await this.usersRepository.save(temp);
 
   }
 
