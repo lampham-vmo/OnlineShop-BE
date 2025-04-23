@@ -1,11 +1,14 @@
 import { User } from "src/modules/user/entities/user.entity";
-import { CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
 import { CartProduct } from "./cart_product.entity";
 import { ApiProperty } from "@nestjs/swagger";
+import { IsNotEmpty, IsString, Length } from 'class-validator';
+
 
 @Entity()
 export class Cart{
     @PrimaryGeneratedColumn()
+    @IsNotEmpty()
     @ApiProperty({
         type: Number,
         description: 'Unique identifier for the cart',
@@ -14,12 +17,14 @@ export class Cart{
     id: number;
     
     @OneToOne(() => User, (user) => user.cart, {onDelete: 'CASCADE'})
+    @IsNotEmpty()
     @ApiProperty({
         type: User,
         description: 'User associated with the cart',
     }) 
     user: User; 
 
+    @IsNotEmpty()
     @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart, {
         eager: true,
         cascade: true,
@@ -28,20 +33,21 @@ export class Cart{
         type: [CartProduct],
         description: 'Array of cart products',
     })
-    items: CartProduct[]; // Array of cart products
+    items: CartProduct[];
 
-    @CreateDateColumn()
+    @Column()
+    @IsNotEmpty()
     @ApiProperty({
-        type: Date,
-        description: 'Date when the cart was created',
+        type: Number,
+        description: "Total price"
     })
-    createdAt: Date; // Date when the cart was created
+    total: number;
 
-    @UpdateDateColumn()
+    @Column()
+    @IsNotEmpty()
     @ApiProperty({
-        type: Date,
-        description: 'Date when the cart was last updated',
+        type: Number,
+        description: "Price before discount"
     })
-    updatedAt: Date;
-    
+    subtotal: number
 }

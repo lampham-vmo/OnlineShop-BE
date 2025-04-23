@@ -149,6 +149,7 @@ export class User {
   address: string;
 
   @OneToOne(() => Cart, (cart) => cart.user, {cascade: true})
+  @IsNotEmpty()
   @JoinColumn()
   cart: Cart;
 

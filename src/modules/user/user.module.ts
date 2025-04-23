@@ -7,10 +7,11 @@ import { JwtService } from '@nestjs/jwt';
 import { PermissionModule } from '../permission/permission.module';
 import { RoleModule } from '../role/role.module';
 import { Role } from '../role/entities/role.entity';
+import { Cart } from '../cart/entities/cart.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role]),
+    TypeOrmModule.forFeature([User, Role,Cart]),
     PermissionModule,
     RoleModule,
   ],

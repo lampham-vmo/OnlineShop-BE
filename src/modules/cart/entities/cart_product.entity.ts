@@ -1,32 +1,38 @@
-import { Column, CreateDateColumn, Entity, ManyToOne, PrimaryGeneratedColumn } from "typeorm";
+import { Column, CreateDateColumn, Entity, ManyToOne, OneToOne, PrimaryGeneratedColumn } from "typeorm";
 import { Cart } from "./cart.entity";
 import { Product } from "src/modules/product/Entity/product.entity";
-import { ApiProperty } from "@nestjs/swagger";
+import { ApiProperty, PickType } from "@nestjs/swagger";
+import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 
 @Entity()
-export class CartProduct {
+export class CartProduct{
     @PrimaryGeneratedColumn()
+    @IsNotEmpty()
     @ApiProperty({
         type: Number,
-        description: 'Unique identifier for the cart product',
+        description: 'Unique identifier for the product in cart',
         example: 1,
     })
     id: number;
 
-    @ManyToOne(() => Cart, (cart) => cart.items, { onDelete: 'CASCADE' })
-    @ApiProperty({
-        type: Cart
-    })
-    cart: Cart;
-
-    @ManyToOne(() => Product, (product) => product.cartProducts, {eager: true, onDelete: 'CASCADE'})
+    @IsNotEmpty()
+    @ManyToOne(() => Product, (product) => product.cartProducts, {onDelete: 'CASCADE'})
     @ApiProperty({
         type: Product,
-        description: 'Product associated with the cart item',
+        description: 'Product associated with the cart product item',
     })
     product: Product;
 
+    @IsNotEmpty()
+    @ManyToOne(() => Cart, (cart) => cart.items, {onDelete: 'CASCADE'})
+    @ApiProperty({
+        type: Cart,
+        description: 'Cart associated with the cart product item',
+    })
+    cart: Cart;
+
+    @IsNotEmpty()
     @Column({default: 1})
     @ApiProperty({
         type: Number,
@@ -34,7 +40,4 @@ export class CartProduct {
         example: 2,
     })
     quantity: number;
-
-    @CreateDateColumn()
-    addedAt: Date;
 }
