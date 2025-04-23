@@ -35,7 +35,6 @@ export class CartController {
     async getCart(@Param('id') userId: string) : Promise<APIResponseDTO<Cart> | BadRequestException>{
         const result = await this.cartService.getAllInCart(Number(userId))
         if(!result) {
-            console.log("not ok")
             throw new BadRequestException("Can not get a cart")
         }
         return {
