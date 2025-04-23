@@ -4,8 +4,10 @@ import {
   Get,
   HttpCode,
   HttpStatus,
+  Param,
   Patch,
   Post,
+  Query,
   Req,
   UseGuards,
 } from '@nestjs/common';
@@ -83,6 +85,36 @@ export class AuthController {
   ): Promise<APIResponseDTO<{ message: string }>> {
     return await this.authService.signup(createUserDTO);
   }
+
+  @Get('resend-confirmation-email/:email')
+  @RouteName('RESENT_CONFIRMATION_EMAIL')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'resent confirmation email success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async reSendConfirmationEmail(@Param('email') email: string): Promise<APIResponseDTO<Boolean>> {
+    const isResendEmail = await this.authService.resendConfirmEmail(email);
+    return new APIResponseDTO<boolean>(isResendEmail, HttpStatus.OK, true);
+  }
+
+
+
+  @Get('confirm/:token')
+  @RouteName('CONFIRM_EMAIL')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'confirm email success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async confirmEmail(@Param('token') token: string): Promise<APIResponseDTO<Boolean>> {
+    const isConfirmEmail = await this.authService.confirmEmail(token);
+    return new APIResponseDTO<boolean>(isConfirmEmail, HttpStatus.OK, true)
+  }
+
+
+
+
 
   @Post('login')
   @RouteName('user login')
