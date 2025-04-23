@@ -9,10 +9,13 @@ import { User } from '../user/entities/user.entity';
 import { BullModule } from '@nestjs/bullmq';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Order, OrderDetail,User]),BullModule.registerQueue({
-    name: 'orderQueue'
-  })],
+  imports: [
+    TypeOrmModule.forFeature([Order, OrderDetail, User]),
+    BullModule.registerQueue({
+      name: 'orderQueue',
+    }),
+  ],
   controllers: [OrdersController],
-  providers: [OrdersService,JwtService],
+  providers: [OrdersService, JwtService],
 })
 export class OrdersModule {}

@@ -78,12 +78,12 @@ export class User {
   })
   role: Role;
 
-  @OneToMany(()=>Order,(order)=> order.user)
+  @OneToMany(() => Order, (order) => order.user)
   orders: Order[];
 
   @Column({ default: 2 })
   @ApiProperty({
-    type: 'integer',  
+    type: 'integer',
     example: 2,
     description: 'Role ID of the user (defaults to 2)',
   })

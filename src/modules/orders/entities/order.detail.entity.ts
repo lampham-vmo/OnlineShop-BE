@@ -1,16 +1,32 @@
-import { ApiProperty } from "@nestjs/swagger";
-import { Exclude, Expose, Transform } from "class-transformer";
-import { IsNotEmpty, IsNumber, IsString, Length, Max, Min } from "class-validator";
-import { Column, CreateDateColumn, Entity, JoinColumn, ManyToMany, ManyToOne, PrimaryGeneratedColumn, UpdateDateColumn } from "typeorm";
-import { Order } from "./order.entity";
+import { ApiProperty } from '@nestjs/swagger';
+import { Exclude, Expose, Transform } from 'class-transformer';
+import {
+  IsNotEmpty,
+  IsNumber,
+  IsString,
+  Length,
+  Max,
+  Min,
+} from 'class-validator';
+import {
+  Column,
+  CreateDateColumn,
+  Entity,
+  JoinColumn,
+  ManyToMany,
+  ManyToOne,
+  PrimaryGeneratedColumn,
+  UpdateDateColumn,
+} from 'typeorm';
+import { Order } from './order.entity';
 
 @Entity()
-export class OrderDetail{
-    @PrimaryGeneratedColumn()
-    @ApiProperty()
-    id: number;
+export class OrderDetail {
+  @PrimaryGeneratedColumn()
+  @ApiProperty()
+  id: number;
 
-    @IsString()
+  @IsString()
   @Expose()
   @IsNotEmpty()
   @Length(1, 255)
@@ -80,13 +96,13 @@ export class OrderDetail{
   @Column({ nullable: false })
   quantity: number;
 
-  @ManyToOne(()=>Order,(order)=>order.order_details)
-  @JoinColumn({name: 'order_id'})
+  @ManyToOne(() => Order, (order) => order.order_details)
+  @JoinColumn({ name: 'order_id' })
   @Expose()
   @ApiProperty({
-    type: ()=>Order
+    type: () => Order,
   })
-  order: Order
+  order: Order;
 
   @CreateDateColumn()
   @Expose()

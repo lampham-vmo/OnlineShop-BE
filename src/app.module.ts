@@ -42,8 +42,8 @@ import 'dotenv/config';
     BullModule.forRoot({
       connection: {
         host: 'localhost',
-        port: 6379
-      }
+        port: 6379,
+      },
     }),
     UserModule,
     ProductModule,
