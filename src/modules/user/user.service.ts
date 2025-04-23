@@ -33,7 +33,7 @@ export class UserService implements OnModuleInit {
     if (!isUserRoleAdminExist) {
       const res = await this.createUser({
         fullname: 'Admin',
-        email: 'nextmercead2025@gmail.com',
+        email: 'admin123@gmail.com',
         password: 'Admin123@',
         phone: '1234567890',
         address: '123 Admin St',
@@ -44,13 +44,21 @@ export class UserService implements OnModuleInit {
         id: res.id,
       }, {
         isVerified: true,
-      })
+      }) 
     }
   }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
+  async updateVerifiedStatus(
+    id: number,
+    isVerified: boolean,
+  ): Promise<void> {
+    await this.usersRepository.update({ id }, { isVerified});
+  }
+
+
 
   async getAllAccounts(): Promise<
     APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>
@@ -108,6 +116,14 @@ export class UserService implements OnModuleInit {
     };
   }
 
+  async isEmailExists(email: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ email: email })) !== null
+  }
+
+  async isPhoneExists(phone: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ phone: phone })) !== null
+  }
+
   async isAddressExist(address: string): Promise<Boolean> {
     return (await this.usersRepository.findOneBy({ address: address })) !== null
       ? true
@@ -121,14 +137,11 @@ export class UserService implements OnModuleInit {
     return await this.usersRepository.update({ id }, { refreshToken });
   }
 
-  async updateVerifiedStatus(
-    id: number,
-    isVerified: boolean,
-  ): Promise<void> {
-    await this.usersRepository.update({ id }, { isVerified});
-  }
-
-
+  // async update(updatedUserID: number, updatedUserDTO: UserSignupDTO) : Promise<User | null> {
+  //     const temp = this.usersRepository.create(updatedUserDTO)
+  //     await this.usersRepository.update({id: updatedUserID},temp)
+  //     return this.findOneById(temp.id)
+  // }
   async createUser(newUser: CreateUserDTO): Promise<User> {
     //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
@@ -140,8 +153,9 @@ export class UserService implements OnModuleInit {
       cart: cart
     });
     //create user
-    return await this.usersRepository.save(temp);
+    await this.usersRepository.save(temp);
 
+    return temp
   }
 
   async delete(

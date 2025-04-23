@@ -26,10 +26,10 @@ export class CartProduct{
 
     @IsNotEmpty()
     @ManyToOne(() => Cart, (cart) => cart.items, {onDelete: 'CASCADE'})
-    @ApiProperty({
-        type: Cart,
-        description: 'Cart associated with the cart product item',
-    })
+    // @ApiProperty({
+    //     type: Cart,
+    //     description: 'Cart associated with the cart product item',
+    // })
     cart: Cart;
 
     @IsNotEmpty()
