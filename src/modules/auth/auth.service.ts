@@ -45,7 +45,7 @@ export class AuthService {
     });
     return { privateKey, publicKey };
   }
-
+  
   async handleRefreshAccessToken({
     payload,
     refreshToken,
