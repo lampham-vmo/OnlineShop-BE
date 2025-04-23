@@ -10,7 +10,6 @@ import { generateKeyPairSync } from 'crypto';
 import { CreateUserDTO } from './dto/create-user.dto';
 import { comparedPassword } from 'src/common/util/bcrypt.util';
 import { LogoutResponseDTO } from './dto/logout-response.dto';
-import { RefreshAtResponseDTO } from './dto/refreshAT-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
@@ -26,6 +25,7 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private roleService: RoleService,
+
   ) {}
 
   createKeyPair(): { privateKey: string; publicKey: string } {
@@ -139,8 +139,9 @@ export class AuthService {
         message: 'The confirm password must match the password',
       });
     } else {
-      this.usersService.createUser(newUser);
-
+      //create user and cart for user
+      await this.usersService.createUser(newUser);
+      
       return {
         success: true,
         statusCode: 200,

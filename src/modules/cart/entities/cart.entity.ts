@@ -6,7 +6,7 @@ import { IsNotEmpty, IsString, Length } from 'class-validator';
 
 
 @Entity()
-export class Cart{
+export class Cart {
     @PrimaryGeneratedColumn()
     @IsNotEmpty()
     @ApiProperty({
@@ -21,8 +21,8 @@ export class Cart{
     @ApiProperty({
         type: User,
         description: 'User associated with the cart',
-    }) 
-    user: User; 
+    })
+    user: User;
 
     @IsNotEmpty()
     @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart, {

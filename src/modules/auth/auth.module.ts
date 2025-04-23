@@ -5,9 +5,10 @@ import { UserModule } from 'src/modules/user/user.module';
 import { JwtModule } from '@nestjs/jwt';
 import { PermissionModule } from 'src/modules/permission/permission.module';
 import { RoleModule } from 'src/modules/role/role.module';
+import { CartModule } from '../cart/cart.module';
 
 @Module({
-  imports: [UserModule, JwtModule, PermissionModule, RoleModule],
+  imports: [UserModule, JwtModule, PermissionModule, RoleModule, CartModule],
   controllers: [AuthController],
   providers: [AuthService],
   exports: [AuthService],

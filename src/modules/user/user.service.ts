@@ -121,7 +121,7 @@ export class UserService implements OnModuleInit {
   //     await this.usersRepository.update({id: updatedUserID},temp)
   //     return this.findOneById(temp.id)
   // }
-  async createUser(newUser: CreateUserDTO) {
+  async createUser(newUser: CreateUserDTO): Promise<void> {
     //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
     const cart = this.cartRepository.create({total: 0, subtotal: 0})
@@ -131,7 +131,11 @@ export class UserService implements OnModuleInit {
       isDeleted: false,
       cart: cart
     });
-    await this.usersRepository.save(temp);
+    const cart = await this.cartService.createCart(user)
+    user.cart = cart;
+    //create user
+    await this.usersRepository.save(user);
+
   }
 
   async delete(

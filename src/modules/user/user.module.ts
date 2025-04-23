@@ -14,6 +14,7 @@ import { Cart } from '../cart/entities/cart.entity';
     TypeOrmModule.forFeature([User, Role,Cart]),
     PermissionModule,
     RoleModule,
+    CartModule 
   ],
   controllers: [UserController],
   providers: [UserService, JwtService],
