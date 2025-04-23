@@ -6,6 +6,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import { Category } from '../../category/entities/category.entity';
 import { Exclude, Expose, Transform } from 'class-transformer';
@@ -15,12 +16,12 @@ import {
   IsNumber,
   IsOptional,
   IsString,
-  IsUrl,
   Length,
   Max,
   Min,
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
+import { CartProduct } from 'src/modules/cart/entities/cart_product.entity';
 
 @Entity()
 export class Product {
@@ -153,6 +154,18 @@ export class Product {
     nullable: true,
   })
   category: Category;
+
+  @OneToMany(()=> CartProduct, (cartProduct) => cartProduct.product, {
+    onDelete: 'SET NULL',
+    nullable: true
+  })
+
+  @ApiProperty({
+    type: () => CartProduct,
+    description: "Cart product",
+    nullable: true
+  })
+  cartProducts: CartProduct[]
 
   @CreateDateColumn()
   @Expose()

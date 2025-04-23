@@ -1,11 +1,10 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { Cart } from './entities/cart.entity';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Product } from '../product/Entity/product.entity';
 import { User } from '../user/entities/user.entity';
 import { CartProduct } from './entities/cart_product.entity';
-import { throwError } from 'rxjs';
 
 @Injectable()
 export class CartService {
