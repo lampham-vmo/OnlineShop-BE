@@ -14,7 +14,8 @@ import { PermissionService } from './modules/permission/permission.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
-
+import { OrdersModule } from './modules/orders/orders.module';
+import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
 import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
 @Module({
@@ -39,6 +40,12 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
         synchronize: true,
       }),
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     UserModule,
     ProductModule,
     AuthModule,
@@ -48,6 +55,7 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
     CloudinaryModule,
     UploadModule,
     CategoryModule,
+    OrdersModule,
     PaymentMethodModule,
   ],
   controllers: [AppController],

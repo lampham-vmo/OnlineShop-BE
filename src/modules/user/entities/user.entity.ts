@@ -7,6 +7,7 @@ import {
   UpdateDateColumn,
   ManyToOne,
   JoinColumn,
+  OneToMany,
 } from 'typeorm';
 import {
   IsEmail,
@@ -19,6 +20,7 @@ import {
 } from 'class-validator';
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 @Entity()
 export class User {
@@ -75,6 +77,9 @@ export class User {
     description: 'The role object of the user',
   })
   role: Role;
+
+  @OneToMany(() => Order, (order) => order.user)
+  orders: Order[];
 
   @Column({ default: 2 })
   @ApiProperty({
