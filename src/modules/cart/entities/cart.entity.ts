@@ -16,7 +16,7 @@ export class Cart {
     })
     id: number;
     
-    @OneToOne(() => User, (user) => user.cart, {onDelete: 'CASCADE'})
+    @OneToOne(() => User, (user) => user.cart)
     @IsNotEmpty()
     @ApiProperty({
         type: User,
@@ -27,7 +27,6 @@ export class Cart {
     @IsNotEmpty()
     @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart, {
         eager: true,
-        cascade: true,
     })
     @ApiProperty({
         type: [CartProduct],

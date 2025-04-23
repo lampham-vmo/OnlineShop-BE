@@ -17,7 +17,7 @@ export class CartProduct{
     id: number;
 
     @IsNotEmpty()
-    @ManyToOne(() => Product, (product) => product.cartProducts, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Product, (product) => product.cartProducts)
     @ApiProperty({
         type: Product,
         description: 'Product associated with the cart product item',
@@ -25,7 +25,7 @@ export class CartProduct{
     product: Product;
 
     @IsNotEmpty()
-    @ManyToOne(() => Cart, (cart) => cart.items, {onDelete: 'CASCADE'})
+    @ManyToOne(() => Cart, (cart) => cart.items)
     @ApiProperty({
         type: Cart,
         description: 'Cart associated with the cart product item',
