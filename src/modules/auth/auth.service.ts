@@ -13,6 +13,8 @@ import { LogoutResponseDTO } from './dto/logout-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
+import { EmailService } from '../email/email.service';
+import { Email } from 'src/common/types/type';
 interface Payload {
   id: number;
   email: string;
@@ -25,8 +27,9 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private roleService: RoleService,
+    private emailService: EmailService
 
-  ) {}
+  ) { }
 
   createKeyPair(): { privateKey: string; publicKey: string } {
     const { privateKey, publicKey } = generateKeyPairSync('rsa', {
@@ -56,13 +59,17 @@ export class AuthService {
       throw new UnauthorizedException('failed rt, please relogin!');
 
     //if not throw error (success), create accesstoken
-    const accessToken = this.jwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey: process.env.JWT_PRIVATE_KEY,
-      expiresIn: '1d',
-    });
+    const accessToken = this.createJwtFromPayload(payload, '1d');
 
     return accessToken;
+  }
+
+  createJwtFromPayload(payload: any, expiredIn: string): string {
+    return this.jwtService.sign(payload, {
+      algorithm: 'RS256',
+      privateKey: process.env.JWT_PRIVATE_KEY,
+      expiresIn: expiredIn,
+    });
   }
 
   async signIn({
@@ -84,7 +91,8 @@ export class AuthService {
 
     const isValidPassword = await comparedPassword(user.password, password);
     if (!isValidPassword) throw new BadRequestException('password not match!');
-
+    //const check if email activate or not
+    if (!user.isVerified) throw new BadRequestException('email not verified!');
     //get payload
     let permission;
     const role = await this.roleService.getPermissionByRoleId(user.role_id);
@@ -97,16 +105,8 @@ export class AuthService {
       role: user.role_id,
     };
     //sign payload with private key
-    const accessToken = this.jwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey: process.env.JWT_PRIVATE_KEY,
-      expiresIn: '1d',
-    });
-    const refreshToken = this.jwtService.sign(payload, {
-      algorithm: 'RS256',
-      privateKey: process.env.JWT_PRIVATE_KEY,
-      expiresIn: '7d',
-    });
+    const accessToken = this.createJwtFromPayload(payload, '1d');
+    const refreshToken = this.createJwtFromPayload(payload, '7d');
 
     //save refreshToken for User
     await this.usersService.updateRefreshToken(payload.id, refreshToken);
@@ -116,9 +116,43 @@ export class AuthService {
       permission,
     };
   }
+  //resend confirm email
+  async resendConfirmEmail(email: string): Promise<boolean> {
+    //check if email exists in DB
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('Email not found!')
+    //create token
+    const confirmEmailToken = this.createJwtFromPayload({ email: email }, '1d');
+    //send email to user
+    await this.emailService.sendConfirmationEmail(email, confirmEmailToken)
+    return true
+  }
+  //confirm email
+  async confirmEmail(token: string): Promise<boolean> {
+    let payload: Email;
+    try {
+      payload = this.jwtService.verify(token, {
+        publicKey: process.env.JWT_PUBLIC_KEY,
+        algorithms: ['RS256'],
+      });
+    } catch (err) {
+      throw new BadRequestException('Invalid token!')
+    }
+    if (!payload) throw new BadRequestException('invalid payload!')
+    //not throw error => token is valid
+    const { email }: { email: string } = payload;
+    //check if email exists in DB
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('Email not found!')
+    //if email not verified => verified
+    if(user.isVerified === false){
+        await this.usersService.updateVerifiedStatus(user.id, true);
+    }
+    return true
+
+  }
 
   //sign up
-
   async signup(
     newUser: CreateUserDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
@@ -139,9 +173,16 @@ export class AuthService {
         message: 'The confirm password must match the password',
       });
     } else {
-      //create user and cart for user
+      //create user with isVerified = false
       await this.usersService.createUser(newUser);
-      
+
+
+      //send email confirm to user
+      const confirmEmailToken = this.createJwtFromPayload({ email: newUser.email }, '1d');
+
+      await this.emailService.sendConfirmationEmail(newUser.email, confirmEmailToken)
+
+
       return {
         success: true,
         statusCode: 200,

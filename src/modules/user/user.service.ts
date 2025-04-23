@@ -33,13 +33,18 @@ export class UserService implements OnModuleInit {
     if (!isUserRoleAdminExist) {
       const res = await this.createUser({
         fullname: 'Admin',
-        email: 'admin123@gmail.com',
+        email: 'nextmercead2025@gmail.com',
         password: 'Admin123@',
         phone: '1234567890',
         address: '123 Admin St',
         confirmPassword: 'Admin123@',
         role_id: 1,
       });
+      await this.usersRepository.update({
+        id: res.id,
+      }, {
+        isVerified: true,
+      })
     }
   }
 
@@ -116,12 +121,15 @@ export class UserService implements OnModuleInit {
     return await this.usersRepository.update({ id }, { refreshToken });
   }
 
-  // async update(updatedUserID: number, updatedUserDTO: UserSignupDTO) : Promise<User | null> {
-  //     const temp = this.usersRepository.create(updatedUserDTO)
-  //     await this.usersRepository.update({id: updatedUserID},temp)
-  //     return this.findOneById(temp.id)
-  // }
-  async createUser(newUser: CreateUserDTO): Promise<void> {
+  async updateVerifiedStatus(
+    id: number,
+    isVerified: boolean,
+  ): Promise<void> {
+    await this.usersRepository.update({ id }, { isVerified});
+  }
+
+
+  async createUser(newUser: CreateUserDTO): Promise<User> {
     //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
     const cart = this.cartRepository.create({total: 0, subtotal: 0})
@@ -132,7 +140,8 @@ export class UserService implements OnModuleInit {
       cart: cart
     });
     //create user
-    await this.usersRepository.save(temp);
+    return await this.usersRepository.save(temp);
+
   }
 
   async delete(
