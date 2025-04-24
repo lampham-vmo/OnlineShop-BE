@@ -16,24 +16,29 @@ export class CartService {
   ) { }
 
   async addProductToCart(userId: number, productId: number, quantity: number): Promise<boolean> {
-    const product = await this.productRepository.findOneBy({ id: productId })
+    const product = await this.productRepository.findOneBy({ id: productId });
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
+      relations: ['items', 'items.product'],
     });
-    if (product === null || cart == null) {
-      return false
-    } else {
-      const temp = this.cartProductRepository.create({
-        product: product,
-        cart: cart,
-        quantity: quantity
-      })
-      await this.cartProductRepository.save(temp)
-      const newTotal = cart.items.reduce((sum, item) => sum + item.product.price, 0)
-      const newSubTotal = cart.items.reduce((sum, item) => sum + (item.product.price - item.product.discount), 0)
-      await this.cartRepository.update({ user: { id: userId } }, { total: newTotal, subtotal: newSubTotal })
-      return true
+    if (!product || !cart) return false;
+    const existingItem = cart.items.find(item => item.product.id === productId);
+    if (existingItem) {
+      return false;
     }
+    const newCartProduct = this.cartProductRepository.create({
+      product,
+      cart,
+      quantity,
+    });
+    await this.cartProductRepository.save(newCartProduct);
+    const newTotal = cart.items.reduce((sum, item) => sum + item.product.price * item.quantity, product.price * quantity);
+    const newSubTotal = cart.items.reduce((sum, item) => sum + (item.product.price - item.product.discount) * item.quantity, (product.price - product.discount) * quantity);
+    await this.cartRepository.update(cart.id, {
+      total: newTotal,
+      subtotal: newSubTotal,
+    });
+    return true;
   }
 
   async getAllInCart(userId: number): Promise<Cart | null> {
@@ -47,41 +52,74 @@ export class CartService {
     }
   }
 
-  async increaseQuantityById(userId: number, productId: number): Promise<boolean> {
-    const cart = await this.cartRepository.findOne({
-      where: { user: { id: userId } },
-    }); 
-    if (!cart) {
-      return false
-    } else {
-      const temp = await this.cartProductRepository.findOneBy({ id: productId })
-      const quantity = temp!.quantity >= temp!.product.stock ? temp!.product.stock : temp!.quantity++
-      await this.cartProductRepository.update(productId, { quantity: quantity })
-      return true
-    }
+  async increaseQuantityById(userId: number, cartProductId: number): Promise<boolean> {
+    const cartProduct = await this.cartProductRepository.findOne({
+      where: {
+        id: cartProductId,
+        cart: {
+          user: { id: userId },
+        },
+      },
+      relations: ['cart', 'cart.user', 'cart.items', 'cart.items.product', 'product'],
+    });
+    if (!cartProduct) return false;
+    const currentQty = cartProduct.quantity;
+    const maxQty = cartProduct.product.stock;
+    const newQty = currentQty >= maxQty ? maxQty : currentQty + 1;
+    await this.cartProductRepository.update(cartProductId, { quantity: newQty });
+    const newTotal = cartProduct.cart.items.reduce((sum, item) =>
+      sum + item.product.price * (item.id === cartProductId ? newQty : item.quantity), 0);
+    const newSubTotal = cartProduct.cart.items.reduce((sum, item) =>
+      sum + (item.product.price - item.product.discount) * (item.id === cartProductId ? newQty : item.quantity), 0);
+    await this.cartRepository.update(cartProduct.cart.id, {
+      total: newTotal,
+      subtotal: newSubTotal,
+    });
+    return true;
   }
 
   async decreaseQuantityById(userId: number, productId: number): Promise<boolean> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
-    }); 
-    if (!cart) {
-      return false
-    } else {
-      const temp = await this.cartProductRepository.findOneBy({ id: productId })
-      const quantity = temp!.quantity < 2 ? 1 : temp!.quantity--
-      await this.cartProductRepository.update(productId, { quantity: quantity })
-      return true
-    }
+      relations: ['items', 'items.product'],
+    });
+    if (!cart) return false;
+    const cartProduct = cart.items.find(item => item.product.id === productId);
+    if (!cartProduct) return false;
+    const currentQuantity = cartProduct.quantity;
+    const newQuantity = currentQuantity > 1 ? currentQuantity - 1 : 1;
+    await this.cartProductRepository.update(cartProduct.id, { quantity: newQuantity });
+    const newTotal = cart.items.reduce((sum, item) =>
+      sum + item.product.price * (item.id === cartProduct.id ? newQuantity : item.quantity), 0);
+    const newSubTotal = cart.items.reduce((sum, item) =>
+      sum + (item.product.price - item.product.discount) * (item.id === cartProduct.id ? newQuantity : item.quantity), 0);
+    await this.cartRepository.update(cart.id, {
+      total: newTotal,
+      subtotal: newSubTotal,
+    });
+    return true;
   }
 
   async deleteCartProductById(productId: number): Promise<boolean> {
-    const product = await this.cartProductRepository.find({ where: { id: productId } })
-    if (!product) {
-      return false
-    } else {
-      await this.cartProductRepository.delete({ id: productId })
-      return true
+    const cartProduct = await this.cartProductRepository.findOne({
+      where: { id: productId },
+      relations: ['cart', 'cart.items', 'cart.items.product'],
+    });
+    if (!cartProduct) {
+      return false;
     }
+    const cartId = cartProduct.cart.id;
+    await this.cartProductRepository.delete({ id: productId });
+    const remainingItems = cartProduct.cart.items.filter(item => item.id !== productId);
+    const newTotal = remainingItems.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
+    const newSubTotal = remainingItems.reduce(
+      (sum, item) => sum + (item.product.price - item.product.discount) * item.quantity,
+      0
+    );
+    await this.cartRepository.update(cartId, {
+      total: newTotal,
+      subtotal: newSubTotal,
+    });
+    return true;
   }
 }
