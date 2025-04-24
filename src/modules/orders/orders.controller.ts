@@ -21,10 +21,14 @@ import {
 import { Request } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { Status } from './enum/status.enum';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue } from 'bullmq';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(private readonly ordersService: OrdersService,
+    @InjectQueue('orderQueue') private readonly orderQueue: Queue,
+  ) {}
 
   @Post()
   @UseGuards(AuthGuard)
@@ -33,8 +37,11 @@ export class OrdersController {
     @Body() createOrderDto: CreateOrderDto,
   ): Promise<APIResponseDTO<string>> {
     const userId = req.user?.id;
-    const result = await this.ordersService.create(createOrderDto, userId);
-    return new APIResponseDTO<string>(true, 200, result);
+    const job = await this.orderQueue.add('orderQueue', {
+      createOrderDto,
+      userId,
+    });
+    return new APIResponseDTO<string>(true, 200, job.data);
   }
 
   @Get('/all')

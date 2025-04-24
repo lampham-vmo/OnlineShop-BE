@@ -20,7 +20,7 @@ export class CartProduct{
     @IsNotEmpty()
     @ManyToOne(() => Product, (product) => product.cartProducts)
     @ApiProperty({
-        type: () => Product,
+        type:() => Product,
         description: 'Product associated with the cart product item',
     })
     product: Product;
