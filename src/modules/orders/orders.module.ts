@@ -7,10 +7,11 @@ import { OrderDetail } from './entities/order.detail.entity';
 import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import { BullModule } from '@nestjs/bullmq';
+import { Product } from '../product/Entity/product.entity';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderDetail, User]),
+    TypeOrmModule.forFeature([Order, OrderDetail, User, Product]),
     BullModule.registerQueue({
       name: 'orderQueue',
     }),

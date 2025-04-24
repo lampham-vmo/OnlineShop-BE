@@ -159,7 +159,6 @@ export class Product {
     onDelete: 'SET NULL',
     nullable: true
   })
-
   @ApiProperty({
     type: () => CartProduct,
     description: "Cart product",

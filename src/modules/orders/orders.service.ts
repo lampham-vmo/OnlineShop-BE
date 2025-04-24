@@ -18,6 +18,8 @@ import { Status } from './enum/status.enum';
 import { User } from '../user/entities/user.entity';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue } from 'bullmq';
+import { Product } from '../product/Entity/product.entity';
+import { Cart } from '../cart/entities/cart.entity';
 
 @Injectable()
 export class OrdersService {
@@ -28,45 +30,154 @@ export class OrdersService {
     private readonly orderDetailRepository: Repository<OrderDetail>,
     @InjectRepository(User)
     private readonly userRepository: Repository<User>,
+    @InjectRepository(Product)
+    private readonly productRepository: Repository<Product>,
     private readonly dataSource: DataSource,
-    @InjectQueue('orderQueue') private readonly orderQueue: Queue,
+    
   ) {}
 
-  async addToQueue(createOrderDTO: CreateOrderDto, userId: number | undefined) {
-    const job = await this.orderQueue.add('orderQueue', {
-      createOrderDTO,
-      userId,
-    });
+  async createCod(createOrderDTO: CreateOrderDto, userId: number | undefined) {
+    if (userId === undefined) {
+      throw new BadRequestException('Token not valid');
+    }
+  
+    const user = await this.userRepository.findOne({ where: { id: userId } });
+    if (!user) {
+      throw new BadRequestException('User Not Found');
+    }
+  
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+  
+    try {
+      const stockBackup = new Map<number, number>(); // productId -> originalStock
+      const cart = await queryRunner.manager.findOne(Cart,{
+        where:{id: createOrderDTO.cartId}
+      })
+      if(!cart){
+        throw new BadRequestException("Cart Not Found")
+      }
+      for (const item of cart.items) {
+        const product = await queryRunner.manager.findOne(this.productRepository.target, {
+          where: { id: item.product.id },
+          lock: { mode: 'pessimistic_write' },
+        });
+  
+        if (!product) {
+          throw new BadRequestException('Product Not Found');
+        }
+  
+        if (product.stock < item.quantity) {
+          throw new BadRequestException(`Product ${product.name} is out of stock`);
+        }
+  
+        stockBackup.set(product.id, product.stock); // backup stock
+        product.stock -= item.quantity;
+        await queryRunner.manager.save(product);
+      }
+  
+      const orderDetails: OrderDetail[] = cart.items.map((item) =>
+        plainToInstance(OrderDetail, item, { excludeExtraneousValues: true })
+      );
+  
+      const order = this.orderRepository.create({
+        subTotal: cart.subtotal,
+        total: cart.total,
+        receiver: createOrderDTO.receiver,
+        receiver_phone: createOrderDTO.receiver_phone,
+        delivery_address: createOrderDTO.delivery_address,
+        user: { id: userId },
+        order_details: orderDetails,
+        status: Status.orderSuccess,
+      });
+  
+      const savedOrder = await queryRunner.manager.save(order);
+  
+      await queryRunner.commitTransaction();
+  
+      return `Order with id: ${savedOrder} is created`;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('Order failed. Rolled back transaction.');
+    } finally {
+      await queryRunner.release();
+    }
   }
 
-  async create(
+  async createPayPal(
     createOrderDto: CreateOrderDto,
     userId: number | undefined,
   ): Promise<string> {
     if (userId === undefined) {
       throw new BadRequestException('Token not valid');
     }
-    const user = this.userRepository.exists({
-      where: { id: userId },
-    });
+  
+    const user = await this.userRepository.findOne({ where: { id: userId } });
     if (!user) {
       throw new BadRequestException('User Not Found');
     }
-    //get list product in cart then insert to order detail
-    //create order
-    const order = this.orderRepository.create({
-      subTotal: 1000,
-      total: 2000,
-      receiver: createOrderDto.receiver,
-      receiver_phone: createOrderDto.receiver_phone,
-      delivery_address: createOrderDto.delivery_address,
-      user: { id: userId },
-      order_details: [],
-    });
-    const result = await this.orderRepository.save(order);
-
-    return `Order with id: ${result.id} is created`;
+  
+    const queryRunner = this.dataSource.createQueryRunner();
+    await queryRunner.connect();
+    await queryRunner.startTransaction();
+  
+    try {
+      const stockBackup = new Map<number, number>(); // productId -> originalStock
+      const cart = await queryRunner.manager.findOne(Cart,{
+        where:{id: createOrderDto.cartId}
+      })
+      if(!cart){
+        throw new BadRequestException("Cart Not Found")
+      }
+      for (const item of cart.items) {
+        const product = await queryRunner.manager.findOne(this.productRepository.target, {
+          where: { id: item.product.id },
+          lock: { mode: 'pessimistic_write' },
+        });
+  
+        if (!product) {
+          throw new BadRequestException('Product Not Found');
+        }
+  
+        if (product.stock < item.quantity) {
+          throw new BadRequestException(`Product ${product.name} is out of stock`);
+        }
+  
+        stockBackup.set(product.id, product.stock); // backup stock
+        product.stock -= item.quantity;
+        await queryRunner.manager.save(product);
+      }
+  
+      const orderDetails: OrderDetail[] = cart.items.map((item) =>
+        plainToInstance(OrderDetail, item, { excludeExtraneousValues: true })
+      );
+  
+      const order = this.orderRepository.create({
+        subTotal: cart.subtotal,
+        total: cart.total,
+        receiver: createOrderDto.receiver,
+        receiver_phone: createOrderDto.receiver_phone,
+        delivery_address: createOrderDto.delivery_address,
+        user: { id: userId },
+        order_details: orderDetails,
+        status: Status.unpaid,
+      });
+  
+      const savedOrder = await queryRunner.manager.save(order);
+  
+      await queryRunner.commitTransaction();
+  
+      return `Order with id: ${savedOrder} is created`;
+    } catch (error) {
+      await queryRunner.rollbackTransaction();
+      throw new InternalServerErrorException('Order failed. Rolled back transaction.');
+    } finally {
+      await queryRunner.release();
+    }
   }
+  
+
 
   async findAll(
     page: number,
