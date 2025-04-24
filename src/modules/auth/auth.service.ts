@@ -14,7 +14,8 @@ import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
 import { EmailService } from '../email/email.service';
-import { Email } from 'src/common/types/type';
+import { ConfirmResetPasswordToken, Email } from 'src/common/types/type';
+import { generateStrongPassword } from 'src/common/util/randomPassword';
 interface Payload {
   id: number;
   email: string;
@@ -127,7 +128,7 @@ export class AuthService {
     await this.emailService.sendConfirmationEmail(email, confirmEmailToken)
     return true
   }
-  //confirm email
+  //confirm email for sign up
   async confirmEmail(token: string): Promise<boolean> {
     let payload: Email;
     try {
@@ -151,6 +152,62 @@ export class AuthService {
     return true
 
   }
+
+  //1. send email to server, server will take this email and create a token link and a password
+  //2. if user click con the link, gmail will redirect to front end
+  //3. frontend then send request to backend with token
+  //4. backend will decode token to take payload that contain email and password
+  //5. backend will update password for this email with new password
+  
+  async sendResetPasswordEmail(email: string): Promise<boolean>{
+    //check if email exists in DB
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('Email not found!')
+      //create password
+    const newResetPassword = generateStrongPassword(16)
+    //create token
+    const resetPasswordToken = this.createJwtFromPayload({ email: email, newPassword: newResetPassword }, '10m');
+    //send email to user
+    await this.emailService.sendResetPasswordEmail(email, newResetPassword, resetPasswordToken)
+    return true
+  }
+
+  async confirmResetPasswordToken(token: string): Promise<boolean> {
+    let payload: ConfirmResetPasswordToken;
+    try {
+      payload = this.jwtService.verify(token, {
+        publicKey: process.env.JWT_PUBLIC_KEY,
+        algorithms: ['RS256'],
+      });
+    } catch (err) {
+      throw new BadRequestException('Invalid token!')
+    }
+    if (!payload) throw new BadRequestException('invalid payload!')
+    return await this.usersService.updatePasswordByEmail(payload.email, payload.newPassword)
+  }
+
+
+  //send email to reset password
+  // async sendResetPasswordEmail(email: string, id: number): Promise<boolean> {
+  //   //check if email exists in DB
+  //   try{
+  //     console.log('hello');
+  //     const user = await this.usersService.findOneById(id);
+  //     if (!user) throw new BadRequestException('User not found!')
+  //     if(user.email !== email) throw new BadRequestException('Not your email!')
+  //     //create password
+  //     const newResetPassword = generateStrongPassword(16)
+  //     console.log(newResetPassword);
+  //     await this.usersService.updatePasswordByEmail(email, newResetPassword)
+  //     //send email to user
+  //     await this.emailService.sendResetPasswordEmail(email, newResetPassword)
+  //     return true
+  //   }catch(err){
+  //     console.log(err);
+  //   }
+  //   return false
+  
+  // }
 
   //sign up
   async signup(
