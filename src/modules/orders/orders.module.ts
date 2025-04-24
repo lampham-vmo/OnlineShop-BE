@@ -8,15 +8,16 @@ import { JwtService } from '@nestjs/jwt';
 import { User } from '../user/entities/user.entity';
 import { BullModule } from '@nestjs/bullmq';
 import { Product } from '../product/Entity/product.entity';
+import { OrderProccess } from './order.process';
 
 @Module({
   imports: [
     TypeOrmModule.forFeature([Order, OrderDetail, User, Product]),
     BullModule.registerQueue({
-      name: 'orderQueue',
+      name: 'orderQueue'
     }),
   ],
   controllers: [OrdersController],
-  providers: [OrdersService, JwtService],
+  providers: [OrdersService, JwtService, OrderProccess],
 })
 export class OrdersModule {}

@@ -29,12 +29,12 @@ export class Order {
   @ApiProperty()
   id: number;
 
-  @Column()
+  @Column("float")
   @IsNumber()
   @ApiProperty()
   subTotal: number;
 
-  @Column()
+  @Column("float")
   @IsNumber()
   @ApiProperty()
   total: number;

@@ -61,7 +61,7 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
-}) 
+})
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,

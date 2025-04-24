@@ -155,17 +155,17 @@ export class Product {
   })
   category: Category;
 
-  @OneToMany(()=> CartProduct, (cartProduct) => cartProduct.product, {
+  @OneToMany(() => CartProduct, (cartProduct) => cartProduct.product, {
     onDelete: 'SET NULL',
-    nullable: true
+    nullable: true,
   })
   @Exclude()
   @ApiProperty({
     type: () => CartProduct,
-    description: "Cart product",
-    nullable: true
+    description: 'Cart product',
+    nullable: true,
   })
-  cartProducts: CartProduct[]
+  cartProducts: CartProduct[];
 
   @CreateDateColumn()
   @Expose()
