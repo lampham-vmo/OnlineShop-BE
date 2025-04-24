@@ -2,11 +2,8 @@ import { BadRequestException, Body, Controller, Get, Param, Patch, Post, UseGuar
 import { CartService } from './cart.service';
 import { AddToCartProductDTO, GetCartFinalResponseDTO } from './dto/cart.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
-import { ApiResponseWithModel } from 'src/common/decorators/swagger.decorator';
-import { CartProduct } from './entities/cart_product.entity';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { Cart } from './entities/cart.entity';
-import { GlobalExceptionFilter } from 'src/common/exceptions/global-exception.filter';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { ApiOkResponse } from '@nestjs/swagger';
 import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api-response.dto';
@@ -15,7 +12,7 @@ import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api
 export class CartController {
     constructor(private readonly cartService: CartService){}
 
-    @Post()
+    @Post('add')
     @UseGuards(AuthGuard)
     @ApiOkResponse({
         description: 'Success message for add to cart',
@@ -47,7 +44,7 @@ export class CartController {
         }
     )
     @RouteName("Get all product to cart")
-    async getCart(@Body() req: {userId: string}) : Promise<APIResponseDTO<Cart> | BadRequestException>{
+    async getCart(@Body() req: {userId: number}) : Promise<APIResponseDTO<Cart> | BadRequestException>{
         const result = await this.cartService.getAllInCart(Number(req.userId))
         if(!result) {
             throw new BadRequestException("Can not get a cart")
@@ -59,14 +56,14 @@ export class CartController {
         }
     }
 
-    @Patch()
+    @Patch('increase')
     @UseGuards(AuthGuard)
     @ApiOkResponse({
         description: 'Success message for increase quantity',
         type: UserSuccessMessageFinalResponseDTO,
     })
     @RouteName("Increase product quantity in a cart")
-    async increaseQuantity(@Body() req: {userId: string, productId: string}): Promise<APIResponseDTO<{message: string}>> {
+    async increaseQuantity(@Body() req: {userId: number, productId: number}): Promise<APIResponseDTO<{message: string}>> {
         const result = await this.cartService.increaseQuantityById(Number(req.userId),Number(req.productId))
         if(!result) {
             return {
@@ -83,14 +80,14 @@ export class CartController {
         }
     }
 
-    @Patch()
+    @Patch('decrease')
     @UseGuards(AuthGuard)
     @ApiOkResponse({
         description: 'Success message for decrease quantity',
         type: UserSuccessMessageFinalResponseDTO,
     })
     @RouteName("Decrease product quantity in a cart")
-    async decreaseQuantity(@Body() req: {userId: string, productId: string}): Promise<APIResponseDTO<{message: string}>> {
+    async decreaseQuantity(@Body() req: {userId: number, productId: number}): Promise<APIResponseDTO<{message: string}>> {
         const result = await this.cartService.decreaseQuantityById(Number(req.userId),Number(req.productId))
         if(!result) {
             return {
@@ -107,14 +104,14 @@ export class CartController {
         }
     }
 
-    @Post()
+    @Post('delete')
     @UseGuards(AuthGuard)
     @ApiOkResponse({
         description: 'Success message for delete in cart',
         type: UserSuccessMessageFinalResponseDTO,
     })
     @RouteName("Delete a product in cart")
-    async deleteCart(@Body() req: {productId: string}) : Promise<APIResponseDTO<{message: string}>>{
+    async deleteCart(@Body() req: {productId: number}) : Promise<APIResponseDTO<{message: string}>>{
         const result = await this.cartService.deleteCartProductById(Number(req.productId))
         if(!result) {
             return {
