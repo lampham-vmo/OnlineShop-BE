@@ -18,6 +18,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
 import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
+// import { EmailService } from './email/email.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -60,7 +61,7 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
-})
+}) 
 export class AppModule implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,

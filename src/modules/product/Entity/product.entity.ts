@@ -159,6 +159,7 @@ export class Product {
     onDelete: 'SET NULL',
     nullable: true
   })
+  @Exclude()
   @ApiProperty({
     type: () => CartProduct,
     description: "Cart product",

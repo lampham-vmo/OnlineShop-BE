@@ -11,6 +11,7 @@ import {
 import { CartProduct } from "../entities/cart_product.entity";
 import { Product } from "src/modules/product/Entity/product.entity";
 import { ProductResponse } from "src/modules/product/DTO/response/product.response";
+import { APIResponseDTO } from "src/common/dto/response-dto";
 
 export class AddToCartProductDTO extends PickType(CartProduct,["quantity"]) {
   @IsInt()
@@ -32,4 +33,9 @@ export class CartProductResponseDTO extends OmitType(CartProduct,['cart','id','p
 export class CartResponseDTO extends OmitType(Cart,['user','items']){
   @ApiProperty({type: [CartProductResponseDTO]})
   items: CartProductResponseDTO[];
+}
+
+export class GetCartFinalResponseDTO extends APIResponseDTO<Cart> {
+  @ApiProperty({ type: () => Cart })
+  data: Cart = new Cart();
 }

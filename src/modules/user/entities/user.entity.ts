@@ -43,6 +43,10 @@ export class User {
     description: 'User email address',
     minLength: 5,
     maxLength: 255,
+    pattern: '^[a-zA-Z0-9._%+-]+@gmail\\.com$'
+  })
+  @Matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, {
+    message: 'Email must be a valid Gmail address',
   })
   @IsEmail()
   @IsNotEmpty()
@@ -153,6 +157,10 @@ export class User {
   address: string;
 
   @OneToOne(() => Cart, (cart) => cart.user, {cascade: true})
+  @ApiProperty({
+    type: () => Cart,
+    description: 'The cart object of the user',
+  })
   @IsNotEmpty()
   @JoinColumn()
   cart: Cart;

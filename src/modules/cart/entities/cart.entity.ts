@@ -18,9 +18,10 @@ export class Cart {
     id: number;
     
     @OneToOne(() => User, (user) => user.cart)
+    @Exclude()
     @IsNotEmpty()
     @ApiProperty({
-        type:()=> User,
+        type: () => User,
         description: 'User associated with the cart',
     })
     @JoinColumn()
@@ -29,10 +30,9 @@ export class Cart {
     @IsNotEmpty()
     @OneToMany(() => CartProduct, (cartProduct) => cartProduct.cart, {
         eager: true,
-        cascade: true,
     })
     @ApiProperty({
-        type: [CartProduct],
+        type: () => CartProduct,
         description: 'Array of cart products',
     })
     @JoinColumn()

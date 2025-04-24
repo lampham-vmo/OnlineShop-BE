@@ -40,12 +40,25 @@ export class UserService implements OnModuleInit {
         confirmPassword: 'Admin123@',
         role_id: 1,
       });
+      await this.usersRepository.update({
+        id: res.id,
+      }, {
+        isVerified: true,
+      }) 
     }
   }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
+  async updateVerifiedStatus(
+    id: number,
+    isVerified: boolean,
+  ): Promise<void> {
+    await this.usersRepository.update({ id }, { isVerified});
+  }
+
+
 
   async getAllAccounts(): Promise<
     APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>
@@ -103,6 +116,14 @@ export class UserService implements OnModuleInit {
     };
   }
 
+  async isEmailExists(email: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ email: email })) !== null
+  }
+
+  async isPhoneExists(phone: string): Promise<Boolean> {
+    return (await this.usersRepository.findOneBy({ phone: phone })) !== null
+  }
+
   async isAddressExist(address: string): Promise<Boolean> {
     return (await this.usersRepository.findOneBy({ address: address })) !== null
       ? true
@@ -121,7 +142,7 @@ export class UserService implements OnModuleInit {
   //     await this.usersRepository.update({id: updatedUserID},temp)
   //     return this.findOneById(temp.id)
   // }
-  async createUser(newUser: CreateUserDTO): Promise<void> {
+  async createUser(newUser: CreateUserDTO): Promise<User> {
     //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
     const cart = this.cartRepository.create({total: 0, subtotal: 0})
@@ -133,6 +154,8 @@ export class UserService implements OnModuleInit {
     });
     //create user
     await this.usersRepository.save(temp);
+
+    return temp
   }
 
   async delete(
