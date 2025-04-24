@@ -21,6 +21,8 @@ export class CartService {
       where: { user: { id: userId } },
     });
     if (product === null || cart == null) {
+      console.log(product)
+      console.log(cart)
       return false
     } else {
       const temp = this.cartProductRepository.create({
