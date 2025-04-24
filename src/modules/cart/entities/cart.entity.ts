@@ -3,6 +3,7 @@ import { Column, CreateDateColumn, Entity, OneToMany, OneToOne, PrimaryGenerated
 import { CartProduct } from "./cart_product.entity";
 import { ApiProperty } from "@nestjs/swagger";
 import { IsNotEmpty, IsString, Length } from 'class-validator';
+import { Exclude } from "class-transformer";
 
 
 @Entity()
@@ -17,9 +18,10 @@ export class Cart {
     id: number;
     
     @OneToOne(() => User, (user) => user.cart)
+    @Exclude()
     @IsNotEmpty()
     @ApiProperty({
-        type: User,
+        type: () => User,
         description: 'User associated with the cart',
     })
     user: User;
@@ -29,7 +31,7 @@ export class Cart {
         eager: true,
     })
     @ApiProperty({
-        type: [CartProduct],
+        type: () => CartProduct,
         description: 'Array of cart products',
     })
     items: CartProduct[];
