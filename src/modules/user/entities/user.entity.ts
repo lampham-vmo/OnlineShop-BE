@@ -157,6 +157,10 @@ export class User {
   address: string;
 
   @OneToOne(() => Cart, (cart) => cart.user, {cascade: true})
+  @ApiProperty({
+    type: () => Cart,
+    description: 'The cart object of the user',
+  })
   @IsNotEmpty()
   @JoinColumn()
   cart: Cart;

@@ -8,6 +8,7 @@ import {
   import { IsIn, IsInt, IsOptional, IsString, Min } from 'class-validator';
   import { Type } from 'class-transformer';
 import { CartProduct } from "../entities/cart_product.entity";
+import { APIResponseDTO } from "src/common/dto/response-dto";
 
 export class AddToCartProductDTO extends PickType(CartProduct,["quantity"]) {
   @IsInt()
@@ -20,3 +21,8 @@ export class AddToCartProductDTO extends PickType(CartProduct,["quantity"]) {
 }
 
 export class ChangeCartProductQuantity extends PickType(CartProduct,["id"]){}
+
+export class GetCartFinalResponseDTO extends APIResponseDTO<Cart> {
+  @ApiProperty({ type: () => Cart })
+  data: Cart = new Cart();
+}
