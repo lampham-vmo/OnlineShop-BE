@@ -17,7 +17,7 @@ export class ProductRequest extends OmitType(Product, [
   'createdAt',
   'isDeleted',
   'rating',
-  'cartProducts'
+  'cartProducts',
 ]) {
   @IsNumber()
   @IsNotEmpty()

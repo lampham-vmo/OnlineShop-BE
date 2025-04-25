@@ -22,6 +22,7 @@ import {
 } from 'typeorm';
 import { OrderDetail } from './order.detail.entity';
 import { Status } from '../enum/status.enum';
+import { PaymentMethod } from 'src/modules/payment-method/entities/payment-method.entity';
 
 @Entity()
 export class Order {
@@ -29,12 +30,12 @@ export class Order {
   @ApiProperty()
   id: number;
 
-  @Column()
+  @Column('float')
   @IsNumber()
   @ApiProperty()
   subTotal: number;
 
-  @Column()
+  @Column('float')
   @IsNumber()
   @ApiProperty()
   total: number;
@@ -64,6 +65,19 @@ export class Order {
   @MaxLength(11)
   @Matches(/^\d+$/, { message: 'Phone number must be number only' })
   receiver_phone: string;
+
+  @ManyToOne(
+    () => PaymentMethod,
+    (p) => {
+      p.orders;
+    },
+  )
+  @JoinColumn({ name: 'payment_id' })
+  @Expose()
+  @ApiProperty({
+    type: () => PaymentMethod,
+  })
+  payment: PaymentMethod;
 
   @IsString()
   @ApiProperty()

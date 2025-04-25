@@ -2,6 +2,7 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
+  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -27,9 +28,8 @@ export class AuthService {
     private usersService: UserService,
     private jwtService: JwtService,
     private roleService: RoleService,
-    private emailService: EmailService
-
-  ) { }
+    private emailService: EmailService,
+  ) {}
 
   createKeyPair(): { privateKey: string; publicKey: string } {
     const { privateKey, publicKey } = generateKeyPairSync('rsa', {
@@ -45,7 +45,7 @@ export class AuthService {
     });
     return { privateKey, publicKey };
   }
-  
+
   async handleRefreshAccessToken({
     payload,
     refreshToken,
@@ -120,12 +120,12 @@ export class AuthService {
   async resendConfirmEmail(email: string): Promise<boolean> {
     //check if email exists in DB
     const user = await this.usersService.findOneByEmail(email);
-    if (!user) throw new BadRequestException('Email not found!')
+    if (!user) throw new BadRequestException('Email not found!');
     //create token
     const confirmEmailToken = this.createJwtFromPayload({ email: email }, '1d');
     //send email to user
-    await this.emailService.sendConfirmationEmail(email, confirmEmailToken)
-    return true
+    await this.emailService.sendConfirmationEmail(email, confirmEmailToken);
+    return true;
   }
   //confirm email
   async confirmEmail(token: string): Promise<boolean> {
@@ -136,55 +136,62 @@ export class AuthService {
         algorithms: ['RS256'],
       });
     } catch (err) {
-      throw new BadRequestException('Invalid token!')
+      throw new BadRequestException('Invalid token!');
     }
-    if (!payload) throw new BadRequestException('invalid payload!')
+    if (!payload) throw new BadRequestException('invalid payload!');
     //not throw error => token is valid
     const { email }: { email: string } = payload;
     //check if email exists in DB
     const user = await this.usersService.findOneByEmail(email);
-    if (!user) throw new BadRequestException('Email not found!')
+    if (!user) throw new BadRequestException('Email not found!');
     //if email not verified => verified
-    if(user.isVerified === false){
-        await this.usersService.updateVerifiedStatus(user.id, true);
+    if (user.isVerified === false) {
+      await this.usersService.updateVerifiedStatus(user.id, true);
     }
-    return true
-
+    return true;
   }
 
   //sign up
   async signup(
     newUser: CreateUserDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
-    
-    if (await this.usersService.isEmailExists(newUser.email)) {
-      throw new BadRequestException({
-        message: 'The email has already existed',
-      });
-    } else if (await this.usersService.isPhoneExists(newUser.phone)) {
-      throw new BadRequestException({
-        message: 'The phone has already existed',
-      });
-    } else if (newUser.password !== newUser.confirmPassword) {
-      throw new BadRequestException({
-        message: 'The confirm password must match the password',
-      });
-    } else {
-      //create user with isVerified = false
-      await this.usersService.createUser(newUser);
+    try {
+      if (await this.usersService.isEmailExists(newUser.email)) {
+        throw new BadRequestException({
+          message: 'The email has already existed',
+        });
+      } else if (await this.usersService.isPhoneExists(newUser.phone)) {
+        throw new BadRequestException({
+          message: 'The phone has already existed',
+        });
+      } else if (newUser.password !== newUser.confirmPassword) {
+        throw new BadRequestException({
+          message: 'The confirm password must match the password',
+        });
+      } else {
+        //create user with isVerified = false
+        await this.usersService.createUser(newUser);
 
+        //send email confirm to user
+        const confirmEmailToken = this.createJwtFromPayload(
+          { email: newUser.email },
+          '1d',
+        );
 
-      //send email confirm to user
-      const confirmEmailToken = this.createJwtFromPayload({ email: newUser.email }, '1d');
+        await this.emailService.sendConfirmationEmail(
+          newUser.email,
+          confirmEmailToken,
+        );
 
-      await this.emailService.sendConfirmationEmail(newUser.email, confirmEmailToken)
-
-
-      return {
-        success: true,
-        statusCode: 200,
-        data: { message: 'Successfully created a user' },
-      };
+        return {
+          success: true,
+          statusCode: 200,
+          data: { message: 'Successfully created a user' },
+        };
+      }
+    } catch (error) {
+      Logger.log(error);
+      throw new BadRequestException(error);
     }
   }
 

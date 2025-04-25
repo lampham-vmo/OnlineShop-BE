@@ -10,8 +10,11 @@ import { User } from '../user/entities/user.entity';
 import { JwtModule } from '@nestjs/jwt';
 
 @Module({
-    imports: [TypeOrmModule.forFeature([Cart, CartProduct, Product, User]), JwtModule],
-    controllers: [CartController],
-    providers: [CartService]
+  imports: [
+    TypeOrmModule.forFeature([Cart, CartProduct, Product, User]),
+    JwtModule,
+  ],
+  controllers: [CartController],
+  providers: [CartService],
 })
 export class CartModule {}

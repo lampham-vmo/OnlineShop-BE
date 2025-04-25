@@ -1,5 +1,5 @@
-const ConfirmEmailHTML = (confirmUrl: string) : string => {
-    return `<div style="background-color: #e3f2fd; padding: 40px; font-family: 'Segoe UI', sans-serif; color: #0d47a1;">
+const ConfirmEmailHTML = (confirmUrl: string): string => {
+  return `<div style="background-color: #e3f2fd; padding: 40px; font-family: 'Segoe UI', sans-serif; color: #0d47a1;">
     <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15); border: 1px solid #90caf9;">
       
       <!-- Header -->
@@ -48,7 +48,7 @@ const ConfirmEmailHTML = (confirmUrl: string) : string => {
         <p>© ${new Date().getFullYear()} NextMerce. All rights reserved.</p>
       </div>
     </div>
-  </div>`
-}
+  </div>`;
+};
 
-export default ConfirmEmailHTML
+export default ConfirmEmailHTML;

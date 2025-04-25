@@ -7,7 +7,10 @@ import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
 import { hashedPasword } from 'src/common/util/bcrypt.util';
-import { UpdateProfileDTO, UpdateUserRoleDTO } from './dto/update-user-role.dto';
+import {
+  UpdateProfileDTO,
+  UpdateUserRoleDTO,
+} from './dto/update-user-role.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { GetUserAccountDTO } from './dto/get-user-account.dto';
 import { Role } from '../role/entities/role.entity';
@@ -18,7 +21,7 @@ export class UserService implements OnModuleInit {
   constructor(
     @InjectRepository(User) private usersRepository: Repository<User>,
     @InjectRepository(Role) private roleRepository: Repository<Role>,
-    @InjectRepository(Cart) private cartRepository: Repository<Cart>
+    @InjectRepository(Cart) private cartRepository: Repository<Cart>,
   ) {}
 
   async onModuleInit(): Promise<void> {
@@ -40,25 +43,23 @@ export class UserService implements OnModuleInit {
         confirmPassword: 'Admin123@',
         role_id: 1,
       });
-      await this.usersRepository.update({
-        id: res.id,
-      }, {
-        isVerified: true,
-      }) 
+      await this.usersRepository.update(
+        {
+          id: res.id,
+        },
+        {
+          isVerified: true,
+        },
+      );
     }
   }
 
   async findAll(): Promise<User[]> {
     return await this.usersRepository.find();
   }
-  async updateVerifiedStatus(
-    id: number,
-    isVerified: boolean,
-  ): Promise<void> {
-    await this.usersRepository.update({ id }, { isVerified});
+  async updateVerifiedStatus(id: number, isVerified: boolean): Promise<void> {
+    await this.usersRepository.update({ id }, { isVerified });
   }
-
-
 
   async getAllAccounts(): Promise<
     APIResponseDTO<{ accounts: GetUserAccountDTO[]; accountsCount: number }>
@@ -117,11 +118,11 @@ export class UserService implements OnModuleInit {
   }
 
   async isEmailExists(email: string): Promise<Boolean> {
-    return (await this.usersRepository.findOneBy({ email: email })) !== null
+    return (await this.usersRepository.findOneBy({ email: email })) !== null;
   }
 
   async isPhoneExists(phone: string): Promise<Boolean> {
-    return (await this.usersRepository.findOneBy({ phone: phone })) !== null
+    return (await this.usersRepository.findOneBy({ phone: phone })) !== null;
   }
 
   async isAddressExist(address: string): Promise<Boolean> {
@@ -143,19 +144,19 @@ export class UserService implements OnModuleInit {
   //     return this.findOneById(temp.id)
   // }
   async createUser(newUser: CreateUserDTO): Promise<User> {
-    //hash password before create
     const hashedPassword = await hashedPasword(newUser.password);
-    const cart = this.cartRepository.create({total: 0, subtotal: 0})
-    const temp = this.usersRepository.create({
+
+    // Tạo user trước
+    const user = this.usersRepository.create({
       ...newUser,
       password: hashedPassword,
       isDeleted: false,
-      cart: cart
+      cart: { total: 0, subtotal: 0 },
     });
-    //create user
-    await this.usersRepository.save(temp);
 
-    return temp
+    await this.usersRepository.save(user);
+
+    return user;
   }
 
   async delete(
@@ -209,16 +210,23 @@ export class UserService implements OnModuleInit {
     }
   }
 
-  async updateUserProfile(updateProfileDTO: UpdateProfileDTO, id: number): Promise<boolean> {
-    const {address, email, fullname, phone } = updateProfileDTO;
+  async updateUserProfile(
+    updateProfileDTO: UpdateProfileDTO,
+    id: number,
+  ): Promise<boolean> {
+    const { address, email, fullname, phone } = updateProfileDTO;
     const user = await this.usersRepository.findOneBy({ id: id });
     if (!user) {
       throw new BadRequestException('User not found!');
     }
     //check if the email or phone already exists
-    const isEmailExists = await this.usersRepository.findOneBy({ email: email });
-    const isPhoneExists = await this.usersRepository.findOneBy({ phone: phone });
-   
+    const isEmailExists = await this.usersRepository.findOneBy({
+      email: email,
+    });
+    const isPhoneExists = await this.usersRepository.findOneBy({
+      phone: phone,
+    });
+
     if (isEmailExists && email !== user.email) {
       throw new BadRequestException('Email already exists!');
     }
@@ -231,6 +239,5 @@ export class UserService implements OnModuleInit {
     user.phone = phone;
     await this.usersRepository.save(user);
     return true;
-
   }
 }

@@ -1,4 +1,4 @@
-export interface UserPayload{
+export interface UserPayload {
   id: number;
   email: string;
   role: number;
@@ -6,9 +6,8 @@ export interface UserPayload{
   refreshToken: string;
 }
 
-
-declare module 'express'{
-    export interface Request{
-        user?: UserPayload;
-    }
+declare module 'express' {
+  export interface Request {
+    user?: UserPayload;
+  }
 }
