@@ -1,12 +1,14 @@
 import { ApiProperty } from '@nestjs/swagger';
 import { Expose, Transform } from 'class-transformer';
 import { IsEnum, IsNotEmpty, IsString, Length } from 'class-validator';
+import { Order } from 'src/modules/orders/entities/order.entity';
 import {
   Entity,
   Column,
   PrimaryGeneratedColumn,
   CreateDateColumn,
   UpdateDateColumn,
+  OneToMany,
 } from 'typeorm';
 
 export enum EStatusPaymentMethod {
@@ -49,7 +51,8 @@ export class PaymentMethod {
   @UpdateDateColumn()
   updatedAt: Date;
 
+
   // TODO: Relations 1-n between PaymentMethod and Order
-  // @OneToMany(() => Order, (order) => order.paymentMethod)
-  // orders: Order[];
+  @OneToMany(() => Order, (order) => order.payment)
+  orders: Order[];
 }

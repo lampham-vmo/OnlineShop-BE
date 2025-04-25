@@ -160,6 +160,7 @@ export class Product {
     nullable: true,
   })
   @Exclude()
+  @IsOptional()
   @ApiProperty({
     type: () => CartProduct,
     description: 'Cart product',

@@ -13,9 +13,6 @@ import { ProductResponse } from 'src/modules/product/DTO/response/product.respon
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 
 export class AddToCartProductDTO extends PickType(CartProduct, ['quantity']) {
-  @IsNumber()
-  @ApiProperty({ type: Number })
-  userId: number;
 
   @IsNumber()
   @ApiProperty({

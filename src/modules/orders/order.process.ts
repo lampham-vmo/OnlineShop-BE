@@ -5,13 +5,14 @@ import { Job, Queue } from 'bullmq';
 import { CreateOrderDto } from './dto/request/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Product } from '../product/Entity/product.entity';
+import { PaymentMethod } from '../payment-method/entities/payment-method.entity';
 //consumer
 @Processor('orderQueue')
 @Injectable()
 export class OrderProccess extends WorkerHost{
   constructor(
     private readonly orderService: OrdersService,
-    @InjectRepository(Product) private readonly produc,
+    @InjectRepository(PaymentMethod) private readonly paymentMethod: PaymentMethod
   ) { super();}
 
   async process(
@@ -21,14 +22,14 @@ export class OrderProccess extends WorkerHost{
     console.log("processing....")
     console.log(createOrderDTO)
     try {
-      if (createOrderDTO.paymentMethod === 'paypal') {
+      if (createOrderDTO.paymentId === 2) {
         console.log(1)
         const result = await this.orderService.createPayPal(
           createOrderDTO,
           userId,
         );
         return result;
-      } else if (createOrderDTO.paymentMethod === 'cod') {
+      } else if (createOrderDTO.paymentId === 1) {
         console.log(2)
         const result = await this.orderService.createCod(
           createOrderDTO,

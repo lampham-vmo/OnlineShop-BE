@@ -10,10 +10,10 @@ export class CreateOrderDto extends PickType(Order, [
   'receiver_phone',
   'delivery_address',
 ]) {
-  @IsString()
+  @IsNumber()
   @IsNotEmpty()
   @ApiProperty()
-  paymentMethod: string;
+  paymentId: number;
 
   @IsNumber()
   @ApiProperty()

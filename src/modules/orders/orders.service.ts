@@ -101,6 +101,7 @@ export class OrdersService {
         user: { id: userId },
         order_details: orderDetails,
         status: Status.orderSuccess,
+        payment: {id: createOrderDTO.paymentId}
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
@@ -172,6 +173,8 @@ export class OrdersService {
         await queryRunner.manager.save(product);
       }
 
+      //call to paypal service
+
       const orderDetails: OrderDetail[] = cart.items.map((item) =>{
         const result = plainToInstance(OrderDetail, item.product, { excludeExtraneousValues: true })
         result.quantity = item.quantity
@@ -188,6 +191,7 @@ export class OrdersService {
         user: { id: userId },
         order_details: orderDetails,
         status: Status.unpaid,
+        payment: {id: createOrderDTO.paymentId}
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
