@@ -37,7 +37,7 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
         username: 'postgres',
         password: config.get('database.password'),
         database: config.get('database.DB'),
-        autoLoadEntities: true,
+        autoLoadEntities: true, 
         synchronize: true,
       }),
     }),
