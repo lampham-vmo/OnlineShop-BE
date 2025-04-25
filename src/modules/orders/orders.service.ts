@@ -187,7 +187,7 @@ export class OrdersService {
         delivery_address: createOrderDTO.delivery_address,
         user: { id: userId },
         order_details: orderDetails,
-        status: Status.orderSuccess,
+        status: Status.unpaid,
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
