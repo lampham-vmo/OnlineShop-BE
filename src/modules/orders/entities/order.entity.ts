@@ -30,12 +30,12 @@ export class Order {
   @ApiProperty()
   id: number;
 
-  @Column("float")
+  @Column('float')
   @IsNumber()
   @ApiProperty()
   subTotal: number;
 
-  @Column("float")
+  @Column('float')
   @IsNumber()
   @ApiProperty()
   total: number;
@@ -66,11 +66,16 @@ export class Order {
   @Matches(/^\d+$/, { message: 'Phone number must be number only' })
   receiver_phone: string;
 
-  @ManyToOne(()=>PaymentMethod,(p)=>{p.orders})
-  @JoinColumn({name: "payment_id"})
+  @ManyToOne(
+    () => PaymentMethod,
+    (p) => {
+      p.orders;
+    },
+  )
+  @JoinColumn({ name: 'payment_id' })
   @Expose()
   @ApiProperty({
-    type: () => PaymentMethod
+    type: () => PaymentMethod,
   })
   payment: PaymentMethod;
 

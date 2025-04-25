@@ -13,9 +13,15 @@ import { PaymentMethod } from '../payment-method/entities/payment-method.entity'
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Order, OrderDetail, User, Product, PaymentMethod]),
+    TypeOrmModule.forFeature([
+      Order,
+      OrderDetail,
+      User,
+      Product,
+      PaymentMethod,
+    ]),
     BullModule.registerQueue({
-      name: 'orderQueue'
+      name: 'orderQueue',
     }),
   ],
   controllers: [OrdersController],

@@ -49,18 +49,18 @@ export class OrdersService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log(createOrderDTO)
+    console.log(createOrderDTO);
     try {
       const stockBackup = new Map<number, number>(); // productId -> originalStock
       const cart = await queryRunner.manager.findOne(Cart, {
         where: { id: createOrderDTO.cartId },
-        relations: ['items', 'items.product']
+        relations: ['items', 'items.product'],
       });
-      console.log(cart)
+      console.log(cart);
       if (!cart || cart.items.length === 0) {
         throw new BadRequestException('Cart Not Found');
       }
-      console.log(cart.items)
+      console.log(cart.items);
       for (const item of cart.items) {
         const product = await queryRunner.manager.findOne(
           this.productRepository.target,
@@ -85,13 +85,14 @@ export class OrdersService {
         await queryRunner.manager.save(product);
       }
 
-      const orderDetails: OrderDetail[] = cart.items.map((item) =>{
-        const result = plainToInstance(OrderDetail, item.product, { excludeExtraneousValues: true })
-        result.quantity = item.quantity
-        return result
-      }
-      );
-      console.log(orderDetails)
+      const orderDetails: OrderDetail[] = cart.items.map((item) => {
+        const result = plainToInstance(OrderDetail, item.product, {
+          excludeExtraneousValues: true,
+        });
+        result.quantity = item.quantity;
+        return result;
+      });
+      console.log(orderDetails);
       const order = this.orderRepository.create({
         subTotal: cart.subtotal,
         total: cart.total,
@@ -101,30 +102,35 @@ export class OrdersService {
         user: { id: userId },
         order_details: orderDetails,
         status: Status.orderSuccess,
-        payment: {id: createOrderDTO.paymentId}
+        payment: { id: createOrderDTO.paymentId },
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
 
-      await queryRunner.manager.update(Cart, { id: cart.id }, {
-        total: 0,
-        subtotal: 0,
-      });
+      await queryRunner.manager.update(
+        Cart,
+        { id: cart.id },
+        {
+          total: 0,
+          subtotal: 0,
+        },
+      );
       await queryRunner.commitTransaction();
 
       return `Order with id: ${savedOrder.id} is created`;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error)
-      throw new InternalServerErrorException(
-        error
-      );
+      console.log(error);
+      throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
     }
   }
 
-  async createPayPal(createOrderDTO: CreateOrderDto, userId: number | undefined) {
+  async createPayPal(
+    createOrderDTO: CreateOrderDto,
+    userId: number | undefined,
+  ) {
     if (userId === undefined) {
       throw new BadRequestException('Token not valid');
     }
@@ -137,18 +143,18 @@ export class OrdersService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log(createOrderDTO)
+    console.log(createOrderDTO);
     try {
       const stockBackup = new Map<number, number>();
       const cart = await queryRunner.manager.findOne(Cart, {
         where: { id: createOrderDTO.cartId },
-        relations: ['items', 'items.product']
+        relations: ['items', 'items.product'],
       });
-      console.log(cart)
+      console.log(cart);
       if (!cart || cart.items.length === 0) {
         throw new BadRequestException('Cart Not Found');
       }
-      console.log(cart.items)
+      console.log(cart.items);
       for (const item of cart.items) {
         const product = await queryRunner.manager.findOne(
           this.productRepository.target,
@@ -175,13 +181,14 @@ export class OrdersService {
 
       //call to paypal service
 
-      const orderDetails: OrderDetail[] = cart.items.map((item) =>{
-        const result = plainToInstance(OrderDetail, item.product, { excludeExtraneousValues: true })
-        result.quantity = item.quantity
-        return result
-      }
-      );
-      console.log(orderDetails)
+      const orderDetails: OrderDetail[] = cart.items.map((item) => {
+        const result = plainToInstance(OrderDetail, item.product, {
+          excludeExtraneousValues: true,
+        });
+        result.quantity = item.quantity;
+        return result;
+      });
+      console.log(orderDetails);
       const order = this.orderRepository.create({
         subTotal: cart.subtotal,
         total: cart.total,
@@ -191,24 +198,26 @@ export class OrdersService {
         user: { id: userId },
         order_details: orderDetails,
         status: Status.unpaid,
-        payment: {id: createOrderDTO.paymentId}
+        payment: { id: createOrderDTO.paymentId },
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
 
-      await queryRunner.manager.update(Cart, { id: cart.id }, {
-        total: 0,
-        subtotal: 0,
-      });
+      await queryRunner.manager.update(
+        Cart,
+        { id: cart.id },
+        {
+          total: 0,
+          subtotal: 0,
+        },
+      );
       await queryRunner.commitTransaction();
 
       return `Order with id: ${savedOrder.id} is created`;
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error)
-      throw new InternalServerErrorException(
-        error
-      );
+      console.log(error);
+      throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
     }

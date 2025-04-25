@@ -40,7 +40,7 @@ export class OrdersController {
     @Body() createOrderDTO: CreateOrderDto,
   ): Promise<APIResponseDTO<string>> {
     const userId = req.user?.id;
-    console.log(createOrderDTO)
+    console.log(createOrderDTO);
     const job = await this.orderQueue.add('orderQueue', {
       createOrderDTO,
       userId,
@@ -51,7 +51,11 @@ export class OrdersController {
       const result = await job.waitUntilFinished(queueEvents);
       return new APIResponseDTO<string>(true, 200, result);
     } catch (error) {
-      return new APIResponseDTO<string>(false, 400, error.message || 'Order failed');
+      return new APIResponseDTO<string>(
+        false,
+        400,
+        error.message || 'Order failed',
+      );
     }
   }
 

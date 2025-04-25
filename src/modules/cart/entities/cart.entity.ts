@@ -45,7 +45,7 @@ export class Cart {
   @JoinColumn()
   items: CartProduct[];
 
-  @Column("float")
+  @Column('float')
   @IsNotEmpty()
   @ApiProperty({
     type: Number,
@@ -53,7 +53,7 @@ export class Cart {
   })
   total: number;
 
-  @Column("float")
+  @Column('float')
   @IsNotEmpty()
   @ApiProperty({
     type: Number,

@@ -51,7 +51,6 @@ export class PaymentMethod {
   @UpdateDateColumn()
   updatedAt: Date;
 
-
   // TODO: Relations 1-n between PaymentMethod and Order
   @OneToMany(() => Order, (order) => order.payment)
   orders: Order[];

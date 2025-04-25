@@ -151,12 +151,11 @@ export class UserService implements OnModuleInit {
       ...newUser,
       password: hashedPassword,
       isDeleted: false,
-      cart: {total: 0, subtotal: 0}
+      cart: { total: 0, subtotal: 0 },
     });
-    
+
     await this.usersRepository.save(user);
-    
-    
+
     return user;
   }
 
