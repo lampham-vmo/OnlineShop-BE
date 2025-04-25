@@ -13,6 +13,7 @@ import Redis from 'ioredis'
         )
       }
     }
-  ]
+  ],
+  exports: [RedisService, 'REDIS_CLIENT']
 })
 export class RedisModule { }
