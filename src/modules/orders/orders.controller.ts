@@ -21,20 +21,42 @@ import {
 import { Request } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { Status } from './enum/status.enum';
+import { InjectQueue } from '@nestjs/bullmq';
+import { Queue, QueueEvents } from 'bullmq';
+import { ApiBearerAuth } from '@nestjs/swagger';
 
 @Controller('orders')
 export class OrdersController {
-  constructor(private readonly ordersService: OrdersService) {}
+  constructor(
+    private readonly ordersService: OrdersService,
+    @InjectQueue('orderQueue') private readonly orderQueue: Queue,
+  ) {}
 
   @Post()
+  @ApiBearerAuth()
   @UseGuards(AuthGuard)
   async create(
     @Req() req: Request,
-    @Body() createOrderDto: CreateOrderDto,
+    @Body() createOrderDTO: CreateOrderDto,
   ): Promise<APIResponseDTO<string>> {
     const userId = req.user?.id;
-    const result = await this.ordersService.create(createOrderDto, userId);
-    return new APIResponseDTO<string>(true, 200, result);
+    console.log(createOrderDTO);
+    const job = await this.orderQueue.add('orderQueue', {
+      createOrderDTO,
+      userId,
+    });
+    const queueEvents = new QueueEvents('orderQueue');
+    await queueEvents.waitUntilReady();
+    try {
+      const result = await job.waitUntilFinished(queueEvents);
+      return new APIResponseDTO<string>(true, 200, result);
+    } catch (error) {
+      return new APIResponseDTO<string>(
+        false,
+        400,
+        error.message || 'Order failed',
+      );
+    }
   }
 
   @Get('/all')

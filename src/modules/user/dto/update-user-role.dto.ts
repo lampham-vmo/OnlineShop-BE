@@ -16,7 +16,7 @@ export class UpdateProfileDTO extends PickType(User, [
   'email',
   'fullname',
   'phone',
-] as const) {
+] as const) {}
 
 }
 

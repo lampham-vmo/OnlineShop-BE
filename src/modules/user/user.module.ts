@@ -12,10 +12,10 @@ import { CartModule } from '../cart/cart.module';
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([User, Role,Cart]),
+    TypeOrmModule.forFeature([User, Role, Cart]),
     PermissionModule,
     RoleModule,
-    CartModule
+    CartModule,
   ],
   controllers: [UserController],
   providers: [UserService, JwtService],

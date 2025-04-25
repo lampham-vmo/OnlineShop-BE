@@ -93,12 +93,12 @@ export class AuthController {
     description: 'resent confirmation email success',
     type: APIResponseDTO<Boolean>,
   })
-  async reSendConfirmationEmail(@Param('email') email: string): Promise<APIResponseDTO<Boolean>> {
+  async reSendConfirmationEmail(
+    @Param('email') email: string,
+  ): Promise<APIResponseDTO<Boolean>> {
     const isResendEmail = await this.authService.resendConfirmEmail(email);
     return new APIResponseDTO<boolean>(isResendEmail, HttpStatus.OK, true);
   }
-
-
 
   @Get('confirm/:token')
   @RouteName('CONFIRM_EMAIL')
@@ -107,9 +107,11 @@ export class AuthController {
     description: 'confirm email success',
     type: APIResponseDTO<Boolean>,
   })
-  async confirmEmail(@Param('token') token: string): Promise<APIResponseDTO<Boolean>> {
+  async confirmEmail(
+    @Param('token') token: string,
+  ): Promise<APIResponseDTO<Boolean>> {
     const isConfirmEmail = await this.authService.confirmEmail(token);
-    return new APIResponseDTO<boolean>(isConfirmEmail, HttpStatus.OK, true)
+    return new APIResponseDTO<boolean>(isConfirmEmail, HttpStatus.OK, true);
   }
 
 
