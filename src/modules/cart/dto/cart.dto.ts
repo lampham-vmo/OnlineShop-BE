@@ -22,6 +22,9 @@ export class AddToCartProductDTO extends PickType(CartProduct, ['quantity']) {
   productId: number;
 }
 
+
+export class ChangeCartProductDTO extends PickType(CartProduct, ["id"]) {}
+
 export class ChangeCartProductQuantity extends PickType(CartProduct, ['id']) {}
 
 export class CartProductResponseDTO extends OmitType(CartProduct, [

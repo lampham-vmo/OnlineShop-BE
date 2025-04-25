@@ -11,7 +11,7 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { AddToCartProductDTO, GetCartFinalResponseDTO } from './dto/cart.dto';
+import { AddToCartProductDTO, ChangeCartProductDTO, GetCartFinalResponseDTO } from './dto/cart.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { Cart } from './entities/cart.entity';
@@ -63,9 +63,9 @@ export class CartController {
   })
   @RouteName('Get all product to cart')
   async getCart(
-    @Body() req: { userId: number },
+    @Req() req: Request,
   ): Promise<APIResponseDTO<Cart> | BadRequestException> {
-    const result = await this.cartService.getAllInCart(Number(req.userId));
+    const result = await this.cartService.getAllInCart(Number(req.user!.id));
     if (!result) {
       throw new BadRequestException('Can not get a cart');
     }
@@ -84,11 +84,12 @@ export class CartController {
   })
   @RouteName('Increase product quantity in a cart')
   async increaseQuantity(
-    @Body() req: { userId: number; productId: number },
+    @Req() req : Request,
+    @Body() req2: ChangeCartProductDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
     const result = await this.cartService.increaseQuantityById(
-      Number(req.userId),
-      Number(req.productId),
+      Number(req.user!.id),
+      Number(req2.id),
     );
     if (!result) {
       return {
@@ -113,11 +114,12 @@ export class CartController {
   })
   @RouteName('Decrease product quantity in a cart')
   async decreaseQuantity(
-    @Body() req: { userId: number; productId: number },
+    @Req() req : Request,
+    @Body() req2: ChangeCartProductDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
     const result = await this.cartService.decreaseQuantityById(
-      Number(req.userId),
-      Number(req.productId),
+      Number(req.user!.id),
+      Number(req2.id),
     );
     if (!result) {
       return {
@@ -142,10 +144,10 @@ export class CartController {
   })
   @RouteName('Delete a product in cart')
   async deleteCart(
-    @Body() req: { productId: string },
+    @Body() req2: ChangeCartProductDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
     const result = await this.cartService.deleteCartProductById(
-      Number(req.productId),
+      Number(req2.id),
     );
     if (!result) {
       return {
