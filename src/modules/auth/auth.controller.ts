@@ -16,7 +16,7 @@ import { LoginUserDTO } from 'src/modules/auth/dto/login-user.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from 'src/modules/user/user.service';
-import { CreateUserDTO } from './dto/create-user.dto';
+import { CreateUserDTO, VerifyEmailDTO } from './dto/create-user.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import {
@@ -40,7 +40,7 @@ export class AuthController {
   constructor(
     private readonly authService: AuthService,
     private readonly userService: UserService,
-  ) {}
+  ) { }
 
   @Get('refreshAT')
   @RouteName('refresh access token')
@@ -113,6 +113,36 @@ export class AuthController {
     const isConfirmEmail = await this.authService.confirmEmail(token);
     return new APIResponseDTO<boolean>(isConfirmEmail, HttpStatus.OK, true);
   }
+
+
+  @Post('reset-password')
+  @RouteName('RESET_PASSWORD')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'confirm email success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async resetPassword(@Body() verifyEmailDTO: VerifyEmailDTO,
+  ): Promise<APIResponseDTO<Boolean>> {
+    const result = await this.authService.sendResetPasswordEmail(verifyEmailDTO.email)
+    return new APIResponseDTO<boolean>(result, HttpStatus.OK, result)
+  }
+
+  @Get('reset-password/confirm/:token')
+  @RouteName('CONFIRM_RESET_PASSWORD_TOKEN')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'confirm reset password token success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async confirmResetPasswordToken(
+    @Param('token') token: string,
+  ): Promise<APIResponseDTO<Boolean>> {
+    const result = await this.authService.confirmResetPasswordToken(token)
+    return new APIResponseDTO<boolean>(result, HttpStatus.OK, result)
+  }
+
+
 
   @Post('login')
   @RouteName('user login')

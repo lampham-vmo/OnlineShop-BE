@@ -1,4 +1,4 @@
-import { Module, OnModuleInit, RequestMethod } from '@nestjs/common';
+import { Inject, Module, OnModuleInit, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
@@ -18,6 +18,9 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
 import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
+import Redis from 'ioredis'
+import { RedisModule } from './modules/redis/redis.module';
+import { RedisService } from './modules/redis/redis.service';
 // import { EmailService } from './email/email.service';
 @Module({
   imports: [
@@ -58,6 +61,8 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
     CategoryModule,
     OrdersModule,
     PaymentMethodModule,
+    RedisModule
+
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
@@ -66,12 +71,13 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly metadataScanner: MetadataScanner,
-    private readonly reflector: Reflector,
+    private readonly redisService: RedisService,
     private readonly permissionService: PermissionService,
-  ) {}
+  ) { }
 
   onModuleInit() {
     this.getAllRouteAndInsertIntoPermission();
+    this.redisService.deleteCacheOfPermissionAndRole();
   }
 
   getAllRouteAndInsertIntoPermission() {
@@ -124,4 +130,6 @@ export class AppModule implements OnModuleInit {
     //sync permission in db every time app run
     this.permissionService.syncPermissions(routes);
   }
+
+  
 }
