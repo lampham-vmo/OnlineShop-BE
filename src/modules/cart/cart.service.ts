@@ -87,12 +87,12 @@ export class CartService {
   async getAllInCart(userId: number): Promise<Cart | null> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
+      relations: ['items', 'items.product'], 
     });
     if (!cart) {
       return null;
-    } else {
-      return cart;
     }
+    return cart;
   }
 
   async increaseQuantityById(
