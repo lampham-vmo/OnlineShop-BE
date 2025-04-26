@@ -1,5 +1,4 @@
 const ForgotPasswordEmailHTML = (
-  newPassword: string,
   resetUrl: string,
 ): string => {
   return `<div style="background-color: #e3f2fd; padding: 40px; font-family: 'Segoe UI', sans-serif; color: #0d47a1;">
@@ -29,20 +28,6 @@ const ForgotPasswordEmailHTML = (
           ✔️ Confirm reset password
         </a>
       </div>
-  
-        <!-- New Password -->
-        <div style="background-color: #e3f2fd; padding: 16px; border-radius: 6px; margin: 30px 0; text-align: center;">
-          <p style="font-size: 15px; margin: 0; color: #0d47a1;">
-            After reset, your new password is:
-          </p>
-          <p style="font-size: 20px; font-weight: bold; margin: 10px 0; color: #1565c0;">
-            ${newPassword}
-          </p>
-        </div>
-  
-        <p style="font-size: 14px; color: #1565c0;">
-          For security reasons, we recommend logging in and changing your password as soon as possible.
-        </p>
   
         <hr style="border: none; border-top: 1px solid #bbdefb; margin: 40px 0;">
   

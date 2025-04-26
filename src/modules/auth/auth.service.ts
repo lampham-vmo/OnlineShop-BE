@@ -15,8 +15,7 @@ import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
 import { EmailService } from '../email/email.service';
-import { ConfirmResetPasswordToken, Email } from 'src/common/types/type';
-import { generateStrongPassword } from 'src/common/util/randomPassword';
+import {Email } from 'src/common/types/type';
 interface Payload {
   id: number;
   email: string;
@@ -162,24 +161,21 @@ export class AuthService {
     //check if email exists in DB
     const user = await this.usersService.findOneByEmail(email);
     if (!user) throw new BadRequestException('Email not found!');
-    //create password
-    const newResetPassword = generateStrongPassword(16);
     //create token
     const resetPasswordToken = this.createJwtFromPayload(
-      { email: email, newPassword: newResetPassword },
+      { email: email },
       '10m',
     );
     //send email to user
     await this.emailService.sendResetPasswordEmail(
       email,
-      newResetPassword,
       resetPasswordToken,
     );
     return true;
   }
 
-  async confirmResetPasswordToken(token: string): Promise<boolean> {
-    let payload: ConfirmResetPasswordToken;
+  async confirmResetPasswordToken(token: string, newPassword: string): Promise<boolean> {
+    let payload: Email
     try {
       payload = this.jwtService.verify(token, {
         publicKey: process.env.JWT_PUBLIC_KEY,
@@ -191,7 +187,7 @@ export class AuthService {
     if (!payload) throw new BadRequestException('invalid payload!');
     return await this.usersService.updatePasswordByEmail(
       payload.email,
-      payload.newPassword,
+      newPassword,
     );
   }
 

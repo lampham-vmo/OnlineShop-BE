@@ -34,6 +34,7 @@ import {
 } from '@nestjs/swagger';
 import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
+import { ForgetPassworDTO, UpdatePasswordDTO } from '../user/dto/update-user-role.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -130,7 +131,7 @@ export class AuthController {
     return new APIResponseDTO<boolean>(result, HttpStatus.OK, result);
   }
 
-  @Get('reset-password/confirm/:token')
+  @Patch('reset-password/confirm/:token')
   @RouteName('CONFIRM_RESET_PASSWORD_TOKEN')
   @ApiProperty()
   @ApiOkResponse({
@@ -139,8 +140,9 @@ export class AuthController {
   })
   async confirmResetPasswordToken(
     @Param('token') token: string,
+    @Body() forgetPasswordDTO : ForgetPassworDTO
   ): Promise<APIResponseDTO<Boolean>> {
-    const result = await this.authService.confirmResetPasswordToken(token);
+    const result = await this.authService.confirmResetPasswordToken(token, forgetPasswordDTO.password);
     return new APIResponseDTO<boolean>(result, HttpStatus.OK, result);
   }
 

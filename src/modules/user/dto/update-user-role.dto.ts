@@ -18,6 +18,7 @@ export class UpdateProfileDTO extends PickType(User, [
   'phone',
 ] as const) {}
 
+
 export class UpdatePasswordDTO extends PickType(User, ['password'] as const) {
   @IsNotEmpty()
   @IsString()
@@ -65,3 +66,6 @@ export class UpdatePasswordDTO extends PickType(User, ['password'] as const) {
   })
   confirmPassword: string;
 }
+
+
+export class ForgetPassworDTO extends PickType(UpdatePasswordDTO, ['password', 'confirmPassword'] as const){}

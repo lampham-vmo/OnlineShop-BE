@@ -48,12 +48,11 @@ export class EmailService {
 
   async sendResetPasswordEmail(
     email: string,
-    password: string,
     resetPasswordToken: string,
   ): Promise<void> {
     try {
       const resetUrl = `${process.env.FE_HOST}/reset-password?token=${resetPasswordToken}`;
-      const htmlPage = ForgotPasswordEmailHTML(password, resetUrl);
+      const htmlPage = ForgotPasswordEmailHTML(resetUrl);
       await this.transporter.sendMail({
         from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
         to: email,
