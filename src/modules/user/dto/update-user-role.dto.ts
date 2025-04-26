@@ -18,7 +18,7 @@ export class UpdateProfileDTO extends PickType(User, [
   'phone',
 ] as const) {}
 
-}
+
 
 export class UpdatePasswordDTO extends PickType(User, ['password'] as const){
   @IsNotEmpty()
