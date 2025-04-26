@@ -11,7 +11,11 @@ import {
   UseGuards,
 } from '@nestjs/common';
 import { CartService } from './cart.service';
-import { AddToCartProductDTO, ChangeCartProductDTO, GetCartFinalResponseDTO } from './dto/cart.dto';
+import {
+  AddToCartProductDTO,
+  ChangeCartProductDTO,
+  GetCartFinalResponseDTO,
+} from './dto/cart.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { Cart } from './entities/cart.entity';
@@ -84,7 +88,7 @@ export class CartController {
   })
   @RouteName('Increase product quantity in a cart')
   async increaseQuantity(
-    @Req() req : Request,
+    @Req() req: Request,
     @Body() req2: ChangeCartProductDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
     const result = await this.cartService.increaseQuantityById(
@@ -114,7 +118,7 @@ export class CartController {
   })
   @RouteName('Decrease product quantity in a cart')
   async decreaseQuantity(
-    @Req() req : Request,
+    @Req() req: Request,
     @Body() req2: ChangeCartProductDTO,
   ): Promise<APIResponseDTO<{ message: string }>> {
     const result = await this.cartService.decreaseQuantityById(

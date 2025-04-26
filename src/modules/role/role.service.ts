@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
@@ -16,24 +20,22 @@ export class RoleService implements OnModuleInit {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
-    private readonly redisService: RedisService
+    private readonly redisService: RedisService,
   ) {}
   async onModuleInit(): Promise<void> {
     await this.createDefaultRoles();
     await this.assignAllPermissionToAdmin();
   }
-  private async assignAllPermissionToAdmin(): Promise<void>{
+  private async assignAllPermissionToAdmin(): Promise<void> {
     const role = await this.roleRepository.findOne({
-      where: {id: 1},
-      relations: ['permissions']
-    })
-    if(!role) throw new InternalServerErrorException('role not found?')
+      where: { id: 1 },
+      relations: ['permissions'],
+    });
+    if (!role) throw new InternalServerErrorException('role not found?');
     const allPermissions = await this.permissionRepository.find();
     role.permissions = allPermissions;
     await this.roleRepository.save(role);
-
   }
-
 
   private async createDefaultRoles(): Promise<void> {
     const roles = [
@@ -103,8 +105,8 @@ export class RoleService implements OnModuleInit {
     }
 
     await this.roleRepository.save(role);
-    //delete cache 
-    this.redisService.deleteCacheOfPermissionAndRole()
+    //delete cache
+    this.redisService.deleteCacheOfPermissionAndRole();
     return 'Successfully updated a user';
   }
 
@@ -150,7 +152,7 @@ export class RoleService implements OnModuleInit {
       where: { id: roleId }, // truyền ID role vào
       relations: ['permissions'],
     });
-    return role
+    return role;
   }
 
   async getPermissionIdByRoleId(roleId: number): Promise<number[]> {
@@ -158,8 +160,8 @@ export class RoleService implements OnModuleInit {
       where: { id: roleId }, // truyền ID role vào
       relations: ['permissions'],
     });
-    if(!role) return []
-    const permission = role.permissions.map(permission  => permission.id)
+    if (!role) return [];
+    const permission = role.permissions.map((permission) => permission.id);
     return permission;
   }
 }

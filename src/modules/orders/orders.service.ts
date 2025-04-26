@@ -227,8 +227,7 @@ export class OrdersService {
     page: number,
     user: UserPayLoad | undefined,
   ): Promise<OrderPagingDTO> {
-    try{
-
+    try {
       const pageSize = 10;
       const where: any = {};
       if (user === undefined) {
@@ -237,15 +236,15 @@ export class OrdersService {
       if (user.role !== 1) {
         where.user = { id: user.id };
       }
-      console.log(where)
+      console.log(where);
       const [order, totalItems] = await this.orderRepository.findAndCount({
         where,
         skip: (page - 1) * pageSize,
         take: pageSize,
         order: { createdAt: 'DESC' },
-        relations: ['order_details']
+        relations: ['order_details'],
       });
-      console.log(order)
+      console.log(order);
       const transformed = plainToInstance(
         OrderResponseDTO,
         order.map((o) => ({
@@ -259,9 +258,9 @@ export class OrdersService {
         totalItems: totalItems,
       };
       return new OrderPagingDTO(transformed, pagination);
-    } catch(error){
-      console.log(error)
-      throw new BadRequestException(error)
+    } catch (error) {
+      console.log(error);
+      throw new BadRequestException(error);
     }
   }
 
