@@ -1,4 +1,4 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import ConfirmEmailHTML from './html/html.confirmEmail';
 import ForgotPasswordEmailHTML from './html/html.forgetpassword';
@@ -28,7 +28,7 @@ export class EmailService {
           html: htmlPage,
         });
       }catch(err){
-        console.log(err);
+        throw new InternalServerErrorException("Confirm Order Email error!")
       }
   }
 
@@ -50,7 +50,8 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException("Confirm Code Email error!")
+
     }
   }
 
@@ -66,7 +67,8 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException("Confirm confirm Email error!")
+
     }
   }
 
@@ -84,7 +86,8 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException("Confirm reset password Email error!")
+
     }
   }
 }
