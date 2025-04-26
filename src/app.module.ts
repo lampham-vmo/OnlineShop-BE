@@ -21,6 +21,7 @@ import { PaymentMethodModule } from './modules/payment-method/payment-method.mod
 import Redis from 'ioredis';
 import { RedisModule } from './modules/redis/redis.module';
 import { RedisService } from './modules/redis/redis.service';
+import { PaypalModule } from './modules/paypal/paypal.module';
 // import { EmailService } from './email/email.service';
 @Module({
   imports: [
@@ -62,6 +63,7 @@ import { RedisService } from './modules/redis/redis.service';
     OrdersModule,
     PaymentMethodModule,
     RedisModule,
+    PaypalModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
