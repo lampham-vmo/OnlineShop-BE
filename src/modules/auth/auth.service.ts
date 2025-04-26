@@ -157,18 +157,25 @@ export class AuthService {
   //3. frontend then send request to backend with token
   //4. backend will decode token to take payload that contain email and password
   //5. backend will update password for this email with new password
-  
-  async sendResetPasswordEmail(email: string): Promise<boolean>{
+
+  async sendResetPasswordEmail(email: string): Promise<boolean> {
     //check if email exists in DB
     const user = await this.usersService.findOneByEmail(email);
-    if (!user) throw new BadRequestException('Email not found!')
-      //create password
-    const newResetPassword = generateStrongPassword(16)
+    if (!user) throw new BadRequestException('Email not found!');
+    //create password
+    const newResetPassword = generateStrongPassword(16);
     //create token
-    const resetPasswordToken = this.createJwtFromPayload({ email: email, newPassword: newResetPassword }, '10m');
+    const resetPasswordToken = this.createJwtFromPayload(
+      { email: email, newPassword: newResetPassword },
+      '10m',
+    );
     //send email to user
-    await this.emailService.sendResetPasswordEmail(email, newResetPassword, resetPasswordToken)
-    return true
+    await this.emailService.sendResetPasswordEmail(
+      email,
+      newResetPassword,
+      resetPasswordToken,
+    );
+    return true;
   }
 
   async confirmResetPasswordToken(token: string): Promise<boolean> {
@@ -179,12 +186,14 @@ export class AuthService {
         algorithms: ['RS256'],
       });
     } catch (err) {
-      throw new BadRequestException('Invalid token!')
+      throw new BadRequestException('Invalid token!');
     }
-    if (!payload) throw new BadRequestException('invalid payload!')
-    return await this.usersService.updatePasswordByEmail(payload.email, payload.newPassword)
+    if (!payload) throw new BadRequestException('invalid payload!');
+    return await this.usersService.updatePasswordByEmail(
+      payload.email,
+      payload.newPassword,
+    );
   }
-
 
   //send email to reset password
   // async sendResetPasswordEmail(email: string, id: number): Promise<boolean> {
@@ -205,7 +214,7 @@ export class AuthService {
   //     console.log(err);
   //   }
   //   return false
-  
+
   // }
 
   //sign up

@@ -18,9 +18,7 @@ export class UpdateProfileDTO extends PickType(User, [
   'phone',
 ] as const) {}
 
-
-
-export class UpdatePasswordDTO extends PickType(User, ['password'] as const){
+export class UpdatePasswordDTO extends PickType(User, ['password'] as const) {
   @IsNotEmpty()
   @IsString()
   @MinLength(8)
@@ -33,17 +31,16 @@ export class UpdatePasswordDTO extends PickType(User, ['password'] as const){
     },
   )
   @ApiProperty({
-      type: 'string',
-      example: 'StrongP@ssw0rd!',
-      description:
-        'oldpassword must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      minLength: 8,
-      maxLength: 20,
-      pattern:
-        '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
-    })
+    type: 'string',
+    example: 'StrongP@ssw0rd!',
+    description:
+      'oldpassword must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    minLength: 8,
+    maxLength: 20,
+    pattern:
+      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
+  })
   oldPassword: string;
-
 
   @IsNotEmpty()
   @IsString()
@@ -57,14 +54,14 @@ export class UpdatePasswordDTO extends PickType(User, ['password'] as const){
     },
   )
   @ApiProperty({
-      type: 'string',
-      example: 'StrongP@ssw0rd!',
-      description:
-        'confirmPassword must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
-      minLength: 8,
-      maxLength: 20,
-      pattern:
-        '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
-    })
+    type: 'string',
+    example: 'StrongP@ssw0rd!',
+    description:
+      'confirmPassword must contain at least one uppercase letter, one lowercase letter, one number, and one special character',
+    minLength: 8,
+    maxLength: 20,
+    pattern:
+      '^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&])[A-Za-z\\d@$!%*?&]{8,}$',
+  })
   confirmPassword: string;
 }

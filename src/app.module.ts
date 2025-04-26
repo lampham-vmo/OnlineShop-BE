@@ -18,7 +18,7 @@ import { OrdersModule } from './modules/orders/orders.module';
 import { BullModule } from '@nestjs/bullmq';
 import 'dotenv/config';
 import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
-import Redis from 'ioredis'
+import Redis from 'ioredis';
 import { RedisModule } from './modules/redis/redis.module';
 import { RedisService } from './modules/redis/redis.service';
 // import { EmailService } from './email/email.service';
@@ -61,8 +61,7 @@ import { RedisService } from './modules/redis/redis.service';
     CategoryModule,
     OrdersModule,
     PaymentMethodModule,
-    RedisModule
-
+    RedisModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
@@ -73,7 +72,7 @@ export class AppModule implements OnModuleInit {
     private readonly metadataScanner: MetadataScanner,
     private readonly redisService: RedisService,
     private readonly permissionService: PermissionService,
-  ) { }
+  ) {}
 
   onModuleInit() {
     this.getAllRouteAndInsertIntoPermission();
@@ -130,6 +129,4 @@ export class AppModule implements OnModuleInit {
     //sync permission in db every time app run
     this.permissionService.syncPermissions(routes);
   }
-
-  
 }

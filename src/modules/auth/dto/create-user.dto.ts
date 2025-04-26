@@ -37,5 +37,4 @@ export class CreateUserDTO extends PickType(User, [
   role_id: number = 2;
 }
 
-
 export class VerifyEmailDTO extends PickType(User, ['email'] as const) {}
