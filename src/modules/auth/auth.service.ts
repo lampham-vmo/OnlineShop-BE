@@ -15,7 +15,7 @@ import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { RoleService } from '../role/role.service';
 import { Permission } from '../permission/entities/permission.entity';
 import { EmailService } from '../email/email.service';
-import {Email } from 'src/common/types/type';
+import { Email } from 'src/common/types/type';
 interface Payload {
   id: number;
   email: string;
@@ -167,15 +167,15 @@ export class AuthService {
       '10m',
     );
     //send email to user
-    await this.emailService.sendResetPasswordEmail(
-      email,
-      resetPasswordToken,
-    );
+    await this.emailService.sendResetPasswordEmail(email, resetPasswordToken);
     return true;
   }
 
-  async confirmResetPasswordToken(token: string, newPassword: string): Promise<boolean> {
-    let payload: Email
+  async confirmResetPasswordToken(
+    token: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    let payload: Email;
     try {
       payload = this.jwtService.verify(token, {
         publicKey: process.env.JWT_PUBLIC_KEY,

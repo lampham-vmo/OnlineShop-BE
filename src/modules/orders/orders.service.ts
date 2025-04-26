@@ -1,5 +1,6 @@
 import {
   BadRequestException,
+  HttpStatus,
   Injectable,
   InternalServerErrorException,
 } from '@nestjs/common';
@@ -12,15 +13,15 @@ import {
   OrderPagingDTO,
   OrderResponseDTO,
 } from './dto/response/order.response.dto';
-import { plainToClass, plainToInstance } from 'class-transformer';
+import { plainToInstance } from 'class-transformer';
 import { UserPayLoad } from 'src/common/type/express';
 import { Status } from './enum/status.enum';
 import { User } from '../user/entities/user.entity';
-import { InjectQueue } from '@nestjs/bullmq';
-import { Queue } from 'bullmq';
 import { Product } from '../product/Entity/product.entity';
 import { Cart } from '../cart/entities/cart.entity';
 import { CartProduct } from '../cart/entities/cart_product.entity';
+import { PaypalService } from '../paypal/paypal.service';
+import { OrderStatus } from '@paypal/paypal-server-sdk';
 
 @Injectable()
 export class OrdersService {
@@ -34,6 +35,7 @@ export class OrdersService {
     @InjectRepository(Product)
     private readonly productRepository: Repository<Product>,
     private readonly dataSource: DataSource,
+    private readonly paypalService: PaypalService,
   ) {}
 
   async createCod(createOrderDTO: CreateOrderDto, userId: number | undefined) {
@@ -49,7 +51,7 @@ export class OrdersService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log(createOrderDTO);
+
     try {
       const stockBackup = new Map<number, number>(); // productId -> originalStock
       const cart = await queryRunner.manager.findOne(Cart, {
@@ -60,7 +62,6 @@ export class OrdersService {
       if (!cart || cart.items.length === 0) {
         throw new BadRequestException('Cart Not Found');
       }
-      console.log(cart.items);
       for (const item of cart.items) {
         const product = await queryRunner.manager.findOne(
           this.productRepository.target,
@@ -92,7 +93,6 @@ export class OrdersService {
         result.quantity = item.quantity;
         return result;
       });
-      console.log(orderDetails);
       const order = this.orderRepository.create({
         subTotal: cart.subtotal,
         total: cart.total,
@@ -117,10 +117,12 @@ export class OrdersService {
       );
       await queryRunner.commitTransaction();
 
-      return `Order with id: ${savedOrder.id} is created`;
+      return {
+        jsonResponse: { id: savedOrder.id, status: 'CREATED' },
+        httpStatusCode: HttpStatus.CREATED,
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error);
       throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
@@ -150,11 +152,9 @@ export class OrdersService {
         where: { id: createOrderDTO.cartId },
         relations: ['items', 'items.product'],
       });
-      console.log(cart);
       if (!cart || cart.items.length === 0) {
         throw new BadRequestException('Cart Not Found');
       }
-      console.log(cart.items);
       for (const item of cart.items) {
         const product = await queryRunner.manager.findOne(
           this.productRepository.target,
@@ -179,8 +179,15 @@ export class OrdersService {
         await queryRunner.manager.save(product);
       }
 
-      //call to paypal service
+      // Call to paypal service to createOrderPaypal
+      const resultCreateOrderPaypal = await this.paypalService.createOrder({
+        total: cart.subtotal,
+      });
 
+      // OrderPaypalId
+      const paypalOrderId = resultCreateOrderPaypal.jsonResponse.id;
+
+      // Insert OrderDetails (Success)
       const orderDetails: OrderDetail[] = cart.items.map((item) => {
         const result = plainToInstance(OrderDetail, item.product, {
           excludeExtraneousValues: true,
@@ -188,7 +195,7 @@ export class OrdersService {
         result.quantity = item.quantity;
         return result;
       });
-      console.log(orderDetails);
+
       const order = this.orderRepository.create({
         subTotal: cart.subtotal,
         total: cart.total,
@@ -199,6 +206,7 @@ export class OrdersService {
         order_details: orderDetails,
         status: Status.unpaid,
         payment: { id: createOrderDTO.paymentId },
+        orderPaypalId: paypalOrderId,
       });
       const savedOrder = await queryRunner.manager.save(order);
       await queryRunner.manager.delete(CartProduct, { cart: { id: cart.id } });
@@ -213,10 +221,15 @@ export class OrdersService {
       );
       await queryRunner.commitTransaction();
 
-      return `Order with id: ${savedOrder.id} is created`;
+      return {
+        jsonResponse: {
+          ...resultCreateOrderPaypal.jsonResponse,
+          id: `${paypalOrderId}-${savedOrder.id}`,
+        },
+        httpStatusCode: HttpStatus.CREATED,
+      };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      console.log(error);
       throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
@@ -290,9 +303,49 @@ export class OrdersService {
       if (e instanceof BadRequestException) {
         throw e;
       }
-      throw new InternalServerErrorException(
-        'Failed to change order status with error: ' + e,
-      );
+      throw new InternalServerErrorException({
+        message: 'Failed to change status with error' + e,
+      });
     }
+  }
+
+  async validateUserOrderPaypal(
+    userId: number,
+    orderId: number,
+    orderPaypalId: string,
+  ): Promise<Order> {
+    const order = await this.orderRepository.findOne({
+      where: {
+        id: orderId,
+        orderPaypalId: orderPaypalId,
+        user: { id: userId },
+      },
+    });
+
+    if (!order) {
+      throw new Error('Order not found or not authorized.');
+    }
+
+    return order;
+  }
+
+  async captureOrderPaypal(orderPaypalId: string, orderId: string) {
+    const { jsonResponse, httpStatusCode } =
+      await this.paypalService.captureOrder(orderPaypalId);
+
+    if (
+      jsonResponse.purchase_units[0].payments.captures[0].status !==
+      OrderStatus.Completed
+    ) {
+      throw new Error('Failed to complete checkout');
+    }
+
+    await this.changeStatus(Status.orderSuccess, +orderId);
+
+    return {
+      httpStatusCode: httpStatusCode,
+      id: orderPaypalId,
+      status: OrderStatus.Completed,
+    };
   }
 }
