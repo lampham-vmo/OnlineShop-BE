@@ -227,35 +227,42 @@ export class OrdersService {
     page: number,
     user: UserPayLoad | undefined,
   ): Promise<OrderPagingDTO> {
-    const pageSize = 10;
-    const where: any = {};
-    if (user === undefined) {
-      throw new BadRequestException('Not valid Token');
-    }
-    if (user.role !== 1) {
-      where.user_id = user.id;
-    }
+    try{
 
-    const [order, totalItems] = await this.orderRepository.findAndCount({
-      where,
-      skip: (page - 1) * pageSize,
-      take: pageSize,
-      order: { createdAt: 'DESC' },
-    });
-
-    const transformed = plainToInstance(
-      OrderResponseDTO,
-      order.map((o) => ({
-        ...o,
-      })),
-    );
-    const pagination = {
-      currentPage: +page,
-      pageSize: pageSize,
-      totalPages: Math.ceil(totalItems / pageSize),
-      totalItems: totalItems,
-    };
-    return new OrderPagingDTO(transformed, pagination);
+      const pageSize = 10;
+      const where: any = {};
+      if (user === undefined) {
+        throw new BadRequestException('Not valid Token');
+      }
+      if (user.role !== 1) {
+        where.user = { id: user.id };
+      }
+      console.log(where)
+      const [order, totalItems] = await this.orderRepository.findAndCount({
+        where,
+        skip: (page - 1) * pageSize,
+        take: pageSize,
+        order: { createdAt: 'DESC' },
+        relations: ['order_details']
+      });
+      console.log(order)
+      const transformed = plainToInstance(
+        OrderResponseDTO,
+        order.map((o) => ({
+          ...o,
+        })),
+      );
+      const pagination = {
+        currentPage: +page,
+        pageSize: pageSize,
+        totalPages: Math.ceil(totalItems / pageSize),
+        totalItems: totalItems,
+      };
+      return new OrderPagingDTO(transformed, pagination);
+    } catch(error){
+      console.log(error)
+      throw new BadRequestException(error)
+    }
   }
 
   async findOne(id: number): Promise<OrderResponseDTO> {

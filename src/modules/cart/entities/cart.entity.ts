@@ -39,7 +39,7 @@ export class Cart {
     eager: true,
   })
   @ApiProperty({
-    type: () => CartProduct,
+    type: () => [CartProduct],
     description: 'Array of cart products',
   })
   @JoinColumn()
