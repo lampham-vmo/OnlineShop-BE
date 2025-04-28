@@ -169,14 +169,14 @@ export class CartController {
 
   // TODO: clear cart
   @Delete('clear-cart')
-  // @UseGuards(AuthGuard)
+  @UseGuards(AuthGuard)
   @ApiOkResponse({
     description: 'Success message when clearing a cart',
     type: UserSuccessMessageFinalResponseDTO,
   })
   @RouteName('Clear the whole cart')
   async clearCart(@Req() req :Request): Promise<APIResponseDTO<{message: string}>> {
-    const userId = Number(req.user?.id)
+    const userId = Number(req.user!.id)
     const isDeleted = await this.cartService.clearAllInCart(userId);
     if (isDeleted) {
       return {
@@ -186,8 +186,8 @@ export class CartController {
       };
     } else {
       return {
-        statusCode: 200,
-        success: true,
+        statusCode: 400,
+        success: false,
         data: {message: `The cart for user ${userId} not found.` }
       };
     }
