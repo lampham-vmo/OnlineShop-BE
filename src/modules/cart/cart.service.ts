@@ -11,19 +11,30 @@ export class CartService {
   constructor(
     @InjectRepository(Product) private productRepository: Repository<Product>,
     @InjectRepository(User) private userRepository: Repository<User>,
-    @InjectRepository(CartProduct) private cartProductRepository: Repository<CartProduct>,
+    @InjectRepository(CartProduct)
+    private cartProductRepository: Repository<CartProduct>,
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
   ) {}
 
   private calculateCartTotals(items: CartProduct[]) {
-    const total = items.reduce((sum, item) => sum + item.product.price * item.quantity, 0);
-    const subtotal = items.reduce((sum, item) => 
-      sum + (item.product.price * (1 - item.product.discount / 100)) * item.quantity,
-    0);
+    const total = items.reduce(
+      (sum, item) => sum + item.product.price * item.quantity,
+      0,
+    );
+    const subtotal = items.reduce(
+      (sum, item) =>
+        sum +
+        item.product.price * (1 - item.product.discount / 100) * item.quantity,
+      0,
+    );
     return { total, subtotal };
   }
 
-  async addProductToCart(userId: number, productId: number, quantity: number): Promise<boolean> {
+  async addProductToCart(
+    userId: number,
+    productId: number,
+    quantity: number,
+  ): Promise<boolean> {
     try {
       const product = await this.productRepository.findOneBy({ id: productId });
       const cart = await this.cartRepository.findOne({
@@ -35,7 +46,9 @@ export class CartService {
         return false;
       }
 
-      const existingItem = cart.items.find(item => item.product.id === productId);
+      const existingItem = cart.items.find(
+        (item) => item.product.id === productId,
+      );
 
       if (existingItem) {
         existingItem.quantity += quantity;
@@ -77,13 +90,22 @@ export class CartService {
     return cart || null;
   }
 
-  async increaseQuantityById(userId: number, cartProductId: number): Promise<boolean> {
+  async increaseQuantityById(
+    userId: number,
+    cartProductId: number,
+  ): Promise<boolean> {
     const cartProduct = await this.cartProductRepository.findOne({
       where: {
         id: cartProductId,
         cart: { user: { id: userId } },
       },
-      relations: ['cart', 'cart.user', 'cart.items', 'cart.items.product', 'product'],
+      relations: [
+        'cart',
+        'cart.user',
+        'cart.items',
+        'cart.items.product',
+        'product',
+      ],
     });
 
     if (!cartProduct) return false;
@@ -92,10 +114,12 @@ export class CartService {
     const maxQty = cartProduct.product.stock;
     const newQty = currentQty >= maxQty ? maxQty : currentQty + 1;
 
-    await this.cartProductRepository.update(cartProductId, { quantity: newQty });
+    await this.cartProductRepository.update(cartProductId, {
+      quantity: newQty,
+    });
 
     const { total, subtotal } = this.calculateCartTotals(
-      cartProduct.cart.items.map(item => ({
+      cartProduct.cart.items.map((item) => ({
         ...item,
         quantity: item.id === cartProductId ? newQty : item.quantity,
       })),
@@ -106,13 +130,22 @@ export class CartService {
     return true;
   }
 
-  async decreaseQuantityById(userId: number, cartProductId: number): Promise<boolean> {
+  async decreaseQuantityById(
+    userId: number,
+    cartProductId: number,
+  ): Promise<boolean> {
     const cartProduct = await this.cartProductRepository.findOne({
       where: {
         id: cartProductId,
         cart: { user: { id: userId } },
       },
-      relations: ['cart', 'cart.user', 'cart.items', 'cart.items.product', 'product'],
+      relations: [
+        'cart',
+        'cart.user',
+        'cart.items',
+        'cart.items.product',
+        'product',
+      ],
     });
 
     if (!cartProduct) return false;
@@ -121,10 +154,12 @@ export class CartService {
     const minQty = 1;
     const newQty = currentQty <= minQty ? minQty : currentQty - 1;
 
-    await this.cartProductRepository.update(cartProductId, { quantity: newQty });
+    await this.cartProductRepository.update(cartProductId, {
+      quantity: newQty,
+    });
 
     const { total, subtotal } = this.calculateCartTotals(
-      cartProduct.cart.items.map(item => ({
+      cartProduct.cart.items.map((item) => ({
         ...item,
         quantity: item.id === cartProductId ? newQty : item.quantity,
       })),
@@ -147,7 +182,9 @@ export class CartService {
 
     await this.cartProductRepository.delete({ id: productId });
 
-    const remainingItems = cartProduct.cart.items.filter(item => item.id !== productId);
+    const remainingItems = cartProduct.cart.items.filter(
+      (item) => item.id !== productId,
+    );
 
     const { total, subtotal } = this.calculateCartTotals(remainingItems);
 
