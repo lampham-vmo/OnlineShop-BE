@@ -221,12 +221,13 @@ export class CartService {
   async clearAllInCart(userId: number): Promise<boolean> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
-      select: ['id'],
+      relations: ['items'],
     });
-
-    if (!cart) return false
-
-    await this.cartRepository.delete(cart.id)
-    return true
+    if (!cart) return false;
+    if (cart.items.length > 0) {
+      await this.cartProductRepository.remove(cart.items);
+    }
+    await this.cartRepository.update(cart.id, { total: 0, subtotal: 0 });
+    return true;
   }
 }
