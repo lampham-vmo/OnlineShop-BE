@@ -65,7 +65,7 @@ export class OrdersService {
         const product = await queryRunner.manager.findOne(
           this.productRepository.target,
           {
-            where: { id: item.product.id },
+            where: { id: item.product.id, isDeleted: false },
             lock: { mode: 'pessimistic_write' },
           },
         );
@@ -243,7 +243,7 @@ export class OrdersService {
         skip: (page - 1) * pageSize,
         take: pageSize,
         order: { createdAt: 'DESC' },
-        relations: ['order_details']
+        relations: ['order_details','payment']
       });
       console.log(order)
       const transformed = plainToInstance(
@@ -266,14 +266,19 @@ export class OrdersService {
   }
 
   async findOne(id: number): Promise<OrderResponseDTO> {
-    const order = await this.orderRepository.findOne({
-      where: { id },
-      relations: ['order_detail'],
-    });
-    if (order === null) {
-      throw new BadRequestException('Order Not Found!');
+    try {
+      const order = await this.orderRepository.findOne({
+        where: { id },
+        relations: ['order_details','payment'],
+      });
+      if (order === null) {
+        throw new BadRequestException('Order Not Found!');
+      }
+      return order;
+    } catch (error) {
+      console.log(error)
+      throw new BadRequestException(error.message)
     }
-    return order;
   }
 
   async changeStatus(status: Status, id: number): Promise<string> {

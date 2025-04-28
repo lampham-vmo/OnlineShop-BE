@@ -1,4 +1,4 @@
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Exclude, Expose, Transform } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -98,10 +98,8 @@ export class OrderDetail {
 
   @ManyToOne(() => Order, (order) => order.order_details)
   @JoinColumn({ name: 'order_id' })
-  @Expose()
-  @ApiProperty({
-    type: () => Order,
-  })
+  @Exclude()
+  @ApiHideProperty()
   order: Order;
 
   @CreateDateColumn()

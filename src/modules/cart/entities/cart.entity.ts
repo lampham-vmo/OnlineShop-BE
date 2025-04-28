@@ -10,7 +10,7 @@ import {
   UpdateDateColumn,
 } from 'typeorm';
 import { CartProduct } from './cart_product.entity';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Exclude } from 'class-transformer';
 
@@ -28,10 +28,7 @@ export class Cart {
   @OneToOne(() => User, (user) => user.cart)
   @Exclude()
   @IsNotEmpty()
-  @ApiProperty({
-    type: () => User,
-    description: 'User associated with the cart',
-  })
+  @ApiHideProperty()
   user: User;
 
   @IsNotEmpty()

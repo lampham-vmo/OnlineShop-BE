@@ -19,7 +19,7 @@ import {
   IsNotEmpty,
   IsNumber,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { Expose } from 'class-transformer';
 import { Order } from 'src/modules/orders/entities/order.entity';
 import { Cart } from 'src/modules/cart/entities/cart.entity';
@@ -157,10 +157,7 @@ export class User {
   address: string;
 
   @OneToOne(() => Cart, (cart) => cart.user, { cascade: true })
-  @ApiProperty({
-    type: () => Cart,
-    description: 'The cart object of the user',
-  })
+  @ApiHideProperty()
   @IsNotEmpty()
   @JoinColumn()
   cart: Cart;
