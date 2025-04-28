@@ -348,4 +348,38 @@ export class OrdersService {
       status: OrderStatus.Completed,
     };
   }
+
+  async getTotalOrders(): Promise<number>{
+    return await this.orderRepository.count();
+  }
+
+  async getTotalRevenue(): Promise<number>{
+    const result = await this.orderRepository
+    .createQueryBuilder('order')
+    .select('SUM(order.totalPrice)', 'sum')
+    .where('order.status = :status', {status: `${Status.orderSuccess}`})
+    .getRawOne();
+    console.log(result);
+    const {sum} = result
+    return Number(sum) || 0
+  }
+
+  async getOrdersByMonth(): Promise<{month: number, totalOrders: number}[]>{
+    const result = await this.orderRepository
+    .createQueryBuilder('order')
+    .select('MONTH(order.createdAt', 'month')
+    .addSelect('COUNT(order.id)', 'totalOrders')
+    .groupBy('MONTH(order.createdAt)')
+    .orderBy('MONTH(order.createdAt)', 'ASC')
+    .getRawMany();
+    return result.map(item => ({
+      month: Number(item.month),
+      totalOrders: Number(item.totalOrders)
+    }))
+  }
+
+  
+
+
+
 }

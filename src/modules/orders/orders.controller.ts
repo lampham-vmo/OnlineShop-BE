@@ -132,4 +132,19 @@ export class OrdersController {
     );
     return new APIResponseDTO<string>(true, 200, result);
   }
+
+  @Get('statistic/total-orders')
+  async getTotalOrders(): Promise<number>{
+    return await this.ordersService.getTotalOrders();
+  }
+
+  @Get('statistic/total-revenue')
+  async getTotalRevenue(){
+    return await this.ordersService.getTotalRevenue();
+  }
+
+  @Get('statistic/orders-by-month')
+  async getOrdersByMonth(){
+    return await this.ordersService.getOrdersByMonth() 
+  }
 }
