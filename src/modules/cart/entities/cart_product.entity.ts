@@ -8,7 +8,7 @@ import {
 } from 'typeorm';
 import { Cart } from './cart.entity';
 import { Product } from 'src/modules/product/Entity/product.entity';
-import { ApiProperty, PickType } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty, PickType } from '@nestjs/swagger';
 import { IsNotEmpty, IsString, Length } from 'class-validator';
 import { Exclude, Expose, Type } from 'class-transformer';
 
@@ -34,12 +34,8 @@ export class CartProduct {
   product: Product;
 
   @IsNotEmpty()
-  @Expose()
   @ManyToOne(() => Cart, (cart) => cart.items)
-  @ApiProperty({
-    type: () => Cart,
-    description: 'Cart associated with the cart product item',
-  })
+  @ApiHideProperty()
   cart: Cart;
 
   @IsNotEmpty()

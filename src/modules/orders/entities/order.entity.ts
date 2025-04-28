@@ -1,7 +1,6 @@
 import { ApiProperty } from '@nestjs/swagger';
-import { Exclude, Expose } from 'class-transformer';
+import { Expose } from 'class-transformer';
 import {
-  IsBoolean,
   IsNotEmpty,
   IsNumber,
   IsString,
@@ -101,6 +100,11 @@ export class Order {
   })
   order_details: OrderDetail[];
 
+  @Column({ type: 'varchar', nullable: true })
+  @IsString()
+  @ApiProperty({ type: 'string', nullable: true })
+  orderPaypalId: string;
+
   @CreateDateColumn()
   @Expose()
   @ApiProperty({
@@ -112,12 +116,12 @@ export class Order {
   createdAt: Date;
 
   @UpdateDateColumn()
+  @Expose()
   @ApiProperty({
     type: 'string',
     format: 'date-time',
     description: 'Last update timestamp',
     example: '2025-04-12T11:00:00Z',
   })
-  @Exclude()
   updatedAt: Date;
 }

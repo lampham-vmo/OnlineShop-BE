@@ -6,7 +6,7 @@ import { User } from './entities/user.entity';
 import { LoginUserDTO } from '../auth/dto/login-user.dto';
 import { CreateUserDTO } from '../auth/dto/create-user.dto';
 
-import { hashedPasword } from 'src/common/util/bcrypt.util';
+import { comparedPassword, hashedPasword } from 'src/common/util/bcrypt.util';
 import {
   UpdateProfileDTO,
   UpdateUserRoleDTO,
@@ -93,6 +93,42 @@ export class UserService implements OnModuleInit {
 
   async findOneByEmail(email: string): Promise<User | null> {
     return await this.usersRepository.findOneBy({ email: email });
+  }
+
+  async updatePasswordByEmail(
+    email: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    const user = await this.usersRepository.findOneBy({ email: email });
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+    const hashedPassword = await hashedPasword(newPassword);
+    user.password = hashedPassword;
+    await this.usersRepository.save(user);
+    return true;
+  }
+
+  async updatePassword(
+    id: number,
+    oldPassword: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    const user = await this.usersRepository.findOneBy({ id: id });
+    if (!user) {
+      throw new BadRequestException('User not found!');
+    }
+    const isOldPasswordCorrect = await comparedPassword(
+      user.password,
+      oldPassword,
+    );
+    if (!isOldPasswordCorrect) {
+      throw new BadRequestException('Old password is incorrect!');
+    }
+    const hashedPassword = await hashedPasword(newPassword);
+    user.password = hashedPassword;
+    await this.usersRepository.save(user);
+    return true;
   }
 
   async findOneByEmailAndPassword(

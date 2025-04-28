@@ -16,7 +16,7 @@ import { LoginUserDTO } from 'src/modules/auth/dto/login-user.dto';
 import { Request, Response } from 'express';
 import { AuthGuard } from 'src/common/guard/auth.guard';
 import { UserService } from 'src/modules/user/user.service';
-import { CreateUserDTO } from './dto/create-user.dto';
+import { CreateUserDTO, VerifyEmailDTO } from './dto/create-user.dto';
 import { RouteName } from 'src/common/decorators/route-name.decorator';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import {
@@ -34,6 +34,10 @@ import {
 } from '@nestjs/swagger';
 import { UserSuccessMessageFinalResponseDTO } from '../user/dto/user-success-api-response.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
+import {
+  ForgetPassworDTO,
+  UpdatePasswordDTO,
+} from '../user/dto/update-user-role.dto';
 
 @Controller('auth')
 export class AuthController {
@@ -112,6 +116,40 @@ export class AuthController {
   ): Promise<APIResponseDTO<Boolean>> {
     const isConfirmEmail = await this.authService.confirmEmail(token);
     return new APIResponseDTO<boolean>(isConfirmEmail, HttpStatus.OK, true);
+  }
+
+  @Post('reset-password')
+  @RouteName('RESET_PASSWORD')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'confirm email success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async resetPassword(
+    @Body() verifyEmailDTO: VerifyEmailDTO,
+  ): Promise<APIResponseDTO<Boolean>> {
+    const result = await this.authService.sendResetPasswordEmail(
+      verifyEmailDTO.email,
+    );
+    return new APIResponseDTO<boolean>(result, HttpStatus.OK, result);
+  }
+
+  @Patch('reset-password/confirm/:token')
+  @RouteName('CONFIRM_RESET_PASSWORD_TOKEN')
+  @ApiProperty()
+  @ApiOkResponse({
+    description: 'confirm reset password token success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async confirmResetPasswordToken(
+    @Param('token') token: string,
+    @Body() forgetPasswordDTO: ForgetPassworDTO,
+  ): Promise<APIResponseDTO<Boolean>> {
+    const result = await this.authService.confirmResetPasswordToken(
+      token,
+      forgetPasswordDTO.password,
+    );
+    return new APIResponseDTO<boolean>(result, HttpStatus.OK, result);
   }
 
   @Post('login')

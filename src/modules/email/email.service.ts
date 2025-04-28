@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import ConfirmEmailHTML from './html/html.confirmEmail';
+import ForgotPasswordEmailHTML from './html/html.forgetpassword';
+import VerifyEmailCodeHTML from './html/html.confirmemail2';
 @Injectable()
 export class EmailService {
   private transporter = nodemailer.createTransport({
@@ -10,8 +12,26 @@ export class EmailService {
       pass: process.env.GMAIL_PASSWORD,
     },
   });
+  //to confirm this email is your email or not?
+  async sendConfirmationEmailWithCodeNumber(
+    email: string,
+    code: number,
+  ): Promise<void> {
+    try {
+      const htmlPage = VerifyEmailCodeHTML(code.toString());
+      await this.transporter.sendMail({
+        from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
+        to: email,
+        subject: `Your verification code is ${code}`,
+        html: htmlPage,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
 
-  async sendConfirmationEmail(email: string, token: string) {
+  //for sign up
+  async sendConfirmationEmail(email: string, token: string): Promise<void> {
     try {
       const confirmUrl = `${process.env.FE_HOST}/verify?token=${token}`;
       const htmlPage = ConfirmEmailHTML(confirmUrl);
@@ -19,6 +39,24 @@ export class EmailService {
         from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
         to: email,
         subject: 'Confirm your email',
+        html: htmlPage,
+      });
+    } catch (err) {
+      console.log(err);
+    }
+  }
+
+  async sendResetPasswordEmail(
+    email: string,
+    resetPasswordToken: string,
+  ): Promise<void> {
+    try {
+      const resetUrl = `${process.env.FE_HOST}/reset-password?token=${resetPasswordToken}`;
+      const htmlPage = ForgotPasswordEmailHTML(resetUrl);
+      await this.transporter.sendMail({
+        from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
+        to: email,
+        subject: 'Verify reset password',
         html: htmlPage,
       });
     } catch (err) {

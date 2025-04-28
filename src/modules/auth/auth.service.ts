@@ -127,7 +127,7 @@ export class AuthService {
     await this.emailService.sendConfirmationEmail(email, confirmEmailToken);
     return true;
   }
-  //confirm email
+  //confirm email for sign up
   async confirmEmail(token: string): Promise<boolean> {
     let payload: Email;
     try {
@@ -150,6 +150,68 @@ export class AuthService {
     }
     return true;
   }
+
+  //1. send email to server, server will take this email and create a token link and a password
+  //2. if user click con the link, gmail will redirect to front end
+  //3. frontend then send request to backend with token
+  //4. backend will decode token to take payload that contain email and password
+  //5. backend will update password for this email with new password
+
+  async sendResetPasswordEmail(email: string): Promise<boolean> {
+    //check if email exists in DB
+    const user = await this.usersService.findOneByEmail(email);
+    if (!user) throw new BadRequestException('Email not found!');
+    //create token
+    const resetPasswordToken = this.createJwtFromPayload(
+      { email: email },
+      '10m',
+    );
+    //send email to user
+    await this.emailService.sendResetPasswordEmail(email, resetPasswordToken);
+    return true;
+  }
+
+  async confirmResetPasswordToken(
+    token: string,
+    newPassword: string,
+  ): Promise<boolean> {
+    let payload: Email;
+    try {
+      payload = this.jwtService.verify(token, {
+        publicKey: process.env.JWT_PUBLIC_KEY,
+        algorithms: ['RS256'],
+      });
+    } catch (err) {
+      throw new BadRequestException('Invalid token!');
+    }
+    if (!payload) throw new BadRequestException('invalid payload!');
+    return await this.usersService.updatePasswordByEmail(
+      payload.email,
+      newPassword,
+    );
+  }
+
+  //send email to reset password
+  // async sendResetPasswordEmail(email: string, id: number): Promise<boolean> {
+  //   //check if email exists in DB
+  //   try{
+  //     console.log('hello');
+  //     const user = await this.usersService.findOneById(id);
+  //     if (!user) throw new BadRequestException('User not found!')
+  //     if(user.email !== email) throw new BadRequestException('Not your email!')
+  //     //create password
+  //     const newResetPassword = generateStrongPassword(16)
+  //     console.log(newResetPassword);
+  //     await this.usersService.updatePasswordByEmail(email, newResetPassword)
+  //     //send email to user
+  //     await this.emailService.sendResetPasswordEmail(email, newResetPassword)
+  //     return true
+  //   }catch(err){
+  //     console.log(err);
+  //   }
+  //   return false
+
+  // }
 
   //sign up
   async signup(

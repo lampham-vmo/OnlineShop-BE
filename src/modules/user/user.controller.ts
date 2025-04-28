@@ -16,6 +16,7 @@ import { AuthGuard } from 'src/common/guard/auth.guard';
 import { RoleGuard } from 'src/common/guard/role.guard';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import {
+  UpdatePasswordDTO,
   UpdateProfileDTO,
   UpdateUserRoleDTO,
 } from './dto/update-user-role.dto';
@@ -78,6 +79,40 @@ export class UserController {
       200,
       'Profile updated successfully!',
     );
+  }
+
+  @Patch('update-password/:id')
+  @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    description: 'update password success',
+    type: APIResponseDTO<Boolean>,
+  })
+  async updatePassword(
+    @Body() updatePasswordDTO: UpdatePasswordDTO,
+    @Req() req: Request,
+    @Param('id') id: string,
+  ) {
+    const user = req['user'];
+    if (id !== user!.id.toString()) {
+      throw new BadRequestException('NOT YOUR PROFILE!');
+    }
+    const { oldPassword, password, confirmPassword } = updatePasswordDTO;
+    if (password !== confirmPassword) {
+      throw new BadRequestException(
+        'The confirm password must match the password',
+      );
+    }
+    if (password === oldPassword) {
+      throw new BadRequestException(
+        'The new password must be different from the old password',
+      );
+    }
+    const result = await this.userService.updatePassword(
+      user!.id,
+      oldPassword,
+      password,
+    );
+    return new APIResponseDTO<boolean>(true, 200, result);
   }
 
   @Get('profile/:id')

@@ -5,16 +5,15 @@ import {
   Body,
   Patch,
   Param,
-  Delete,
   Query,
   Req,
   UseGuards,
   BadRequestException,
+  InternalServerErrorException,
 } from '@nestjs/common';
 import { OrdersService } from './orders.service';
 import { CreateOrderDto } from './dto/request/create-order.dto';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
-import { Order } from './entities/order.entity';
 import {
   OrderPagingDTO,
   OrderResponseDTO,
@@ -25,7 +24,11 @@ import { Status } from './enum/status.enum';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, QueueEvents } from 'bullmq';
 import { ApiBearerAuth } from '@nestjs/swagger';
-import { ApiResponseWithModel, ApiResponseWithPrimitive } from 'src/common/decorators/swagger.decorator';
+import {
+  ApiResponseWithModel,
+  ApiResponseWithPrimitive,
+} from 'src/common/decorators/swagger.decorator';
+import { CreateOrderPaypalReponseDto } from '../paypal/dto/paypal.dto';
 
 @Controller('orders')
 export class OrdersController {
@@ -37,11 +40,11 @@ export class OrdersController {
   @Post()
   @ApiBearerAuth()
   @UseGuards(AuthGuard)
-  @ApiResponseWithPrimitive('string')
+  @ApiResponseWithModel(CreateOrderPaypalReponseDto)
   async create(
     @Req() req: Request,
     @Body() createOrderDTO: CreateOrderDto,
-  ): Promise<APIResponseDTO<string>> {
+  ): Promise<APIResponseDTO<CreateOrderPaypalReponseDto>> {
     const userId = req.user?.id;
     console.log(createOrderDTO);
     const job = await this.orderQueue.add('orderQueue', {
@@ -51,10 +54,49 @@ export class OrdersController {
     const queueEvents = new QueueEvents('orderQueue');
     await queueEvents.waitUntilReady();
     try {
-      const result = await job.waitUntilFinished(queueEvents);
-      return new APIResponseDTO<string>(true, 200, result);
+      const { jsonResponse, httpStatusCode } =
+        await job.waitUntilFinished(queueEvents);
+      return new APIResponseDTO<CreateOrderPaypalReponseDto>(
+        true,
+        httpStatusCode,
+        jsonResponse,
+      );
     } catch (error) {
-      throw new BadRequestException(error.message||"Undefined error")
+      throw new BadRequestException({ message: error.message });
+    }
+  }
+
+  @Post(':orderPaypalId/:orderId/capture')
+  @ApiBearerAuth()
+  @UseGuards(AuthGuard)
+  @ApiResponseWithModel(CreateOrderPaypalReponseDto)
+  async captureOrder(
+    @Param('orderPaypalId') orderPaypalId: string,
+    @Param('orderId') orderId: string,
+    @Req() req: Request,
+  ) {
+    try {
+      const userId = req.user?.id!;
+
+      await this.ordersService.validateUserOrderPaypal(
+        userId,
+        +orderId,
+        orderPaypalId,
+      );
+
+      const { httpStatusCode, id, status } =
+        await this.ordersService.captureOrderPaypal(orderPaypalId, orderId);
+
+      return new APIResponseDTO<CreateOrderPaypalReponseDto>(
+        true,
+        httpStatusCode,
+        {
+          id,
+          status,
+        },
+      );
+    } catch (error) {
+      throw new InternalServerErrorException({ message: error.message });
     }
   }
 
@@ -66,7 +108,7 @@ export class OrdersController {
     @Query('page') page: number = 1,
     @Req() req: Request,
   ): Promise<APIResponseDTO<OrderPagingDTO>> {
-    console.log(req.user)
+    console.log(req.user);
     const user = req.user;
     const result = await this.ordersService.findAll(+page, user);
     return new APIResponseDTO<OrderPagingDTO>(true, 200, result);

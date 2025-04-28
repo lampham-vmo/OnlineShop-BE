@@ -14,7 +14,7 @@ export class CartService {
     @InjectRepository(CartProduct)
     private cartProductRepository: Repository<CartProduct>,
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
-  ) {}
+  ) { }
 
   async addProductToCart(
     userId: number,
@@ -87,12 +87,12 @@ export class CartService {
   async getAllInCart(userId: number): Promise<Cart | null> {
     const cart = await this.cartRepository.findOne({
       where: { user: { id: userId } },
+      relations: ['items', 'items.product'],
     });
     if (!cart) {
       return null;
-    } else {
-      return cart;
     }
+    return cart;
   }
 
   async increaseQuantityById(
@@ -125,14 +125,14 @@ export class CartService {
       (sum, item) =>
         sum +
         item.product.price *
-          (item.id === cartProductId ? newQty : item.quantity),
+        (item.id === cartProductId ? newQty : item.quantity),
       0,
     );
     const newSubTotal = cartProduct.cart.items.reduce(
       (sum, item) =>
         sum +
         (item.product.price - item.product.discount) *
-          (item.id === cartProductId ? newQty : item.quantity),
+        (item.id === cartProductId ? newQty : item.quantity),
       0,
     );
     await this.cartRepository.update(cartProduct.cart.id, {
@@ -144,37 +144,45 @@ export class CartService {
 
   async decreaseQuantityById(
     userId: number,
-    productId: number,
+    cartProductId: number,
   ): Promise<boolean> {
-    const cart = await this.cartRepository.findOne({
-      where: { user: { id: userId } },
-      relations: ['items', 'items.product'],
+    const cartProduct = await this.cartProductRepository.findOne({
+      where: {
+        id: cartProductId,
+        cart: {
+          user: { id: userId },
+        },
+      },
+      relations: [
+        'cart',
+        'cart.user',
+        'cart.items',
+        'cart.items.product',
+        'product',
+      ],
     });
-    if (!cart) return false;
-    const cartProduct = cart.items.find(
-      (item) => item.product.id === productId,
-    );
     if (!cartProduct) return false;
-    const currentQuantity = cartProduct.quantity;
-    const newQuantity = currentQuantity > 1 ? currentQuantity - 1 : 1;
-    await this.cartProductRepository.update(cartProduct.id, {
-      quantity: newQuantity,
+    const currentQty = cartProduct.quantity;
+    const minQty = 1;
+    const newQty = currentQty <= minQty ? minQty : currentQty - 1;
+    await this.cartProductRepository.update(cartProductId, {
+      quantity: newQty,
     });
-    const newTotal = cart.items.reduce(
+    const newTotal = cartProduct.cart.items.reduce(
       (sum, item) =>
         sum +
         item.product.price *
-          (item.id === cartProduct.id ? newQuantity : item.quantity),
+        (item.id === cartProductId ? newQty : item.quantity),
       0,
     );
-    const newSubTotal = cart.items.reduce(
+    const newSubTotal = cartProduct.cart.items.reduce(
       (sum, item) =>
         sum +
         (item.product.price - item.product.discount) *
-          (item.id === cartProduct.id ? newQuantity : item.quantity),
+        (item.id === cartProductId ? newQty : item.quantity),
       0,
     );
-    await this.cartRepository.update(cart.id, {
+    await this.cartRepository.update(cartProduct.cart.id, {
       total: newTotal,
       subtotal: newSubTotal,
     });
@@ -207,6 +215,19 @@ export class CartService {
       total: newTotal,
       subtotal: newSubTotal,
     });
+    return true;
+  }
+
+  async clearAllInCart(userId: number): Promise<boolean> {
+    const cart = await this.cartRepository.findOne({
+      where: { user: { id: userId } },
+      relations: ['items'],
+    });
+    if (!cart) return false;
+    if (cart.items.length > 0) {
+      await this.cartProductRepository.remove(cart.items);
+    }
+    await this.cartRepository.update(cart.id, { total: 0, subtotal: 0 });
     return true;
   }
 }
