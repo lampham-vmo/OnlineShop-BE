@@ -166,4 +166,30 @@ export class CartController {
       data: { message: 'Sucessfully delete in cart' },
     };
   }
+
+  // TODO: clear cart
+  @Delete('clear-cart')
+  // @UseGuards(AuthGuard)
+  @ApiOkResponse({
+    description: 'Success message when clearing a cart',
+    type: UserSuccessMessageFinalResponseDTO,
+  })
+  @RouteName('Clear the whole cart')
+  async clearCart(@Req() req :Request): Promise<APIResponseDTO<{message: string}>> {
+    const userId = Number(req.user?.id)
+    const isDeleted = await this.cartService.clearAllInCart(userId);
+    if (isDeleted) {
+      return {
+        statusCode: 200,
+        success: true,
+        data: {message: `The cart for user ${userId} has been cleared.` }
+      };
+    } else {
+      return {
+        statusCode: 200,
+        success: true,
+        data: {message: `The cart for user ${userId} not found.` }
+      };
+    }
+  }
 }

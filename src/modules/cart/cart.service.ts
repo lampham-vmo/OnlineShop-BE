@@ -209,4 +209,16 @@ export class CartService {
     });
     return true;
   }
+
+  async clearAllInCart(userId: number): Promise<boolean> {
+    const cart = await this.cartRepository.findOne({
+      where: { user: {id: userId}},
+      select: ['id'],
+    });
+
+    if (!cart) return false
+
+    await this.cartRepository.delete(cart.id)
+    return true
+  }
 }
