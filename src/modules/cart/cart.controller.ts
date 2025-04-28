@@ -180,20 +180,22 @@ export class CartController {
   })
   @ApiBearerAuth()
   @RouteName('Clear the whole cart')
-  async clearCart(@Req() req :Request): Promise<APIResponseDTO<{message: string}>> {
-    const userId = Number(req.user!.id)
+  async clearCart(
+    @Req() req: Request,
+  ): Promise<APIResponseDTO<{ message: string }>> {
+    const userId = Number(req.user!.id);
     const isDeleted = await this.cartService.clearAllInCart(userId);
     if (isDeleted) {
       return {
         statusCode: 200,
         success: true,
-        data: {message: `The cart for user ${userId} has been cleared.` }
+        data: { message: `The cart for user ${userId} has been cleared.` },
       };
     } else {
       return {
         statusCode: 400,
         success: false,
-        data: {message: `The cart for user ${userId} not found.` }
+        data: { message: `The cart for user ${userId} not found.` },
       };
     }
   }

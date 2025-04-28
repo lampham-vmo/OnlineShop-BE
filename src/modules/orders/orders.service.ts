@@ -55,7 +55,7 @@ export class OrdersService {
     try {
       const stockBackup = new Map<number, number>(); // productId -> originalStock
       const cart = await queryRunner.manager.findOne(Cart, {
-        where: { id: createOrderDTO.cartId },
+        where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
       console.log(cart);
@@ -149,7 +149,7 @@ export class OrdersService {
     try {
       const stockBackup = new Map<number, number>();
       const cart = await queryRunner.manager.findOne(Cart, {
-        where: { id: createOrderDTO.cartId },
+        where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
       if (!cart || cart.items.length === 0) {

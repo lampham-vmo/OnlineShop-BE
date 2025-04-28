@@ -30,8 +30,8 @@ export class PaymentMethodController {
 
   @Post()
   @RouteName('CREATE_PAYMENT_METHOD')
-  // @UseGuards(AuthGuard, RoleGuard)
-  // @ApiBearerAuth()
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiBearerAuth()
   @ApiResponseWithModel(PaymentMethodResponseDto, 201)
   async create(@Body() dto: CreatePaymentMethodDto) {
     const response = await this.paymentMethodService.create(dto);
@@ -44,7 +44,7 @@ export class PaymentMethodController {
 
   @Get()
   @RouteName('GET_ALL_PAYMENT_METHOD')
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiResponseWithArrayModel(PaymentMethodResponseDto)
   async findAll() {
