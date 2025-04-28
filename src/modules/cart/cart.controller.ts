@@ -65,6 +65,7 @@ export class CartController {
     description: 'Get all product in a cart',
     type: GetCartFinalResponseDTO,
   })
+  @ApiBearerAuth()
   @RouteName('Get all product to cart')
   async getCart(
     @Req() req: Request,
@@ -86,6 +87,7 @@ export class CartController {
     description: 'Success message for increase quantity',
     type: UserSuccessMessageFinalResponseDTO,
   })
+  @ApiBearerAuth()
   @RouteName('Increase product quantity in a cart')
   async increaseQuantity(
     @Req() req: Request,
@@ -116,6 +118,7 @@ export class CartController {
     description: 'Success message for decrease quantity',
     type: UserSuccessMessageFinalResponseDTO,
   })
+  @ApiBearerAuth()
   @RouteName('Decrease product quantity in a cart')
   async decreaseQuantity(
     @Req() req: Request,
@@ -146,6 +149,7 @@ export class CartController {
     description: 'Success message for delete in cart',
     type: UserSuccessMessageFinalResponseDTO,
   })
+  @ApiBearerAuth()
   @RouteName('Delete a product in cart')
   async deleteCart(
     @Body() req2: ChangeCartProductDTO,
@@ -174,6 +178,7 @@ export class CartController {
     description: 'Success message when clearing a cart',
     type: UserSuccessMessageFinalResponseDTO,
   })
+  @ApiBearerAuth()
   @RouteName('Clear the whole cart')
   async clearCart(@Req() req :Request): Promise<APIResponseDTO<{message: string}>> {
     const userId = Number(req.user!.id)
