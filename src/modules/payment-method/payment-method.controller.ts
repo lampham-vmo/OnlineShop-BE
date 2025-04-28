@@ -44,7 +44,7 @@ export class PaymentMethodController {
 
   @Get()
   @RouteName('GET_ALL_PAYMENT_METHOD')
-  @UseGuards(AuthGuard, RoleGuard)
+  @UseGuards(AuthGuard)
   @ApiBearerAuth()
   @ApiResponseWithArrayModel(PaymentMethodResponseDto)
   async findAll() {
