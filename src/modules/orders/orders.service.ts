@@ -11,8 +11,10 @@ import { Order } from './entities/order.entity';
 import { DataSource, Repository } from 'typeorm';
 import { OrderDetail } from './entities/order.detail.entity';
 import {
+  OrderMonthTotal,
   OrderPagingDTO,
   OrderResponseDTO,
+  SoldQuantityProduct,
 } from './dto/response/order.response.dto';
 import { plainToInstance } from 'class-transformer';
 import { UserPayLoad } from 'src/common/type/express';
@@ -37,7 +39,7 @@ export class OrdersService {
     private readonly productRepository: Repository<Product>,
     private readonly dataSource: DataSource,
     private readonly paypalService: PaypalService,
-  ) {}
+  ) { }
 
   async createCod(createOrderDTO: CreateOrderDto, userId: number | undefined) {
     if (userId === undefined) {
@@ -362,4 +364,72 @@ export class OrdersService {
       status: OrderStatus.Completed,
     };
   }
+
+  async getTotalOrders(): Promise<number> {
+    return await this.orderRepository.count();
+  }
+
+  async getTotalRevenue(): Promise<number> {
+    try {
+      const result = await this.orderRepository
+        .createQueryBuilder('order')
+        .select('SUM(order.total)', 'sum')
+        .where('order.status = :status', { status: `${Status.orderSuccess}` })
+        .getRawOne();
+      console.log(result);
+      const { sum } = result
+      return Number(sum) || 0
+    } catch (err) {
+      throw new InternalServerErrorException('Error Get Total Revenue')
+
+    }
+
+
+  }
+
+  async getOrdersByMonth(): Promise<OrderMonthTotal[]> {
+    try {
+      const result = await this.orderRepository
+        .createQueryBuilder('order')
+        .select('EXTRACT(MONTH FROM order.createdAt)', 'month')
+        .addSelect('COUNT(order.id)', 'total')
+        .groupBy('EXTRACT(MONTH FROM order.createdAt)')
+        .orderBy('EXTRACT(MONTH FROM order.createdAt)', 'ASC')
+        .getRawMany();
+      
+    
+        return result.map(item => {
+          const total_month = new OrderMonthTotal(item.month, item.total)
+          return total_month
+        })
+    } catch (err) {
+      throw new InternalServerErrorException('Error Get Orders By Month')
+    }
+
+  }
+
+  async getTopProducts(x: number): Promise< SoldQuantityProduct[]> {
+    try {
+      const topProducts : SoldQuantityProduct[] = await this.orderDetailRepository
+        .createQueryBuilder('order_detail')
+        .select('order_detail.name', 'productName') // Tên sản phẩm
+        .addSelect('SUM(order_detail.quantity)', 'quantity') // Tổng số lượng bán
+        .leftJoin('order_detail.order', 'order') // Liên kết với bảng Order
+        .where('order.status = :status', { status: Status.orderSuccess }) // Chỉ tính đơn hàng thành công
+        .groupBy('order_detail.name') // Group theo tên sản phẩm
+        .orderBy('quantity', 'DESC') // Sắp xếp theo tổng số lượng bán
+        .limit(x) // Giới hạn số lượng sản phẩm, ví dụ top 5
+        .getRawMany();
+        
+      return topProducts
+    } catch (err) {
+      throw new InternalServerErrorException('Error Get Top Products')
+    }
+
+  }
+
+
+
+
+
 }
