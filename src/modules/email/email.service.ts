@@ -1,8 +1,10 @@
-import { Injectable } from '@nestjs/common';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import ConfirmEmailHTML from './html/html.confirmEmail';
 import ForgotPasswordEmailHTML from './html/html.forgetpassword';
 import VerifyEmailCodeHTML from './html/html.confirmemail2';
+import { Order } from '../orders/entities/order.entity';
+import OrderSuccessEmailHTML from './html/html.order';
 @Injectable()
 export class EmailService {
   private transporter = nodemailer.createTransport({
@@ -12,6 +14,21 @@ export class EmailService {
       pass: process.env.GMAIL_PASSWORD,
     },
   });
+  //send order detail when purchase success
+  async sendConfirmMailSuccess(email: string, order: Order): Promise<void> {
+    try {
+      const htmlPage = OrderSuccessEmailHTML(email, order);
+      await this.transporter.sendMail({
+        from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
+        to: email,
+        subject: `Order ${order.id} success`,
+        html: htmlPage,
+      });
+    } catch (err) {
+      throw new InternalServerErrorException('Confirm Order Email error!');
+    }
+  }
+
   //to confirm this email is your email or not?
   async sendConfirmationEmailWithCodeNumber(
     email: string,
@@ -26,7 +43,7 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException('Confirm Code Email error!');
     }
   }
 
@@ -42,7 +59,7 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException('Confirm confirm Email error!');
     }
   }
 
@@ -60,7 +77,9 @@ export class EmailService {
         html: htmlPage,
       });
     } catch (err) {
-      console.log(err);
+      throw new InternalServerErrorException(
+        'Confirm reset password Email error!',
+      );
     }
   }
 }

@@ -3,6 +3,7 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
+  Logger,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/request/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -55,7 +56,7 @@ export class OrdersService {
     try {
       const stockBackup = new Map<number, number>(); // productId -> originalStock
       const cart = await queryRunner.manager.findOne(Cart, {
-        where: { id: createOrderDTO.cartId },
+        where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
       console.log(cart);
@@ -101,7 +102,7 @@ export class OrdersService {
         delivery_address: createOrderDTO.delivery_address,
         user: { id: userId },
         order_details: orderDetails,
-        status: Status.orderSuccess,
+        status: Status.PENDING,
         payment: { id: createOrderDTO.paymentId },
       });
       const savedOrder = await queryRunner.manager.save(order);
@@ -149,7 +150,7 @@ export class OrdersService {
     try {
       const stockBackup = new Map<number, number>();
       const cart = await queryRunner.manager.findOne(Cart, {
-        where: { id: createOrderDTO.cartId },
+        where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
       if (!cart || cart.items.length === 0) {
@@ -178,7 +179,7 @@ export class OrdersService {
         product.stock -= item.quantity;
         await queryRunner.manager.save(product);
       }
-
+      console.log(typeof cart.subtotal);
       // Call to paypal service to createOrderPaypal
       const resultCreateOrderPaypal = await this.paypalService.createOrder({
         total: cart.subtotal,
@@ -204,7 +205,7 @@ export class OrdersService {
         delivery_address: createOrderDTO.delivery_address,
         user: { id: userId },
         order_details: orderDetails,
-        status: Status.unpaid,
+        status: Status.UNPAID,
         payment: { id: createOrderDTO.paymentId },
         orderPaypalId: paypalOrderId,
       });
@@ -230,6 +231,7 @@ export class OrdersService {
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
+      Logger.log(error);
       throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
@@ -255,7 +257,7 @@ export class OrdersService {
         skip: (page - 1) * pageSize,
         take: pageSize,
         order: { createdAt: 'DESC' },
-        relations: ['order_details','payment']
+        relations: ['order_details', 'payment'],
       });
       console.log(order);
       const transformed = plainToInstance(
@@ -281,35 +283,42 @@ export class OrdersService {
     try {
       const order = await this.orderRepository.findOne({
         where: { id },
-        relations: ['order_details','payment'],
+        relations: ['order_details', 'payment'],
       });
       if (order === null) {
         throw new BadRequestException('Order Not Found!');
       }
       return order;
     } catch (error) {
-      console.log(error)
-      throw new BadRequestException(error.message)
+      console.log(error);
+      throw new BadRequestException(error.message);
     }
   }
 
-  async changeStatus(status: Status, id: number): Promise<string> {
+  async changeStatus(status: string, id: number): Promise<string> {
     try {
-      const orderStatus = await this.orderRepository.findOneBy({
-        id: id,
-      });
-      if (orderStatus === null) {
+      const order = await this.orderRepository.findOneBy({ id });
+
+      if (!order) {
         throw new BadRequestException('Order Not Found!');
       }
-      orderStatus.status = status;
-      await this.orderRepository.save(orderStatus);
-      return `order with id: ${id} change status success`;
+
+      // Kiểm tra status có hợp lệ không
+      const validStatuses = Object.values(Status);
+      if (!validStatuses.includes(status as Status)) {
+        throw new BadRequestException(`Invalid status: ${status}`);
+      }
+
+      order.status = status as Status;
+      await this.orderRepository.save(order);
+
+      return `Order with ID ${id} changed status to ${status} successfully.`;
     } catch (e) {
       if (e instanceof BadRequestException) {
         throw e;
       }
       throw new InternalServerErrorException({
-        message: 'Failed to change status with error' + e,
+        message: 'Failed to change status with error: ' + e.message,
       });
     }
   }
@@ -345,7 +354,7 @@ export class OrdersService {
       throw new Error('Failed to complete checkout');
     }
 
-    await this.changeStatus(Status.orderSuccess, +orderId);
+    await this.changeStatus(Status.PENDING, +orderId);
 
     return {
       httpStatusCode: httpStatusCode,

@@ -14,8 +14,4 @@ export class CreateOrderDto extends PickType(Order, [
   @IsNotEmpty()
   @ApiProperty()
   paymentId: number;
-
-  @IsNumber()
-  @ApiProperty()
-  cartId: number;
 }
