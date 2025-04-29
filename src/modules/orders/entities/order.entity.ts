@@ -41,7 +41,7 @@ export class Order {
 
   @IsString()
   @ApiProperty()
-  @Column({ default: Status.orderAccept })
+  @Column({ default: Status.UNPAID })
   status: Status;
 
   @IsString()
@@ -91,7 +91,9 @@ export class Order {
   })
   user: User;
 
-  @ApiProperty()
+  @ApiProperty({
+    type: [OrderDetail],
+  })
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order, {
     cascade: true,
   })

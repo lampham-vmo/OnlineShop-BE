@@ -41,7 +41,6 @@ export class CartService {
         where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
-
       if (!product || !cart) {
         return false;
       }
@@ -83,11 +82,16 @@ export class CartService {
   }
 
   async getAllInCart(userId: number): Promise<Cart | null> {
-    const cart = await this.cartRepository.findOne({
-      where: { user: { id: userId } },
-      relations: ['items', 'items.product'],
-    });
-    return cart || null;
+    try {
+      const cart = await this.cartRepository.findOne({
+        where: { user: { id: userId } },
+        relations: ['items', 'items.product'],
+      });
+      console.log(cart);
+      return cart;
+    } catch (error) {
+      throw new BadRequestException(error);
+    }
   }
 
   async increaseQuantityById(

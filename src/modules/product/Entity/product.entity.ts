@@ -20,7 +20,7 @@ import {
   Max,
   Min,
 } from 'class-validator';
-import { ApiProperty } from '@nestjs/swagger';
+import { ApiHideProperty, ApiProperty } from '@nestjs/swagger';
 import { CartProduct } from 'src/modules/cart/entities/cart_product.entity';
 
 @Entity()
@@ -161,11 +161,7 @@ export class Product {
   })
   @Exclude()
   @IsOptional()
-  @ApiProperty({
-    type: () => CartProduct,
-    description: 'Cart product',
-    nullable: true,
-  })
+  @ApiHideProperty()
   cartProducts: CartProduct[];
 
   @CreateDateColumn()

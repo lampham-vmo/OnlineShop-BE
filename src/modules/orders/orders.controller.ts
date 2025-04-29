@@ -29,6 +29,7 @@ import {
   ApiResponseWithPrimitive,
 } from 'src/common/decorators/swagger.decorator';
 import { CreateOrderPaypalReponseDto } from '../paypal/dto/paypal.dto';
+import { ChangeStatusRequest } from './dto/request/change-status.request';
 
 @Controller('orders')
 export class OrdersController {
@@ -123,12 +124,14 @@ export class OrdersController {
     return new APIResponseDTO<OrderResponseDTO>(true, 200, result);
   }
 
-  @Patch('/status/:id')
+  @Patch('/status')
   @ApiResponseWithPrimitive('string')
-  async changeStatus(@Param('id') id: string): Promise<APIResponseDTO<string>> {
+  async changeStatus(
+    @Body() change: ChangeStatusRequest,
+  ): Promise<APIResponseDTO<string>> {
     const result = await this.ordersService.changeStatus(
-      Status.orderAccept,
-      +id,
+      change.status,
+      +change.id,
     );
     return new APIResponseDTO<string>(true, 200, result);
   }
