@@ -374,7 +374,7 @@ export class OrdersService {
       const result = await this.orderRepository
         .createQueryBuilder('order')
         .select('SUM(order.total)', 'sum')
-        .where('order.status = :status', { status: `${Status.orderSuccess}` })
+        .where('order.status = :status', { status: `${Status.PENDING}` })
         .getRawOne();
       console.log(result);
       const { sum } = result
@@ -415,7 +415,7 @@ export class OrdersService {
         .select('order_detail.name', 'productName') // Tên sản phẩm
         .addSelect('SUM(order_detail.quantity)', 'quantity') // Tổng số lượng bán
         .leftJoin('order_detail.order', 'order') // Liên kết với bảng Order
-        .where('order.status = :status', { status: Status.orderSuccess }) // Chỉ tính đơn hàng thành công
+        .where('order.status = :status', { status: Status.PENDING }) // Chỉ tính đơn hàng thành công
         .groupBy('order_detail.name') // Group theo tên sản phẩm
         .orderBy('quantity', 'DESC') // Sắp xếp theo tổng số lượng bán
         .limit(x) // Giới hạn số lượng sản phẩm, ví dụ top 5
