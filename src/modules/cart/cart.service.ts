@@ -87,7 +87,6 @@ export class CartService {
         where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
-      console.log(cart);
       return cart;
     } catch (error) {
       throw new BadRequestException(error);

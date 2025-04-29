@@ -6,7 +6,7 @@ const OrderSuccessEmailHTML = (email: string, order: Order): string => {
       (item) => `
         <tr>
           <td style="padding: 10px 0;">
-            <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 10px;" />
+            <img src="${JSON.parse(item.image)[0]}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 10px;" />
           </td>
           <td style="padding: 10px 0;">
             <div style="font-weight: bold; color: #0d47a1;">${item.name}</div>

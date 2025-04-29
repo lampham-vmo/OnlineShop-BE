@@ -1,7 +1,6 @@
 import {
   BadRequestException,
   Injectable,
-  Logger,
   NotFoundException,
 } from '@nestjs/common';
 import { Product } from './Entity/product.entity';
@@ -77,14 +76,11 @@ export class ProductService {
     productRes.priceAfterDis = parseInt(
       this.priceAfterDis(productRes.price, productRes.discount).toFixed(0),
     );
-    Logger.log(product.category);
     if (product.category === null) {
-      Logger.log('wqeqwe');
       productRes.categoryName = null;
     } else {
       productRes.categoryName = product.category.name;
     }
-    Logger.log(productRes.categoryName);
     return productRes;
   }
 
@@ -101,12 +97,10 @@ export class ProductService {
       if (!updatedProduct) {
         throw new BadRequestException('Nothing to updated!');
       }
-      Logger.log(updateData);
       let productRes = this.makeProductRes(updateData);
       try {
         await this.esService.updateProductPartial(id, productRes);
       } catch (error) {
-        Logger.error(error);
         throw new BadRequestException('Error when update Elastic');
       }
       await queryRunner.commitTransaction();
@@ -129,7 +123,6 @@ export class ProductService {
         where: { id: id, isDeleted: false },
         relations: ['category'],
       });
-      Logger.log(product);
       if (!product) {
         throw new NotFoundException('Product not found!');
       }
@@ -160,7 +153,6 @@ export class ProductService {
     try {
       const newProduct = queryRunner.manager.create(Product, productData);
       await queryRunner.manager.save(newProduct);
-      Logger.log(newProduct);
       let productRes = this.makeProductRes(newProduct);
       try {
         await this.esService.indexProduct(productRes);
@@ -281,11 +273,9 @@ export class ProductService {
       relations: ['category'],
     });
     if (!product) {
-      Logger.log('not found');
       throw new NotFoundException({ message: 'Product not found!' });
     }
     const productRes = this.makeProductRes(product);
-    Logger.log(productRes);
     return productRes;
   }
 
