@@ -92,7 +92,7 @@ export class Order {
   user: User;
 
   @ApiProperty({
-    type: [OrderDetail],
+    type: () => [OrderDetail],
   })
   @OneToMany(() => OrderDetail, (orderDetail) => orderDetail.order, {
     cascade: true,

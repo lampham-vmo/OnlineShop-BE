@@ -1,9 +1,9 @@
-import { Order } from "src/modules/orders/entities/order.entity";
+import { Order } from 'src/modules/orders/entities/order.entity';
 
 const OrderSuccessEmailHTML = (email: string, order: Order): string => {
-    const productRows = order.order_details
-      .map(
-        (item) => `
+  const productRows = order.order_details
+    .map(
+      (item) => `
         <tr>
           <td style="padding: 10px 0;">
             <img src="${item.image}" alt="${item.name}" style="width: 60px; height: 60px; object-fit: cover; border-radius: 8px; margin-right: 10px;" />
@@ -13,11 +13,11 @@ const OrderSuccessEmailHTML = (email: string, order: Order): string => {
             <div style="font-size: 13px; color: #1976d2;">${item.quantity} x $${item.price.toFixed(2)}</div>
           </td>
         </tr>
-      `
-      )
-      .join('');
-  
-    return `<div style="background-color: #e3f2fd; padding: 40px; font-family: 'Segoe UI', sans-serif; color: #0d47a1;">
+      `,
+    )
+    .join('');
+
+  return `<div style="background-color: #e3f2fd; padding: 40px; font-family: 'Segoe UI', sans-serif; color: #0d47a1;">
       <div style="max-width: 600px; margin: auto; background: #ffffff; padding: 30px 40px; border-radius: 10px; box-shadow: 0 4px 12px rgba(0, 123, 255, 0.15); border: 1px solid #90caf9;">
         
         <!-- Header -->
@@ -75,7 +75,6 @@ const OrderSuccessEmailHTML = (email: string, order: Order): string => {
         </div>
       </div>
     </div>`;
-  };
-  
-  export default OrderSuccessEmailHTML;
-  
+};
+
+export default OrderSuccessEmailHTML;
