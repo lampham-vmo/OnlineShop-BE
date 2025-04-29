@@ -39,7 +39,7 @@ export class OrdersService {
     private readonly productRepository: Repository<Product>,
     private readonly dataSource: DataSource,
     private readonly paypalService: PaypalService,
-  ) { }
+  ) {}
 
   async createCod(createOrderDTO: CreateOrderDto, userId: number | undefined) {
     if (userId === undefined) {
@@ -375,16 +375,14 @@ export class OrdersService {
         .createQueryBuilder('order')
         .select('SUM(order.total)', 'sum')
         .where('order.status = :status', { status: `${Status.PENDING}` })
+        .where('order.status = :status', { status: `${Status.PENDING}` })
         .getRawOne();
       console.log(result);
-      const { sum } = result
-      return Number(sum) || 0
+      const { sum } = result;
+      return Number(sum) || 0;
     } catch (err) {
-      throw new InternalServerErrorException('Error Get Total Revenue')
-
+      throw new InternalServerErrorException('Error Get Total Revenue');
     }
-
-
   }
 
   async getOrdersByMonth(): Promise<OrderMonthTotal[]> {
@@ -396,19 +394,17 @@ export class OrdersService {
         .groupBy('EXTRACT(MONTH FROM order.createdAt)')
         .orderBy('EXTRACT(MONTH FROM order.createdAt)', 'ASC')
         .getRawMany();
-      
-    
-        return result.map(item => {
-          const total_month = new OrderMonthTotal(item.month, item.total)
-          return total_month
-        })
-    } catch (err) {
-      throw new InternalServerErrorException('Error Get Orders By Month')
-    }
 
+      return result.map((item) => {
+        const total_month = new OrderMonthTotal(item.month, item.total);
+        return total_month;
+      });
+    } catch (err) {
+      throw new InternalServerErrorException('Error Get Orders By Month');
+    }
   }
 
-  async getTopProducts(x: number): Promise< SoldQuantityProduct[]> {
+  async getTopProducts(x: number): Promise<SoldQuantityProduct[]> {
     try {
       const topProducts : SoldQuantityProduct[] = await this.orderDetailRepository
         .createQueryBuilder('order_detail')
@@ -423,13 +419,7 @@ export class OrdersService {
         
       return topProducts
     } catch (err) {
-      throw new InternalServerErrorException('Error Get Top Products')
+      throw new InternalServerErrorException('Error Get Top Products');
     }
-
   }
-
-
-
-
-
 }

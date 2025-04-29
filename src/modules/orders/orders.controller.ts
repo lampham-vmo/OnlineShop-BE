@@ -140,32 +140,35 @@ export class OrdersController {
 
   @Get('statistic/total-orders')
   @ApiResponseWithPrimitive('number')
-  async getTotalOrders(): Promise<APIResponseDTO<number>>{
-    const result =  await this.ordersService.getTotalOrders();
-    return new APIResponseDTO<number>(true, 200, result)
+  async getTotalOrders(): Promise<APIResponseDTO<number>> {
+    const result = await this.ordersService.getTotalOrders();
+    return new APIResponseDTO<number>(true, 200, result);
   }
 
   @Get('statistic/total-revenue')
   @ApiResponseWithPrimitive('number')
-  async getTotalRevenue(): Promise<APIResponseDTO<number>>{
+  async getTotalRevenue(): Promise<APIResponseDTO<number>> {
     const result = await this.ordersService.getTotalRevenue();
-    return new APIResponseDTO<number>(true, 200, result)
+    return new APIResponseDTO<number>(true, 200, result);
   }
 
   @Get('statistic/orders-by-month')
   @ApiResponseWithModel(OrderByMonthResponseDTO)
-  async getOrdersByMonth(): Promise<APIResponseDTO<OrderByMonthResponseDTO>>{
-    const result= await this.ordersService.getOrdersByMonth() 
-    return new APIResponseDTO<OrderByMonthResponseDTO>(true, 200, {orders: result})
+  async getOrdersByMonth(): Promise<APIResponseDTO<OrderByMonthResponseDTO>> {
+    const result = await this.ordersService.getOrdersByMonth();
+    return new APIResponseDTO<OrderByMonthResponseDTO>(true, 200, {
+      orders: result,
+    });
   }
 
   @Get('statistic/top-product/:number')
   @ApiResponseWithModel(GetTopProductResponseDTO)
   async getTopProduct(
-    @Param('number') x : string
-  ): Promise<APIResponseDTO<GetTopProductResponseDTO>>{
-
+    @Param('number') x: string,
+  ): Promise<APIResponseDTO<GetTopProductResponseDTO>> {
     const result = await this.ordersService.getTopProducts(+x);
-    return new APIResponseDTO<GetTopProductResponseDTO>(true, 200, {topProducts: result})
+    return new APIResponseDTO<GetTopProductResponseDTO>(true, 200, {
+      topProducts: result,
+    });
   }
 }
