@@ -18,39 +18,32 @@ export class OrderPagingDTO {
   }
 }
 
-
-
-
-
-
-
-
-export class OrderMonthTotal{
-  @ApiProperty({type: Number})
+export class OrderMonthTotal {
+  @ApiProperty({ type: Number })
   month: number;
 
-  @ApiProperty({type: Number})
+  @ApiProperty({ type: Number })
   total: number;
 
-  constructor(month: number, total: number){
+  constructor(month: number, total: number) {
     this.month = month;
     this.total = total;
   }
 }
 export class OrderByMonthResponseDTO {
-  @ApiProperty({type: [OrderMonthTotal]})
-  orders: OrderMonthTotal[]
+  @ApiProperty({ type: [OrderMonthTotal] })
+  orders: OrderMonthTotal[];
 }
 
 export class SoldQuantityProduct {
-  @ApiProperty({type: String})
+  @ApiProperty({ type: String })
   productName: string;
 
-  @ApiProperty({type: String})
-  quantity: string 
+  @ApiProperty({ type: String })
+  quantity: string;
 }
 
-export class GetTopProductResponseDTO{
-  @ApiProperty({type: [SoldQuantityProduct]})
-  topProducts: SoldQuantityProduct[]
+export class GetTopProductResponseDTO {
+  @ApiProperty({ type: [SoldQuantityProduct] })
+  topProducts: SoldQuantityProduct[];
 }
