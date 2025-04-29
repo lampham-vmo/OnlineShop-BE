@@ -3,7 +3,6 @@ import {
   HttpStatus,
   Injectable,
   InternalServerErrorException,
-  Logger,
 } from '@nestjs/common';
 import { CreateOrderDto } from './dto/request/create-order.dto';
 import { InjectRepository } from '@nestjs/typeorm';
@@ -25,6 +24,7 @@ import { Cart } from '../cart/entities/cart.entity';
 import { CartProduct } from '../cart/entities/cart_product.entity';
 import { PaypalService } from '../paypal/paypal.service';
 import { OrderStatus } from '@paypal/paypal-server-sdk';
+import { EmailService } from '../email/email.service';
 
 @Injectable()
 export class OrdersService {
@@ -39,6 +39,7 @@ export class OrdersService {
     private readonly productRepository: Repository<Product>,
     private readonly dataSource: DataSource,
     private readonly paypalService: PaypalService,
+    private readonly emailService: EmailService,
   ) {}
 
   async createCod(createOrderDTO: CreateOrderDto, userId: number | undefined) {
@@ -61,7 +62,6 @@ export class OrdersService {
         where: { user: { id: userId } },
         relations: ['items', 'items.product'],
       });
-      console.log(cart);
       if (!cart || cart.items.length === 0) {
         throw new BadRequestException('Cart Not Found');
       }
@@ -120,6 +120,8 @@ export class OrdersService {
       );
       await queryRunner.commitTransaction();
 
+      await this.emailService.sendConfirmMailSuccess(user.email, savedOrder);
+
       return {
         jsonResponse: { id: savedOrder.id, status: 'CREATED' },
         httpStatusCode: HttpStatus.CREATED,
@@ -148,7 +150,6 @@ export class OrdersService {
     const queryRunner = this.dataSource.createQueryRunner();
     await queryRunner.connect();
     await queryRunner.startTransaction();
-    console.log(createOrderDTO);
     try {
       const stockBackup = new Map<number, number>();
       const cart = await queryRunner.manager.findOne(Cart, {
@@ -181,7 +182,6 @@ export class OrdersService {
         product.stock -= item.quantity;
         await queryRunner.manager.save(product);
       }
-      console.log(typeof cart.subtotal);
       // Call to paypal service to createOrderPaypal
       const resultCreateOrderPaypal = await this.paypalService.createOrder({
         total: cart.subtotal,
@@ -233,7 +233,6 @@ export class OrdersService {
       };
     } catch (error) {
       await queryRunner.rollbackTransaction();
-      Logger.log(error);
       throw new InternalServerErrorException(error);
     } finally {
       await queryRunner.release();
@@ -253,7 +252,6 @@ export class OrdersService {
       if (user.role !== 1) {
         where.user = { id: user.id };
       }
-      console.log(where);
       const [order, totalItems] = await this.orderRepository.findAndCount({
         where,
         skip: (page - 1) * pageSize,
@@ -261,7 +259,6 @@ export class OrdersService {
         order: { createdAt: 'DESC' },
         relations: ['order_details', 'payment'],
       });
-      console.log(order);
       const transformed = plainToInstance(
         OrderResponseDTO,
         order.map((o) => ({
@@ -276,7 +273,6 @@ export class OrdersService {
       };
       return new OrderPagingDTO(transformed, pagination);
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error);
     }
   }
@@ -292,7 +288,6 @@ export class OrdersService {
       }
       return order;
     } catch (error) {
-      console.log(error);
       throw new BadRequestException(error.message);
     }
   }
@@ -345,7 +340,11 @@ export class OrdersService {
     return order;
   }
 
-  async captureOrderPaypal(orderPaypalId: string, orderId: string) {
+  async captureOrderPaypal(
+    orderPaypalId: string,
+    orderId: string,
+    email: string,
+  ) {
     const { jsonResponse, httpStatusCode } =
       await this.paypalService.captureOrder(orderPaypalId);
 
@@ -356,13 +355,25 @@ export class OrdersService {
       throw new Error('Failed to complete checkout');
     }
 
-    await this.changeStatus(Status.PENDING, +orderId);
+    try {
+      await this.changeStatus(Status.PENDING, +orderId);
 
-    return {
-      httpStatusCode: httpStatusCode,
-      id: orderPaypalId,
-      status: OrderStatus.Completed,
-    };
+      const result = await this.orderRepository.findOne({
+        where: {
+          id: +orderId,
+        },
+        relations: ['payment', 'order_details'],
+      });
+      await this.emailService.sendConfirmMailSuccess(email, result!);
+
+      return {
+        httpStatusCode: httpStatusCode,
+        id: orderPaypalId,
+        status: OrderStatus.Completed,
+      };
+    } catch (error) {
+      throw new Error(error);
+    }
   }
 
   async getTotalOrders(): Promise<number> {
@@ -377,7 +388,6 @@ export class OrdersService {
         .where('order.status = :status', { status: `${Status.PENDING}` })
         .where('order.status = :status', { status: `${Status.PENDING}` })
         .getRawOne();
-      console.log(result);
       const { sum } = result;
       return Number(sum) || 0;
     } catch (err) {

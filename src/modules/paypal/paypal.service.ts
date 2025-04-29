@@ -45,7 +45,7 @@ export class PaypalService {
           {
             amount: {
               currencyCode: 'USD',
-              value: `${cart.total}`,
+              value: `${Number(cart.total.toFixed(2))}`,
             },
           },
         ],

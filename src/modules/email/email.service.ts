@@ -13,6 +13,9 @@ export class EmailService {
       user: process.env.GMAIL_EMAIL,
       pass: process.env.GMAIL_PASSWORD,
     },
+    tls: {
+      rejectUnauthorized: false,
+    },
   });
   //send order detail when purchase success
   async sendConfirmMailSuccess(email: string, order: Order): Promise<void> {
@@ -21,7 +24,7 @@ export class EmailService {
       await this.transporter.sendMail({
         from: `"NextMerce" <${process.env.GMAIL_EMAIL}> `,
         to: email,
-        subject: `Order ${order.id} success`,
+        subject: `Thanks for purchase`,
         html: htmlPage,
       });
     } catch (err) {

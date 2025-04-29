@@ -30,7 +30,6 @@ export class CloudinaryService {
         data: secure_url,
       };
     } catch (error) {
-      console.log(error);
       return new BadRequestException({ message: error });
     }
   }

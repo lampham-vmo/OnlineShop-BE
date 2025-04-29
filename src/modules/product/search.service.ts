@@ -109,8 +109,6 @@ export class SearchService {
       },
       refresh: true,
     });
-
-    console.log('Elasticsearch update response:', response);
   }
 
   public async updateProductPartial(

@@ -49,7 +49,6 @@ export class OrdersController {
     @Body() createOrderDTO: CreateOrderDto,
   ): Promise<APIResponseDTO<CreateOrderPaypalReponseDto>> {
     const userId = req.user?.id;
-    console.log(createOrderDTO);
     const job = await this.orderQueue.add('orderQueue', {
       createOrderDTO,
       userId,
@@ -88,7 +87,11 @@ export class OrdersController {
       );
 
       const { httpStatusCode, id, status } =
-        await this.ordersService.captureOrderPaypal(orderPaypalId, orderId);
+        await this.ordersService.captureOrderPaypal(
+          orderPaypalId,
+          orderId,
+          req.user?.email!,
+        );
 
       return new APIResponseDTO<CreateOrderPaypalReponseDto>(
         true,
@@ -111,7 +114,6 @@ export class OrdersController {
     @Query('page') page: number = 1,
     @Req() req: Request,
   ): Promise<APIResponseDTO<OrderPagingDTO>> {
-    console.log(req.user);
     const user = req.user;
     const result = await this.ordersService.findAll(+page, user);
     return new APIResponseDTO<OrderPagingDTO>(true, 200, result);

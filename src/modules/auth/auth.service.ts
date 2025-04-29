@@ -2,7 +2,6 @@ import {
   BadRequestException,
   HttpStatus,
   Injectable,
-  Logger,
   UnauthorizedException,
 } from '@nestjs/common';
 import { JwtService } from '@nestjs/jwt';
@@ -252,7 +251,6 @@ export class AuthService {
         };
       }
     } catch (error) {
-      Logger.log(error);
       throw new BadRequestException(error);
     }
   }
