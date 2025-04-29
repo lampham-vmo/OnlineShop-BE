@@ -2,6 +2,7 @@ import {
   BadRequestException,
   Injectable,
   NotFoundException,
+  OnModuleInit,
 } from '@nestjs/common';
 import {
   CreatePaymentMethodDto,
@@ -16,7 +17,7 @@ import { Repository } from 'typeorm';
 import { plainToInstance } from 'class-transformer';
 
 @Injectable()
-export class PaymentMethodService {
+export class PaymentMethodService implements OnModuleInit {
   constructor(
     @InjectRepository(PaymentMethod)
     private readonly paymentMethodRepository: Repository<PaymentMethod>,
@@ -29,6 +30,17 @@ export class PaymentMethodService {
     return plainToInstance(classType, plainData, {
       excludeExtraneousValues: true,
     });
+  }
+
+  async onModuleInit() {
+    const defaultMethods = ['Cash on delivery', 'Pay with PayPal'];
+
+    for (const name of defaultMethods) {
+      const exists = await this.paymentMethodRepository.findOneBy({ name });
+      if (!exists) {
+        await this.paymentMethodRepository.save({ name });
+      }
+    }
   }
 
   async create(
