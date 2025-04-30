@@ -43,10 +43,6 @@ export class User {
     description: 'User email address',
     minLength: 5,
     maxLength: 255,
-    pattern: '^[a-zA-Z0-9._%+-]+@gmail\\.com$',
-  })
-  @Matches(/^[a-zA-Z0-9._%+-]+@gmail\.com$/, {
-    message: 'Email must be a valid Gmail address',
   })
   @IsEmail()
   @IsNotEmpty()
