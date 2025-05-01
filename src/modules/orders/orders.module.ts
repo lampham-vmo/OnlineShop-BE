@@ -12,6 +12,7 @@ import { OrderProccess } from './order.process';
 import { PaymentMethod } from '../payment-method/entities/payment-method.entity';
 import { PaypalModule } from '../paypal/paypal.module';
 import { PaypalService } from '../paypal/paypal.service';
+import { EmailModule } from '../email/email.module';
 
 @Module({
   imports: [
@@ -26,6 +27,7 @@ import { PaypalService } from '../paypal/paypal.service';
       name: 'orderQueue',
     }),
     PaypalModule,
+    EmailModule,
   ],
   controllers: [OrdersController],
   providers: [OrdersService, JwtService, OrderProccess, PaypalService],
