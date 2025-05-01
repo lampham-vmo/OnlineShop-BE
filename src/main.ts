@@ -11,17 +11,21 @@ async function bootstrap() {
     methods: 'GET,HEAD,PUT,PATCH,POST,DELETE',
     credentials: true, // Cho phép gửi cookie
   });
-  app.useGlobalPipes(new ValidationPipe({ whitelist: true }));
+  app.useGlobalPipes(new ValidationPipe({ whitelist: true, transform: true }));
   app.useGlobalFilters(new GlobalExceptionFilter(app.get(HttpAdapterHost)));
   app.setGlobalPrefix(process.env.API_PREFIX || 'api/v1');
   const config = new DocumentBuilder()
     .setTitle('Shoppe example')
     .setDescription('The shop API description')
     .setVersion('1.0')
-    .addTag('shop')
+    .addBearerAuth()
     .build();
   const documentFactory = () => SwaggerModule.createDocument(app, config);
-  SwaggerModule.setup('api', app, documentFactory);
-  await app.listen(process.env.PORT ?? 3000);
+  SwaggerModule.setup('api', app, documentFactory, {
+    swaggerOptions: {
+      persistAuthorization: true,
+    },
+  });
+  await app.listen(process.env.PORT ?? 4000);
 }
 bootstrap();

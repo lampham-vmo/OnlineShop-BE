@@ -1,4 +1,4 @@
-import { Module, OnModuleInit, RequestMethod } from '@nestjs/common';
+import { Inject, Module, OnModuleInit, RequestMethod } from '@nestjs/common';
 import { AppController } from './app.controller';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { UserModule } from './modules/user/user.module';
@@ -14,7 +14,15 @@ import { PermissionService } from './modules/permission/permission.service';
 import { JwtModule } from '@nestjs/jwt';
 import { CloudinaryModule } from './modules/cloudinary/cloudinary.module';
 import { UploadModule } from './modules/upload/upload.module';
-
+import { OrdersModule } from './modules/orders/orders.module';
+import { BullModule } from '@nestjs/bullmq';
+import 'dotenv/config';
+import { PaymentMethodModule } from './modules/payment-method/payment-method.module';
+import Redis from 'ioredis';
+import { RedisModule } from './modules/redis/redis.module';
+import { RedisService } from './modules/redis/redis.service';
+import { PaypalModule } from './modules/paypal/paypal.module';
+// import { EmailService } from './email/email.service';
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -37,6 +45,12 @@ import { UploadModule } from './modules/upload/upload.module';
         synchronize: true,
       }),
     }),
+    BullModule.forRoot({
+      connection: {
+        host: 'localhost',
+        port: 6379,
+      },
+    }),
     UserModule,
     ProductModule,
     AuthModule,
@@ -46,6 +60,10 @@ import { UploadModule } from './modules/upload/upload.module';
     CloudinaryModule,
     UploadModule,
     CategoryModule,
+    OrdersModule,
+    PaymentMethodModule,
+    RedisModule,
+    PaypalModule,
   ],
   controllers: [AppController],
   providers: [DiscoveryService, MetadataScanner],
@@ -54,12 +72,13 @@ export class AppModule implements OnModuleInit {
   constructor(
     private readonly discoveryService: DiscoveryService,
     private readonly metadataScanner: MetadataScanner,
-    private readonly reflector: Reflector,
+    private readonly redisService: RedisService,
     private readonly permissionService: PermissionService,
   ) {}
 
   onModuleInit() {
     this.getAllRouteAndInsertIntoPermission();
+    this.redisService.deleteCacheOfPermissionAndRole();
   }
 
   getAllRouteAndInsertIntoPermission() {
@@ -90,7 +109,13 @@ export class AppModule implements OnModuleInit {
         const routeName = Reflect.getMetadata('routeName', prototype[method]);
         if (methodType !== undefined) {
           //path:  /something/something
-          let fullPath = `${basePath}/${methodPath}`.replace(/\/+/g, '/');
+          const apiPrefix = process.env.API_PREFIX
+            ? process.env.API_PREFIX
+            : 'api/v1';
+          let fullPath = `/${apiPrefix}/${basePath}/${methodPath}`.replace(
+            /\/+/g,
+            '/',
+          );
           if (fullPath != '/') {
             fullPath = fullPath.replace(/\/+$/, '');
           }

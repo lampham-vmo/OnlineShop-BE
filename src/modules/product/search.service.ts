@@ -1,7 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { ProductResponse } from './DTO/response/product.response';
-import { ProductFindResponse } from './DTO/response/product.find.response';
 import { ProductPagingResponse } from './DTO/response/product.paging.response';
 
 @Injectable()
@@ -53,6 +52,12 @@ export class SearchService {
                   },
                 },
               },
+              description: {
+                type: 'text',
+              },
+              createAt: {
+                type: 'date',
+              },
             },
           },
           settings: {
@@ -81,13 +86,34 @@ export class SearchService {
   public async indexProduct(product: ProductResponse) {
     return await this.esService.index({
       index: 'product',
+      id: product.id.toString(),
       body: product,
+    });
+  }
+
+  public async updateCategoryNameToNullInES(categoryName: string) {
+    const index = 'product';
+
+    const response = await this.esService.updateByQuery({
+      index,
+      body: {
+        script: {
+          source: 'ctx._source.categoryName = null', // Hoặc: 'ctx._source.categoryName = ""'
+          lang: 'painless',
+        },
+        query: {
+          term: {
+            'categoryName.keyword': categoryName, // dùng keyword để so sánh chính xác
+          },
+        },
+      },
+      refresh: true,
     });
   }
 
   public async updateProductPartial(
     productId: number,
-    updateFields: Partial<ProductResponse>,
+    updateFields: ProductResponse,
   ) {
     return await this.esService.update({
       index: 'product',
@@ -144,9 +170,9 @@ export class SearchService {
       },
     });
     const product = response.hits.hits.map(
-      (hit) => hit._source as Partial<ProductResponse>,
+      (hit) => hit._source as ProductResponse,
     );
-    return new ProductFindResponse(product);
+    return product;
   }
 
   public async findProductForPaging(

@@ -4,8 +4,22 @@ services:
     container_name: es-container
     image: docker.elastic.co/elasticsearch/elasticsearch:8.16.6
     environment:
-      - xpack.security.enabled=false
-      - "discovery.type=single-node"
+      - xpack.security.enabled=false              # Tắt tính năng bảo mật (nếu không cần)
+      - xpack.ml.enabled=false                   # Tắt tính năng machine learning (ngốn nhiều tài nguyên)
+      - bootstrap.memory_lock=true               # Cố định bộ nhớ (giúp giảm hiệu suất CPU khi xử lý dữ liệu lớn)
+      - "discovery.type=single-node"             # Cấu hình cho chế độ single-node (không cần clustering)
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m  
+    ulimits:
+      memlock:
+        soft: -1
+        hard: -1
+    deploy:
+      resources:
+        limits:
+          cpus: '1.0'                            # Giới hạn CPU tối đa 1 core
+          memory: 2g
+    volumes:
+      - esdata:/usr/share/elasticsearch/data
     networks:
       - es-net
     ports:
@@ -21,6 +35,15 @@ services:
       - elasticsearch
     ports:
       - 5601:5601
+  redis:
+    container_name: redis-container
+    image: redis
+    ports:
+      - 6379:6379
 networks:
   es-net:
     driver: bridge
+
+volumes:
+  esdata: {}
+

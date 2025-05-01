@@ -1,4 +1,8 @@
-import { Injectable, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { In, Repository } from 'typeorm';
 import { Role } from './entities/role.entity';
@@ -7,6 +11,7 @@ import { BadRequestException } from '@nestjs/common';
 import { Permission } from '../permission/entities/permission.entity';
 import { APIResponseDTO } from 'src/common/dto/response-dto';
 import { UpdateRoleDTO } from './dto/update-role-dto';
+import { RedisService } from '../redis/redis.service';
 
 @Injectable()
 export class RoleService implements OnModuleInit {
@@ -15,9 +20,21 @@ export class RoleService implements OnModuleInit {
     private readonly roleRepository: Repository<Role>,
     @InjectRepository(Permission)
     private readonly permissionRepository: Repository<Permission>,
+    private readonly redisService: RedisService,
   ) {}
   async onModuleInit(): Promise<void> {
     await this.createDefaultRoles();
+    await this.assignAllPermissionToAdmin();
+  }
+  private async assignAllPermissionToAdmin(): Promise<void> {
+    const role = await this.roleRepository.findOne({
+      where: { id: 1 },
+      relations: ['permissions'],
+    });
+    if (!role) throw new InternalServerErrorException('role not found?');
+    const allPermissions = await this.permissionRepository.find();
+    role.permissions = allPermissions;
+    await this.roleRepository.save(role);
   }
 
   private async createDefaultRoles(): Promise<void> {
@@ -36,9 +53,7 @@ export class RoleService implements OnModuleInit {
     }
   }
 
-  async createARole(
-    newRole: CreateRoleDTO,
-  ): Promise<APIResponseDTO<string> | BadRequestException> {
+  async createARole(newRole: CreateRoleDTO): Promise<string> {
     const { name, description, permissionIds } = newRole;
     const role = new Role();
     role.name = name;
@@ -46,22 +61,19 @@ export class RoleService implements OnModuleInit {
     if ((await this.roleRepository.findOne({ where: { name } })) != null) {
       throw new BadRequestException('The role name has already existed');
     } else {
-      if (permissionIds && permissionIds.length > 0) {
+      //if permissionId include
+      if (permissionIds) {
         role.permissions = await this.permissionRepository.findBy({
           id: In(permissionIds),
         });
-        this.roleRepository.save(role);
-      } else {
-        throw new BadRequestException('The permissionsIDs must not be blank');
       }
-      return new APIResponseDTO(true, 200, 'Sucessfully create a role');
+      this.roleRepository.save(role);
+      return 'Sucessfully create a role';
     }
   }
 
-  async updateARole(
-    id: number,
-    updatedRole: UpdateRoleDTO,
-  ): Promise<APIResponseDTO<string> | BadRequestException> {
+  async updateARole(updatedRole: UpdateRoleDTO): Promise<string> {
+    const { id } = updatedRole;
     const role = await this.roleRepository.findOne({
       where: { id },
       relations: ['permissions'],
@@ -69,7 +81,16 @@ export class RoleService implements OnModuleInit {
     if (!role) {
       throw new BadRequestException("The role doesn't exist");
     }
+
     if (updatedRole.name) {
+      const foundRole = await this.roleRepository.findOne({
+        where: { name: updatedRole.name },
+      });
+      if (foundRole && updatedRole.name != role.name) {
+        //if found role is another role(different role id but same name)
+        throw new BadRequestException('The role name has already existed');
+      }
+
       role.name = updatedRole.name;
     }
     if (updatedRole.description) {
@@ -82,11 +103,14 @@ export class RoleService implements OnModuleInit {
         },
       });
     }
+
     await this.roleRepository.save(role);
-    return new APIResponseDTO<string>(true, 200, 'Successfully updated a user');
+    //delete cache
+    this.redisService.deleteCacheOfPermissionAndRole();
+    return 'Successfully updated a user';
   }
 
-  async getAllRole(): Promise<Role[] | BadRequestException> {
+  async getAllRole(): Promise<Role[]> {
     const result = await this.roleRepository.find({
       relations: { permissions: true },
     });
@@ -122,5 +146,22 @@ export class RoleService implements OnModuleInit {
     return query.permissions.some(
       (permission) => permission.id == permissionId,
     );
+  }
+  async getPermissionByRoleId(roleId: number): Promise<Role | null> {
+    const role = await this.roleRepository.findOne({
+      where: { id: roleId }, // truyền ID role vào
+      relations: ['permissions'],
+    });
+    return role;
+  }
+
+  async getPermissionIdByRoleId(roleId: number): Promise<number[]> {
+    const role = await this.roleRepository.findOne({
+      where: { id: roleId }, // truyền ID role vào
+      relations: ['permissions'],
+    });
+    if (!role) return [];
+    const permission = role.permissions.map((permission) => permission.id);
+    return permission;
   }
 }

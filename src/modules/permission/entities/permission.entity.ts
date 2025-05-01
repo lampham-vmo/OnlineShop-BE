@@ -1,3 +1,4 @@
+import { ApiProperty } from '@nestjs/swagger';
 import { Role } from 'src/modules/role/entities/role.entity';
 import {
   Entity,
@@ -11,15 +12,19 @@ import {
 @Entity()
 export class Permission {
   @PrimaryGeneratedColumn()
+  @ApiProperty({ type: Number })
   id: number;
 
   @Column({ nullable: true })
+  @ApiProperty({ type: String })
   name: string; //name permission
 
   @Column({ nullable: false })
+  @ApiProperty({ type: String })
   path: string; // path permission
 
   @Column({ nullable: false })
+  @ApiProperty({ type: String })
   method: string; // method permission
 
   @ManyToMany(() => Role, (role) => role.permissions)

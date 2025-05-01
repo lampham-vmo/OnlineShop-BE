@@ -7,6 +7,7 @@ import { Category } from '../category/entities/category.entity';
 import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { SearchService } from './search.service';
+import { ProductSyncService } from './product-sync.service';
 
 @Module({
   imports: [
@@ -23,7 +24,8 @@ import { SearchService } from './search.service';
     }),
   ],
   controllers: [ProductController],
-  providers: [ProductService, SearchService],
+  providers: [ProductService, SearchService, ProductSyncService],
+  exports: [ProductService],
 })
 export class ProductModule implements OnModuleInit {
   constructor(private readonly searchService: SearchService) {}
