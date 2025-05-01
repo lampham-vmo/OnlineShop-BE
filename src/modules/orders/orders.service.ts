@@ -385,8 +385,8 @@ export class OrdersService {
       const result = await this.orderRepository
         .createQueryBuilder('order')
         .select('SUM(order.total)', 'sum')
-        .where('order.status = :status', { status: `${Status.PENDING}` })
-        .where('order.status = :status', { status: `${Status.PENDING}` })
+        .where('order.status = :status', { status: `${Status.DELIVERED}` })
+        .where('order.status = :status', { status: `${Status.DELIVERED}` })
         .getRawOne();
       const { sum } = result;
       return Number(sum) || 0;
@@ -416,19 +416,18 @@ export class OrdersService {
 
   async getTopProducts(x: number): Promise<SoldQuantityProduct[]> {
     try {
-      const topProducts: SoldQuantityProduct[] =
-        await this.orderDetailRepository
-          .createQueryBuilder('order_detail')
-          .select('order_detail.name', 'productName') // Tên sản phẩm
-          .addSelect('SUM(order_detail.quantity)', 'quantity') // Tổng số lượng bán
-          .leftJoin('order_detail.order', 'order') // Liên kết với bảng Order
-          .where('order.status = :status', { status: Status.PENDING }) // Chỉ tính đơn hàng thành công
-          .groupBy('order_detail.name') // Group theo tên sản phẩm
-          .orderBy('quantity', 'DESC') // Sắp xếp theo tổng số lượng bán
-          .limit(x) // Giới hạn số lượng sản phẩm, ví dụ top 5
-          .getRawMany();
-
-      return topProducts;
+      const topProducts : SoldQuantityProduct[] = await this.orderDetailRepository
+        .createQueryBuilder('order_detail')
+        .select('order_detail.name', 'productName') // Tên sản phẩm
+        .addSelect('SUM(order_detail.quantity)', 'quantity') // Tổng số lượng bán
+        .leftJoin('order_detail.order', 'order') // Liên kết với bảng Order
+        .where('order.status = :status', { status: Status.DELIVERED }) // Chỉ tính đơn hàng thành công
+        .groupBy('order_detail.name') // Group theo tên sản phẩm
+        .orderBy('quantity', 'DESC') // Sắp xếp theo tổng số lượng bán
+        .limit(x) // Giới hạn số lượng sản phẩm, ví dụ top 5
+        .getRawMany();
+        
+      return topProducts
     } catch (err) {
       throw new InternalServerErrorException('Error Get Top Products');
     }
