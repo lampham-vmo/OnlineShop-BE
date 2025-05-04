@@ -1,12 +1,4 @@
-import {
-  IsInt,
-  IsNotEmpty,
-  IsNumber,
-  IsString,
-  Length,
-  Max,
-  Min,
-} from 'class-validator';
+import { IsInt, IsNotEmpty, IsNumber } from 'class-validator';
 import { ApiProperty, OmitType } from '@nestjs/swagger';
 import { Product } from '../../Entity/product.entity';
 

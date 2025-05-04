@@ -1,14 +1,15 @@
-# version: "3.0"
+version: "3.0"
+
 services:
   elasticsearch:
     container_name: es-container
     image: docker.elastic.co/elasticsearch/elasticsearch:8.16.6
     environment:
-      - xpack.security.enabled=false              # Tắt tính năng bảo mật (nếu không cần)
-      - xpack.ml.enabled=false                   # Tắt tính năng machine learning (ngốn nhiều tài nguyên)
-      - bootstrap.memory_lock=true               # Cố định bộ nhớ (giúp giảm hiệu suất CPU khi xử lý dữ liệu lớn)
-      - "discovery.type=single-node"             # Cấu hình cho chế độ single-node (không cần clustering)
-      - ES_JAVA_OPTS=-Xms512m -Xmx512m  
+      - xpack.security.enabled=false
+      - xpack.ml.enabled=false
+      - bootstrap.memory_lock=true
+      - "discovery.type=single-node"
+      - ES_JAVA_OPTS=-Xms512m -Xmx512m
     ulimits:
       memlock:
         soft: -1
@@ -16,7 +17,7 @@ services:
     deploy:
       resources:
         limits:
-          cpus: '1.0'                            # Giới hạn CPU tối đa 1 core
+          cpus: '1.0'
           memory: 2g
     volumes:
       - esdata:/usr/share/elasticsearch/data
@@ -24,26 +25,48 @@ services:
       - es-net
     ports:
       - 9200:9200
-  kibana:
-    container_name: kb-container
-    image: docker.elastic.co/kibana/kibana:8.16.6
-    environment:
-      - ELASTICSEARCH_HOSTS=http://es-container:9200
-    networks:
-      - es-net
-    depends_on:
-      - elasticsearch
-    ports:
-      - 5601:5601
   redis:
     container_name: redis-container
-    image: redis
+    image: redis:7
     ports:
       - 6379:6379
+    networks:
+      - es-net
+
+  postgres:
+    container_name: postgres-container
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_DB: online_shop_db
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - 5432:5432
+    networks:
+      - es-net
+
+  backend:
+    container_name: shoppe-backend
+    build:
+      context: .
+      dockerfile: Dockerfile
+    env_file:
+      - .env
+    ports:
+      - "4000:4000"
+    depends_on:
+      - postgres
+      - redis
+      - elasticsearch
+    networks:
+      - es-net
+
 networks:
   es-net:
     driver: bridge
 
 volumes:
   esdata: {}
-
+  pgdata: {}

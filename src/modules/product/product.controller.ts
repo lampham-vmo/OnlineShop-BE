@@ -7,6 +7,7 @@ import {
   Patch,
   Post,
   Query,
+  UseGuards,
 } from '@nestjs/common';
 import { ProductService } from './product.service';
 
@@ -22,7 +23,12 @@ import {
   ApiTags,
   getSchemaPath,
 } from '@nestjs/swagger';
-import { Product } from './Entity/product.entity';
+import {
+  ApiResponseWithModel,
+  ApiResponseWithPrimitive,
+} from 'src/common/decorators/swagger.decorator';
+import { AuthGuard } from 'src/common/guard/auth.guard';
+import { RoleGuard } from 'src/common/guard/role.guard';
 
 @ApiTags('Product')
 @Controller()
@@ -31,19 +37,7 @@ export class ProductController {
 
   @Post('product')
   @ApiExtraModels(ApiResponse, ProductResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          type: 'object',
-          properties: {
-            result: { $ref: getSchemaPath(ProductResponse) },
-          },
-        },
-      ],
-    },
-  })
+  @ApiResponseWithModel(ProductResponse)
   async createProduct(
     @Body() productRequest: ProductRequest,
   ): Promise<ApiResponse<ProductResponse>> {
@@ -83,19 +77,7 @@ export class ProductController {
   @ApiQuery({ name: 'orderField', required: false })
   @ApiQuery({ name: 'orderBy', required: false })
   @ApiExtraModels(ApiResponse, ProductPagingResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          type: 'object',
-          properties: {
-            result: { $ref: getSchemaPath(ProductPagingResponse) },
-          },
-        },
-      ],
-    },
-  })
+  @ApiResponseWithModel(ProductPagingResponse)
   async getProductPagination(
     @Query('text') text: string,
     @Query('page') page: number,
@@ -119,20 +101,7 @@ export class ProductController {
   @ApiQuery({ name: 'orderBy', required: false })
   @ApiQuery({ name: 'categoryId', required: false })
   @ApiExtraModels(ApiResponse, ProductPagingResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          properties: {
-            result: {
-              $ref: getSchemaPath(ProductPagingResponse),
-            },
-          },
-        },
-      ],
-    },
-  })
+  @ApiResponseWithModel(ProductPagingResponse)
   async getAllProduct(
     @Query('page') page: number,
     @Query('pageSize') pageSize: number,
@@ -152,20 +121,9 @@ export class ProductController {
 
   @Patch('product/:id')
   @ApiBody({ type: ProductRequest })
+  @UseGuards(AuthGuard, RoleGuard)
   @ApiExtraModels(ApiResponse, ProductResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          type: 'object',
-          properties: {
-            result: { $ref: getSchemaPath(ProductResponse) },
-          },
-        },
-      ],
-    },
-  })
+  @ApiResponseWithModel(ProductResponse)
   async updateProductDetail(
     @Param('id') id: number,
     @Body() productUpdateDto: ProductRequest,
@@ -179,19 +137,8 @@ export class ProductController {
 
   @Delete('product/:id')
   @ApiExtraModels(ApiResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          type: 'object',
-          properties: {
-            result: { type: 'string' },
-          },
-        },
-      ],
-    },
-  })
+  @UseGuards(AuthGuard, RoleGuard)
+  @ApiResponseWithPrimitive('string')
   async removeProduct(@Param('id') id: number): Promise<ApiResponse<string>> {
     const result = await this.productService.deleteProduct(id);
     return new ApiResponse<string>(result);
@@ -199,19 +146,7 @@ export class ProductController {
 
   @Get('product/:id')
   @ApiExtraModels(ApiResponse, ProductResponse)
-  @ApiOkResponse({
-    schema: {
-      allOf: [
-        { $ref: getSchemaPath(ApiResponse) },
-        {
-          type: 'object',
-          properties: {
-            result: { $ref: getSchemaPath(ProductResponse) },
-          },
-        },
-      ],
-    },
-  })
+  @ApiResponseWithModel(ProductResponse)
   async getProductById(
     @Param('id') id: number,
   ): Promise<ApiResponse<ProductResponse>> {
