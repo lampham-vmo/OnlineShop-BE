@@ -17,7 +17,7 @@ export class ProductResponse extends PickType(Product, [
   @Expose()
   priceAfterDis: number;
 
-  @ApiProperty()
+  @ApiProperty({ type: String, nullable: true })
   @Expose()
   categoryName: string | null;
 }
