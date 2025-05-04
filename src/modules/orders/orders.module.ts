@@ -13,9 +13,13 @@ import { PaymentMethod } from '../payment-method/entities/payment-method.entity'
 import { PaypalModule } from '../paypal/paypal.module';
 import { PaypalService } from '../paypal/paypal.service';
 import { EmailModule } from '../email/email.module';
+import { PermissionModule } from '../permission/permission.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports: [
+    PermissionModule,
+    RoleModule,
     TypeOrmModule.forFeature([
       Order,
       OrderDetail,
@@ -25,6 +29,10 @@ import { EmailModule } from '../email/email.module';
     ]),
     BullModule.registerQueue({
       name: 'orderQueue',
+      connection: {
+        host: process.env.REDIS_HOST || 'redis',
+        port: 6379,
+      },
     }),
     PaypalModule,
     EmailModule,
