@@ -8,9 +8,16 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { ElasticsearchModule } from '@nestjs/elasticsearch';
 import { SearchService } from './search.service';
 import { ProductSyncService } from './product-sync.service';
+import { JwtModule, JwtService } from '@nestjs/jwt';
+import { RoleService } from '../role/role.service';
+import { PermissionService } from '../permission/permission.service';
+import { PermissionModule } from '../permission/permission.module';
+import { RoleModule } from '../role/role.module';
 
 @Module({
   imports: [
+    PermissionModule,
+    RoleModule,
     TypeOrmModule.forFeature([Category, Product]),
     ConfigModule,
     ElasticsearchModule.registerAsync({
@@ -24,7 +31,7 @@ import { ProductSyncService } from './product-sync.service';
     }),
   ],
   controllers: [ProductController],
-  providers: [ProductService, SearchService, ProductSyncService],
+  providers: [ProductService, SearchService, ProductSyncService, JwtService],
   exports: [ProductService],
 })
 export class ProductModule implements OnModuleInit {

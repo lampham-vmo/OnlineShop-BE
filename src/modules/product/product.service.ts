@@ -35,7 +35,7 @@ export class ProductService {
   //TODO: create product
   async createProduct(
     productRequest: ProductRequest,
-  ): Promise<ProductResponse | undefined> {
+  ): Promise<ProductResponse> {
     const category = await this.categoryRepository.findOneBy({
       id: productRequest.categoryId,
       deleted: false,

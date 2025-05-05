@@ -4,11 +4,14 @@ export default () => ({
     publicKey: process.env.JWT_PUBLIC_KEY,
   },
   database: {
-    port: process.env.POSTGRES_PORT || 5432,
-    password: process.env.POSTGRES_PW,
-    DB: process.env.POSTGRES_DB,
+    port: process.env.DATABASE_PORT || 5432,
+    password: process.env.DATABASE_PASSWORD,
+    DB: process.env.DATABASE_NAME,
   },
   elastic: {
     node: process.env.ELASTICSEARCH_NODE || 'http://localhost:9200',
+  },
+  redis: {
+    host: process.env.REDIS_HOST || 'redis',
   },
 });

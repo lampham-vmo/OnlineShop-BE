@@ -32,6 +32,7 @@ import {
 } from 'src/common/decorators/swagger.decorator';
 import { CreateOrderPaypalReponseDto } from '../paypal/dto/paypal.dto';
 import { ChangeStatusRequest } from './dto/request/change-status.request';
+import { RoleGuard } from 'src/common/guard/role.guard';
 
 @Controller('orders')
 export class OrdersController {
@@ -48,14 +49,19 @@ export class OrdersController {
     @Req() req: Request,
     @Body() createOrderDTO: CreateOrderDto,
   ): Promise<APIResponseDTO<CreateOrderPaypalReponseDto>> {
-    const userId = req.user?.id;
-    const job = await this.orderQueue.add('orderQueue', {
-      createOrderDTO,
-      userId,
-    });
-    const queueEvents = new QueueEvents('orderQueue');
-    await queueEvents.waitUntilReady();
     try {
+      const userId = req.user?.id;
+      const job = await this.orderQueue.add('orderQueue', {
+        createOrderDTO,
+        userId,
+      });
+      const queueEvents = new QueueEvents('orderQueue', {
+        connection: {
+          host: process.env.REDIS_HOST || 'redis',
+          port: Number(process.env.REDIS_PORT),
+        },
+      });
+      await queueEvents.waitUntilReady();
       const { jsonResponse, httpStatusCode } =
         await job.waitUntilFinished(queueEvents);
       return new APIResponseDTO<CreateOrderPaypalReponseDto>(
@@ -130,6 +136,7 @@ export class OrdersController {
 
   @Patch('/status')
   @ApiResponseWithPrimitive('string')
+  @UseGuards(AuthGuard, RoleGuard)
   async changeStatus(
     @Body() change: ChangeStatusRequest,
   ): Promise<APIResponseDTO<string>> {
@@ -141,6 +148,7 @@ export class OrdersController {
   }
 
   @Get('statistic/total-orders')
+  @UseGuards(AuthGuard, RoleGuard)
   @ApiResponseWithPrimitive('number')
   async getTotalOrders(): Promise<APIResponseDTO<number>> {
     const result = await this.ordersService.getTotalOrders();
@@ -149,12 +157,14 @@ export class OrdersController {
 
   @Get('statistic/total-revenue')
   @ApiResponseWithPrimitive('number')
+  @UseGuards(AuthGuard, RoleGuard)
   async getTotalRevenue(): Promise<APIResponseDTO<number>> {
     const result = await this.ordersService.getTotalRevenue();
     return new APIResponseDTO<number>(true, 200, result);
   }
 
   @Get('statistic/orders-by-month')
+  @UseGuards(AuthGuard, RoleGuard)
   @ApiResponseWithModel(OrderByMonthResponseDTO)
   async getOrdersByMonth(): Promise<APIResponseDTO<OrderByMonthResponseDTO>> {
     const result = await this.ordersService.getOrdersByMonth();

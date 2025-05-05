@@ -36,7 +36,7 @@ import { PaypalModule } from './modules/paypal/paypal.module';
       inject: [ConfigService],
       useFactory: async (config) => ({
         type: 'postgres',
-        host: 'localhost',
+        host: 'postgres',
         port: config.get('database.port'),
         username: 'postgres',
         password: config.get('database.password'),
@@ -45,11 +45,15 @@ import { PaypalModule } from './modules/paypal/paypal.module';
         synchronize: true,
       }),
     }),
-    BullModule.forRoot({
-      connection: {
-        host: 'localhost',
-        port: 6379,
-      },
+    BullModule.forRootAsync({
+      imports: [ConfigModule],
+      inject: [ConfigService],
+      useFactory: async (configService: ConfigService) => ({
+        connection: {
+          host: configService.get('redis.host') || 'redis',
+          port: 6379,
+        },
+      }),
     }),
     UserModule,
     ProductModule,
