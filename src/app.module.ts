@@ -36,9 +36,9 @@ import { PaypalModule } from './modules/paypal/paypal.module';
       inject: [ConfigService],
       useFactory: async (config) => ({
         type: 'postgres',
-        host: 'postgres',
+        host: config.get('database.host'),
         port: config.get('database.port'),
-        username: 'postgres',
+        username: config.get('database.user'),
         password: config.get('database.password'),
         database: config.get('database.DB'),
         autoLoadEntities: true,
@@ -50,8 +50,10 @@ import { PaypalModule } from './modules/paypal/paypal.module';
       inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
         connection: {
-          host: configService.get('redis.host') || 'redis',
-          port: 6379,
+          host: configService.get('redis.host'),
+          port: configService.get('redis.port'),
+          password: configService.get('redis.password'),
+          username: configService.get('redis.user'),
         },
       }),
     }),

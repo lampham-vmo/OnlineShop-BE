@@ -29,10 +29,6 @@ import { RoleModule } from '../role/role.module';
     ]),
     BullModule.registerQueue({
       name: 'orderQueue',
-      connection: {
-        host: process.env.REDIS_HOST || 'redis',
-        port: 6379,
-      },
     }),
     PaypalModule,
     EmailModule,
