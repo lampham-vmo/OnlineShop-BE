@@ -22,12 +22,19 @@ import { RoleModule } from '../role/role.module';
     ConfigModule,
     ElasticsearchModule.registerAsync({
       imports: [ConfigModule],
+      inject: [ConfigService],
       useFactory: async (configService: ConfigService) => ({
-        node: configService.get('elastic.node'),
+        node: configService.get<string>('elastic.node'),
+        auth: {
+          username: configService.get<string>('elastic.user') ?? '',
+          password: configService.get<string>('elastic.password') ?? '',
+        },
+        ssl: {
+          rejectUnauthorized: false,
+        },
         maxRetries: 10,
         requestTimeout: 60000,
       }),
-      inject: [ConfigService],
     }),
   ],
   controllers: [ProductController],

@@ -42,7 +42,7 @@ export class ProductController {
     @Body() productRequest: ProductRequest,
   ): Promise<APIResponseDTO<ProductResponse>> {
     const result = await this.productService.createProduct(productRequest);
-    return new APIResponseDTO<ProductResponse>(true,200,result);
+    return new APIResponseDTO<ProductResponse>(true, 200, result);
   }
 
   @Get('product/search')
@@ -68,7 +68,7 @@ export class ProductController {
     @Query('text') text: string,
   ): Promise<APIResponseDTO<ProductResponse[]>> {
     const result = await this.productService.findProductBySearch(text);
-    return new APIResponseDTO<ProductResponse[]>(true,200,result);
+    return new APIResponseDTO<ProductResponse[]>(true, 200, result);
   }
 
   @Get('product/paging')
@@ -83,7 +83,9 @@ export class ProductController {
     @Query('orderField') orderField: string,
     @Query('orderBy') orderBy: string,
   ): Promise<APIResponseDTO<ProductPagingResponse>> {
-    return new APIResponseDTO<ProductPagingResponse>(true,200,
+    return new APIResponseDTO<ProductPagingResponse>(
+      true,
+      200,
       await this.productService.GetProductPagination(
         text,
         page,
@@ -114,7 +116,7 @@ export class ProductController {
       pageSize,
       categoryId,
     );
-    return new APIResponseDTO<ProductPagingResponse>(true,200,result);
+    return new APIResponseDTO<ProductPagingResponse>(true, 200, result);
   }
 
   @Patch('product/:id')
@@ -129,15 +131,17 @@ export class ProductController {
       id,
       productUpdateDto,
     );
-    return new APIResponseDTO<ProductResponse>(true,200,result);
+    return new APIResponseDTO<ProductResponse>(true, 200, result);
   }
 
   @Delete('product/:id')
   @UseGuards(AuthGuard, RoleGuard)
   @ApiResponseWithPrimitive('string')
-  async removeProduct(@Param('id') id: number): Promise<APIResponseDTO<string>> {
+  async removeProduct(
+    @Param('id') id: number,
+  ): Promise<APIResponseDTO<string>> {
     const result = await this.productService.deleteProduct(id);
-    return new APIResponseDTO<string>(true,200,result);
+    return new APIResponseDTO<string>(true, 200, result);
   }
 
   @Get('product/:id')
@@ -146,6 +150,6 @@ export class ProductController {
     @Param('id') id: number,
   ): Promise<APIResponseDTO<ProductResponse>> {
     const result = await this.productService.getProductById(id);
-    return new APIResponseDTO<ProductResponse>(true,200,result);
+    return new APIResponseDTO<ProductResponse>(true, 200, result);
   }
 }
