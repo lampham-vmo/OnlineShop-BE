@@ -14,7 +14,7 @@ export class CartService {
     @InjectRepository(CartProduct)
     private cartProductRepository: Repository<CartProduct>,
     @InjectRepository(Cart) private cartRepository: Repository<Cart>,
-  ) { }
+  ) {}
 
   private calculateCartTotals(items: CartProduct[]) {
     const total = items.reduce(
@@ -50,7 +50,9 @@ export class CartService {
       );
 
       if (existingItem) {
-        existingItem.quantity == existingItem.product.stock ? existingItem.quantity = existingItem.product.stock : existingItem.quantity += quantity;
+        existingItem.quantity == existingItem.product.stock
+          ? (existingItem.quantity = existingItem.product.stock)
+          : (existingItem.quantity += quantity);
         await this.cartProductRepository.save(existingItem);
       } else {
         const newCartItem = this.cartProductRepository.create({
